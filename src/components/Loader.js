@@ -45,7 +45,8 @@ class Loader extends React.Component {
   }
 
   render () {
-    if (typeof window === 'undefined' ||
+    if (!this.props.callbackUrl ||
+      typeof window === 'undefined' ||
       typeof window.location === 'undefined') {
       return null
     }
