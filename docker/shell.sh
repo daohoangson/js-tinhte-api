@@ -20,7 +20,7 @@ if [ ! -f "$_npmrcPath" ]; then
 fi
 
 docker run --rm -it \
-  -p "3000:3000" \
+  -p "13000:3000" \
   -v "$_srcPath:/src" \
   -v "$_dataPath/global_node_modules:/usr/local/lib/node_modules" \
   -v "$_netrcPath:/root/.netrc" \
