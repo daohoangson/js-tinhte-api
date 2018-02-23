@@ -31,13 +31,23 @@ export default (config = {}) => {
   let requestCounter = 0
   let batchRequests = null
 
-  const fetchJson = (url, options) => {
+  const buildUrl = (url) => {
+    if (url.match(/^https?:\/\//)) {
+      return url
+    }
+
     let urlQuery = url.replace('?', '&')
     if (auth && auth.access_token) {
       urlQuery += `&oauth_token=${auth.access_token}`
     }
 
     const finalUrl = `${apiRoot}?${urlQuery}`
+
+    return finalUrl
+  }
+
+  const fetchJson = (url, options) => {
+    const finalUrl = buildUrl(url)
 
     return unfetch(finalUrl, options)
       .then(response => response.json())
