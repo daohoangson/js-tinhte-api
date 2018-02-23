@@ -179,6 +179,18 @@ api.fetchMultiple(() => {
 })
 ```
 
+### api.onAuthenticated
+
+Params:
+
+ - `callback` required func
+
+Example:
+
+```js
+api.onAuthenticated(() => api.fetchOne('users/me'))
+```
+
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api
 

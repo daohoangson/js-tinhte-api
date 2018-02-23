@@ -39,9 +39,9 @@ const Home = () => {
 
   const ButtonMultipleBase = ({api}) => {
     const onClick = () => api.fetchMultiple(() => {
-      get(api, 'users/me')
-      get(api, 'conversations')
-      get(api, 'notifications')
+      get(api, 'threads/1')
+      get(api, 'threads/2')
+      get(api, 'threads/3')
     })
     return <button onClick={onClick}>POST `/batch`</button>
   }
@@ -51,6 +51,14 @@ const Home = () => {
   const Middleman = ({children}) => (
     <div className='middleman'>Inside middleman: {children}</div>
   )
+
+  const AutoFetchBase = ({api, uri}) => {
+    api.onAuthenticated(() => get(api, uri))
+
+    return <span>GET `{uri}`</span>
+  }
+
+  const AutoFetch = hoc.ApiConsumer(AutoFetchBase)
 
   return (
     <div>
@@ -69,6 +77,13 @@ const Home = () => {
       <Middleman>
         <ButtonOne uri='users/me' />
       </Middleman><br />
+
+      <p>
+        auto fetch:
+        <AutoFetch uri='posts/1' />
+        <AutoFetch uri='posts/2' />
+        <AutoFetch uri='posts/3' />
+      </p>
     </div>
   )
 }

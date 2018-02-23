@@ -25,6 +25,7 @@ export default (config = {}) => {
     }
   }
 
+  const authCallbacks = []
   let secret = null
 
   let requestCounter = 0
@@ -77,16 +78,25 @@ export default (config = {}) => {
 
     setAuth: (newAuth) => {
       auth = {}
+
+      const notifyWaitingForAuths = () => {
+        api.fetchMultiple(() => {
+          for (let callback of authCallbacks) {
+            callback()
+          }
+        })
+      }
+
       if (!newAuth || !newAuth.access_token || !newAuth.state) {
-        return false
+        return notifyWaitingForAuths()
       }
 
       if (newAuth.state !== secret) {
-        return false
+        return notifyWaitingForAuths()
       }
 
       auth = newAuth
-      return true
+      return notifyWaitingForAuths()
     }
   }
 
@@ -133,13 +143,12 @@ export default (config = {}) => {
     fetchMultiple: (fetches) => {
       // initialize batchRequests as we are having a pending batch
       batchRequests = []
-
       fetches()
 
       const headers = {}
       const handlers = {}
       const batchBody = batchRequests.map((req) => {
-        for (var headerKey of Object.keys(req.options.headers)) {
+        for (let headerKey of Object.keys(req.options.headers)) {
           headers[headerKey] = req.options.headers[headerKey]
         }
 
@@ -158,6 +167,10 @@ export default (config = {}) => {
 
       // reset batchRequests to handle future requests normally
       batchRequests = null
+
+      if (batchBody.length === 0) {
+        return
+      }
 
       fetchJson('/batch', {
         method: 'POST',
@@ -191,6 +204,18 @@ export default (config = {}) => {
           handler.reject()
         })
       })
+    },
+
+    onAuthenticated: (callback) => {
+      if (typeof callback !== 'function') {
+        return
+      }
+
+      if (auth !== null) {
+        return callback()
+      }
+
+      return authCallbacks.push(callback)
     }
   }
 
