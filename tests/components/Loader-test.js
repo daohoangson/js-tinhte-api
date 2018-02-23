@@ -47,7 +47,8 @@ describe('components', () => {
       const clientId = 'clientId'
       const api = tinhteApi({
         callbackUrl,
-        clientId
+        clientId,
+        delayMs: 0
       })
 
       const Component = () => <div>foo</div>
@@ -66,7 +67,8 @@ describe('components', () => {
       const api = tinhteApi({
         apiRoot,
         callbackUrl: 'callback url',
-        clientId: 'clientId'
+        clientId: 'clientId',
+        delayMs: 0
       })
 
       const Component = () => <div>foo</div>
@@ -82,7 +84,8 @@ describe('components', () => {
       const api = tinhteApi({
         callbackUrl: 'callback url',
         clientId: 'clientId',
-        scope
+        scope,
+        delayMs: 0
       })
 
       const Component = () => <div>foo</div>

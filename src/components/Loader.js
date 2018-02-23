@@ -3,8 +3,18 @@ import React from 'react'
 class Loader extends React.Component {
   constructor (props) {
     super(props)
+
     this.state = {
+      src: '',
       userId: 0
+    }
+
+    this.srcTimer = null
+    this.srcUpdate = () => {
+      const authorizeUrl = this.props.internalApi.buildAuthorizeUrl()
+      if (authorizeUrl) {
+        this.setState({src: authorizeUrl})
+      }
     }
 
     this.onWindowMessage = (e) => {
@@ -18,36 +28,38 @@ class Loader extends React.Component {
     }
   }
 
-  componentDidMount () {
-    if (typeof window === 'undefined' ||
-      typeof window.addEventListener !== 'function') {
-      return
+  componentWillMount () {
+    const delayMs = this.props.internalApi.getDelayMs()
+    if (delayMs > 0) {
+      this.srcTimer = setTimeout(this.srcUpdate, delayMs)
+    } else {
+      this.srcUpdate()
     }
+  }
 
-    window.addEventListener('message', this.onWindowMessage)
+  componentDidMount () {
+    if (typeof window !== 'undefined' &&
+      typeof window.addEventListener === 'function') {
+      window.addEventListener('message', this.onWindowMessage)
+    }
   }
 
   componentWillUnmount () {
-    if (typeof window === 'undefined' ||
-      typeof window.removeEventListener !== 'function') {
-      return
+    if (this.srcTimer) {
+      clearTimeout(this.srcTimer)
     }
 
-    window.removeEventListener('message', this.onWindowMessage)
+    if (typeof window !== 'undefined' &&
+      typeof window.removeEventListener === 'function') {
+      window.removeEventListener('message', this.onWindowMessage)
+    }
   }
 
   render () {
-    const authorizeUrl = this.props.internalApi.buildAuthorizeUrl()
-    if (!authorizeUrl) {
-      return null
-    }
-
     return (
-      <div className='Loader' data-user-id={this.state.userId}>
-        <iframe sandbox='allow-scripts' src={authorizeUrl}
-          style={{display: 'block', height: 0, width: 0}} />
-        {this.props.children}
-      </div>
+      <iframe className='Loader' data-user-id={this.state.userId}
+        sandbox='allow-scripts' src={this.state.src}
+        style={{display: 'block', height: 0, width: 0}} />
     )
   }
 }

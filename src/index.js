@@ -15,6 +15,7 @@ export default (config = {}) => {
   const callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
   const clientId = (typeof config.clientId === 'string') ? config.clientId : ''
   const debug = (typeof config.debug === 'boolean') ? config.debug : false
+  const delayMs = (typeof config.delayMs === 'number') ? config.delayMs : 10
   const scope = (typeof config.scope === 'string') ? config.scope : 'read'
 
   let auth = null
@@ -82,6 +83,8 @@ export default (config = {}) => {
 
       return authorizeUrl
     },
+
+    getDelayMs: () => delayMs,
 
     isDebug: () => debug,
 
