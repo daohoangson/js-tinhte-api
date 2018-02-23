@@ -16,17 +16,29 @@ describe('components', () => {
       unmountComponentAtNode(node)
     })
 
-    it('does not render', () => {
-      const api = tinhteApi()
+    it('does not render without clientId', () => {
+      const api = tinhteApi({
+        callbackUrl: 'callback url'
+      })
 
       const Component = () => <div>foo</div>
       const ApiProvider = api.hocApiProvider(Component)
 
       render(<ApiProvider />, node, () => {
         expect(node.children.length).toEqual(1)
+      })
+    })
 
-        const child = node.children[0]
-        expect(child.innerHTML).toEqual('<div>foo</div>')
+    it('does not render without callbackUrl', () => {
+      const api = tinhteApi({
+        clientId: 'clientId'
+      })
+
+      const Component = () => <div>foo</div>
+      const ApiProvider = api.hocApiProvider(Component)
+
+      render(<ApiProvider />, node, () => {
+        expect(node.children.length).toEqual(1)
       })
     })
 
@@ -45,7 +57,7 @@ describe('components', () => {
         expect(node.innerHTML).toContain('<iframe')
         expect(node.innerHTML).toContain(`client_id=${clientId}`)
         expect(node.innerHTML).toContain('redirect_uri=' + encodeURIComponent(callbackUrl))
-        expect(node.innerHTML).toContain(`scope=read`)
+        expect(node.innerHTML).toContain('scope=read')
       })
     })
 

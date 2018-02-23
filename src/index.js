@@ -1,4 +1,3 @@
-import React from 'react'
 import randomBytes from 'randombytes'
 import unfetch from 'isomorphic-unfetch'
 
@@ -9,7 +8,7 @@ require('es6-promise').polyfill()
 
 export default (config = {}) => {
   if (typeof config !== 'object') {
-    config = {clientId: config}
+    config = {}
   }
   const apiRoot = (typeof config.apiRoot === 'string') ? config.apiRoot : 'https://tinhte.vn/appforo/index.php'
   const callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
@@ -26,10 +25,10 @@ export default (config = {}) => {
   }
 
   const authCallbacks = []
-  let secret = null
-
-  let requestCounter = 0
   let batchRequests = null
+  let fetchCount = 0
+  let requestLatestId = 0
+  let secret = null
 
   const buildUrl = (url) => {
     if (url.match(/^https?:\/\//)) {
@@ -47,15 +46,13 @@ export default (config = {}) => {
   }
 
   const fetchJson = (url, options) => {
+    fetchCount++
+
     const finalUrl = buildUrl(url)
 
     return unfetch(finalUrl, options)
       .then(response => response.json())
       .then((json) => {
-        if (json.error) {
-          throw new Error(json.error)
-        }
-
         if (json.errors) {
           throw new Error(json.errors)
         }
@@ -111,9 +108,9 @@ export default (config = {}) => {
   }
 
   const api = {
-    CallbackComponent: (props) => {
-      return <Callback {...props} />
-    },
+    CallbackComponent: Callback,
+
+    getFetchCount: () => fetchCount,
 
     getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
 
@@ -123,10 +120,10 @@ export default (config = {}) => {
 
     fetchOne: (uri, method = 'GET', headers = {}, body = null) => {
       if (!uri) {
-        return new Promise((resolve, reject) => reject(new Error('uri is required')))
+        return Promise.reject(new Error('uri is required'))
       }
 
-      requestCounter++
+      requestLatestId++
 
       const options = {
         uri,
@@ -142,7 +139,7 @@ export default (config = {}) => {
         return new Promise((resolve, reject) => {
           batchRequests.push({
             options,
-            id: '_req' + requestCounter,
+            id: '_req' + requestLatestId,
             resolve,
             reject
           })
@@ -179,7 +176,7 @@ export default (config = {}) => {
       batchRequests = null
 
       if (batchBody.length === 0) {
-        return
+        return batchBody.length
       }
 
       fetchJson('/batch', {
@@ -212,8 +209,11 @@ export default (config = {}) => {
           }
 
           handler.reject()
+          handler.handled = true
         })
       })
+
+      return batchBody.length
     },
 
     onAuthenticated: (callback) => {

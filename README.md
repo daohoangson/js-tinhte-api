@@ -120,6 +120,10 @@ Returns an `api` object.
 
 Returns a React component.
 
+### api.getFetchCount
+
+Returns a number.
+
 ### api.getUserId
 
 Returns a number.
@@ -164,6 +168,8 @@ api.fetchOne('users/me')
 Params:
 
  - `fetches` required func
+
+Returns the number of requests groupped together in the batch.
 
 Example:
 

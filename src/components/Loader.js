@@ -54,7 +54,7 @@ class Loader extends React.Component {
     }
 
     return (
-      <div data-user-id={this.state.userId}>
+      <div className='Loader' data-user-id={this.state.userId}>
         <iframe sandbox='allow-scripts' src={authorizeUrl}
           style={{display: 'block', height: 0, width: 0}} />
         {this.props.children}
