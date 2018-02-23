@@ -25,6 +25,14 @@ describe('LoaderComponent', () => {
       expect(node.innerHTML).toContain('<iframe')
       expect(node.innerHTML).toContain(`client_id=${clientId}`)
       expect(node.innerHTML).toContain('redirect_uri=' + encodeURIComponent(callbackUrl))
+      expect(node.innerHTML).toContain(`scope=read`)
+    })
+  })
+
+  it('accepts props.scope', () => {
+    const scope = 'read post'
+    render(<api.LoaderComponent callbackUrl='url' scope={scope} />, node, () => {
+      expect(node.innerHTML).toContain('scope=' + encodeURIComponent(scope))
     })
   })
 })

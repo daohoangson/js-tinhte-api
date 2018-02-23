@@ -45,10 +45,10 @@ class Loader extends React.Component {
   render () {
     const redirectUri = `${this.props.callbackUrl}?targetOrigin=${window.location.origin}`
 
-    if (!this.props.buildAuthorizeUrl) {
+    if (!this.props.buildAuthorizeUrl || !this.props.scope) {
       return null
     }
-    const authorizeUrl = this.props.buildAuthorizeUrl(redirectUri)
+    const authorizeUrl = this.props.buildAuthorizeUrl(redirectUri, this.props.scope)
 
     return (
       <div data-user-id={this.state.userId}>
@@ -64,7 +64,12 @@ Loader.propTypes = {
   api: PropTypes.object.isRequired,
   buildAuthorizeUrl: PropTypes.func.isRequired,
   callbackUrl: PropTypes.string.isRequired,
+  scope: PropTypes.string,
   setAuth: PropTypes.func.isRequired
+}
+
+Loader.defaultProps = {
+  scope: 'read'
 }
 
 export default Loader
