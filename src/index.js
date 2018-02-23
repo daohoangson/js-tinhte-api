@@ -7,7 +7,7 @@ import Loader from './components/Loader'
 
 require('es6-promise').polyfill()
 
-export default (apiClientId, apiRoot = 'https://tinhte.vn/appforo/index.php') => {
+export default (clientId = '', apiRoot = 'https://tinhte.vn/appforo/index.php') => {
   let auth = null
   let requestCounter = 0
   let batchRequests = null
@@ -44,12 +44,16 @@ export default (apiClientId, apiRoot = 'https://tinhte.vn/appforo/index.php') =>
       let secret = null
 
       const buildAuthorizeUrl = (redirectUri, scope) => {
+        if (!clientId) {
+          return null
+        }
+
         if (secret === null) {
           secret = randomBytes(32).toString('hex')
         }
 
         return `${apiRoot}?oauth/authorize&` +
-          `client_id=${apiClientId}&` +
+          `client_id=${clientId}&` +
           `redirect_uri=${encodeURIComponent(redirectUri)}&` +
           'response_type=token&' +
           `scope=${encodeURIComponent(scope)}&` +
@@ -79,6 +83,10 @@ export default (apiClientId, apiRoot = 'https://tinhte.vn/appforo/index.php') =>
     getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
 
     fetchOne: (uri, method = 'GET', headers = {}, body = null) => {
+      if (!uri) {
+        return new Promise((resolve, reject) => reject(new Error('uri is required')))
+      }
+
       requestCounter++
 
       const options = {

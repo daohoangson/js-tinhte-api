@@ -49,6 +49,9 @@ class Loader extends React.Component {
       return null
     }
     const authorizeUrl = this.props.buildAuthorizeUrl(redirectUri, this.props.scope)
+    if (!authorizeUrl) {
+      return null
+    }
 
     return (
       <div data-user-id={this.state.userId}>
