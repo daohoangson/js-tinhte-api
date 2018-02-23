@@ -10,4 +10,4 @@ docker run --rm -it \
   -v "$_dockerPath/.data/global_node_modules:/usr/local/lib/node_modules" \
   -v "$_dockerPath/.data/npm:/root/.npm" \
   -w "/src" \
-  node:9.5.0-alpine sh
+  node:9.5.0 bash

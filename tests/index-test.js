@@ -2,12 +2,16 @@ import expect from 'expect'
 import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
-import Component from 'src/'
+import tinhteApi from 'src/'
 
-describe('Component', () => {
+describe('LoaderComponent', () => {
+  const clientId = 'clientId'
+
+  let api
   let node
 
   beforeEach(() => {
+    api = tinhteApi(clientId)
     node = document.createElement('div')
   })
 
@@ -15,9 +19,12 @@ describe('Component', () => {
     unmountComponentAtNode(node)
   })
 
-  it('displays a welcome message', () => {
-    render(<Component />, node, () => {
-      expect(node.innerHTML).toContain('Welcome to React components')
+  it('displays an iframe', () => {
+    const callbackUrl = 'callback url'
+    render(<api.LoaderComponent callbackUrl={callbackUrl} />, node, () => {
+      expect(node.innerHTML).toContain('<iframe')
+      expect(node.innerHTML).toContain(`client_id=${clientId}`)
+      expect(node.innerHTML).toContain('redirect_uri=' + encodeURIComponent(callbackUrl))
     })
   })
 })
