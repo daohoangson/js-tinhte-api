@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "tinhte-api React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -21,10 +21,10 @@
   },
   "dependencies": {
     "es6-promise": "^4.2.4",
+    "isomorphic-unfetch": "^2.0.0",
     "prop-types": "^15.6.0",
     "querystring": "^0.2.0",
-    "randombytes": "^2.0.6",
-    "unfetch": "^3.0.0"
+    "randombytes": "^2.0.6"
   },
   "peerDependencies": {
     "react": "16.x"

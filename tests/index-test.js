@@ -1,38 +1,23 @@
 import expect from 'expect'
-import React from 'react'
-import {render, unmountComponentAtNode} from 'react-dom'
 
 import tinhteApi from 'src/'
 
-describe('LoaderComponent', () => {
-  const clientId = 'clientId'
-
-  let api
-  let node
-
-  beforeEach(() => {
-    api = tinhteApi(clientId)
-    node = document.createElement('div')
-  })
-
-  afterEach(() => {
-    unmountComponentAtNode(node)
-  })
-
-  it('displays an iframe', () => {
-    const callbackUrl = 'callback url'
-    render(<api.LoaderComponent callbackUrl={callbackUrl} />, node, () => {
-      expect(node.innerHTML).toContain('<iframe')
-      expect(node.innerHTML).toContain(`client_id=${clientId}`)
-      expect(node.innerHTML).toContain('redirect_uri=' + encodeURIComponent(callbackUrl))
-      expect(node.innerHTML).toContain(`scope=read`)
+describe('api', () => {
+  it('accepts auth.access_token', async () => {
+    const accessToken = 'at' + Math.random()
+    const api = tinhteApi({
+      auth: {access_token: accessToken},
+      apiRoot: 'https://httpbin.org/anything'
     })
+
+    const json = await api.fetchOne('test')
+    expect(json.args.oauth_token).toEqual(accessToken)
   })
 
-  it('accepts props.scope', () => {
-    const scope = 'read post'
-    render(<api.LoaderComponent callbackUrl='url' scope={scope} />, node, () => {
-      expect(node.innerHTML).toContain('scope=' + encodeURIComponent(scope))
-    })
+  it('accepts auth.user_id', () => {
+    const userId = Math.random() * 9999 + 1
+    const api = tinhteApi({auth: {user_id: userId}})
+
+    expect(api.getUserId()).toEqual(userId)
   })
 })

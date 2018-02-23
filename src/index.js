@@ -1,14 +1,32 @@
 import React from 'react'
 import randomBytes from 'randombytes'
-import unfetch from 'unfetch'
+import unfetch from 'isomorphic-unfetch'
 
 import Callback from './components/Callback'
-import Loader from './components/Loader'
+import hoc from './hoc'
 
 require('es6-promise').polyfill()
 
-export default (clientId = '', apiRoot = 'https://tinhte.vn/appforo/index.php') => {
+export default (config = {}) => {
+  if (typeof config !== 'object') {
+    config = {clientId: config}
+  }
+  const apiRoot = (typeof config.apiRoot === 'string') ? config.apiRoot : 'https://tinhte.vn/appforo/index.php'
+  const callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
+  const clientId = (typeof config.clientId === 'string') ? config.clientId : ''
+  const scope = (typeof config.scope === 'string') ? config.scope : 'read'
+
   let auth = null
+  if (typeof config.auth === 'object') {
+    const ca = config.auth
+    auth = {
+      access_token: (typeof ca.access_token === 'string') ? ca.access_token : '',
+      user_id: (typeof ca.user_id === 'number') ? ca.user_id : 0
+    }
+  }
+
+  let secret = null
+
   let requestCounter = 0
   let batchRequests = null
 
@@ -35,52 +53,53 @@ export default (clientId = '', apiRoot = 'https://tinhte.vn/appforo/index.php') 
       })
   }
 
+  const internalApi = {
+    buildAuthorizeUrl: (redirectUri) => {
+      if (!clientId) {
+        return null
+      }
+
+      if (secret === null) {
+        secret = randomBytes(32).toString('hex')
+      }
+
+      const authorizeUrl = `${apiRoot}?oauth/authorize&` +
+        `client_id=${clientId}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        'response_type=token&' +
+        `scope=${encodeURIComponent(scope)}&` +
+        `state=${secret}`
+
+      return authorizeUrl
+    },
+
+    getCallbackUrl: () => callbackUrl,
+
+    setAuth: (newAuth) => {
+      auth = {}
+      if (!newAuth || !newAuth.access_token || !newAuth.state) {
+        return false
+      }
+
+      if (newAuth.state !== secret) {
+        return false
+      }
+
+      auth = newAuth
+      return true
+    }
+  }
+
   const api = {
     CallbackComponent: (props) => {
       return <Callback {...props} />
     },
 
-    LoaderComponent: (props) => {
-      let secret = null
-
-      const buildAuthorizeUrl = (redirectUri, scope) => {
-        if (!clientId) {
-          return null
-        }
-
-        if (secret === null) {
-          secret = randomBytes(32).toString('hex')
-        }
-
-        return `${apiRoot}?oauth/authorize&` +
-          `client_id=${clientId}&` +
-          `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-          'response_type=token&' +
-          `scope=${encodeURIComponent(scope)}&` +
-          `state=${secret}`
-      }
-
-      const setAuth = (newAuth) => {
-        auth = {}
-        if (!newAuth || !newAuth.access_token || !newAuth.state) {
-          return false
-        }
-
-        if (newAuth.state !== secret) {
-          return false
-        }
-
-        auth = newAuth
-        return true
-      }
-
-      return <Loader {...props}
-        api={api}
-        buildAuthorizeUrl={buildAuthorizeUrl}
-        setAuth={setAuth} />
-    },
-
     getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
+
+    hocApiConsumer: hoc.ApiConsumer,
+
+    hocApiProvider: (Component) => hoc.ApiProvider(api, internalApi, Component),
 
     fetchOne: (uri, method = 'GET', headers = {}, body = null) => {
       if (!uri) {

@@ -1,5 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
 class Loader extends React.Component {
   constructor (props) {
@@ -14,14 +13,7 @@ class Loader extends React.Component {
       }
       const auth = e.data.auth
 
-      if (!this.props.setAuth) {
-        return
-      }
-      this.props.setAuth(auth)
-
-      if (!this.props.api) {
-        return
-      }
+      this.props.internalApi.setAuth(auth)
       this.setState({userId: this.props.api.getUserId()})
     }
   }
@@ -45,17 +37,18 @@ class Loader extends React.Component {
   }
 
   render () {
-    if (!this.props.callbackUrl ||
-      typeof window === 'undefined' ||
+    if (typeof window === 'undefined' ||
       typeof window.location === 'undefined') {
       return null
     }
-    const redirectUri = `${this.props.callbackUrl}?targetOrigin=${window.location.origin}`
 
-    if (!this.props.buildAuthorizeUrl || !this.props.scope) {
+    const callbackUrl = this.props.internalApi.getCallbackUrl()
+    if (!callbackUrl) {
       return null
     }
-    const authorizeUrl = this.props.buildAuthorizeUrl(redirectUri, this.props.scope)
+
+    const redirectUri = `${callbackUrl}?targetOrigin=${window.location.origin}`
+    const authorizeUrl = this.props.internalApi.buildAuthorizeUrl(redirectUri)
     if (!authorizeUrl) {
       return null
     }
@@ -68,18 +61,6 @@ class Loader extends React.Component {
       </div>
     )
   }
-}
-
-Loader.propTypes = {
-  api: PropTypes.object.isRequired,
-  buildAuthorizeUrl: PropTypes.func.isRequired,
-  callbackUrl: PropTypes.string.isRequired,
-  scope: PropTypes.string,
-  setAuth: PropTypes.func.isRequired
-}
-
-Loader.defaultProps = {
-  scope: 'read'
 }
 
 export default Loader
