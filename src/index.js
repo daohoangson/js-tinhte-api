@@ -43,7 +43,7 @@ export default (apiClientId, apiRoot = 'https://tinhte.vn/appforo/index.php') =>
     LoaderComponent: (props) => {
       let secret = null
 
-      const buildAuthorizeUrl = (redirectUri) => {
+      const buildAuthorizeUrl = (redirectUri, scope = 'read') => {
         if (secret === null) {
           secret = randomBytes(32).toString('hex')
         }
@@ -52,6 +52,7 @@ export default (apiClientId, apiRoot = 'https://tinhte.vn/appforo/index.php') =>
           `client_id=${apiClientId}&` +
           `redirect_uri=` + encodeURIComponent(redirectUri) + `&` +
           `response_type=token&` +
+          `scope=${scope}&` +
           `state=${secret}`
       }
 
