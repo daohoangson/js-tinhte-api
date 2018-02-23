@@ -159,23 +159,30 @@ export default (config = {}) => {
 
       const headers = {}
       const handlers = {}
-      const batchBody = batchRequests.map((req) => {
+      const batchBody = []
+      const reqIds = {}
+      for (let req of batchRequests) {
         for (let headerKey of Object.keys(req.options.headers)) {
           headers[headerKey] = req.options.headers[headerKey]
         }
 
-        handlers[req.id] = {
+        const id = req.id
+        const uri = req.options.uri
+        const method = req.options.method.toUpperCase()
+
+        handlers[id] = {
           resolve: req.resolve,
-          reject: req.reject,
-          handled: false
+          reject: req.reject
         }
 
-        return {
-          id: req.id,
-          uri: req.options.uri,
-          method: req.options.method
+        const reqUniqueKey = uri + method
+        if (typeof reqIds[reqUniqueKey] === 'undefined') {
+          reqIds[reqUniqueKey] = [id]
+          batchBody.push({ id, uri, method })
+        } else {
+          reqIds[reqUniqueKey].push(id)
         }
-      })
+      }
 
       // reset batchRequests to handle future requests normally
       batchRequests = null
@@ -188,34 +195,33 @@ export default (config = {}) => {
         method: 'POST',
         body: JSON.stringify(batchBody)
       }).then(responses => {
-        Object.keys(responses.jobs).map(jobId => {
-          if (!handlers[jobId]) {
+        const handle = (jobId, reqId) => {
+          if (typeof handlers[reqId] === 'undefined') {
             return
           }
 
-          const json = responses.jobs[jobId]
-          if (!json._job_result) {
-            return
+          const { resolve, reject } = handlers[reqId]
+
+          if (typeof responses.jobs[jobId] === 'object') {
+            const json = responses.jobs[jobId]
+            if (typeof json._job_result === 'string') {
+              if (json._job_result === 'ok') {
+                return resolve(json)
+              } else if (json._job_error) {
+                return reject(json._job_error)
+              }
+            }
           }
 
-          if (json._job_result === 'ok') {
-            handlers[jobId].resolve(json)
-          } else {
-            handlers[jobId].reject(json._job_error)
+          return reject()
+        }
+
+        for (let reqUniqueKey of Object.keys(reqIds)) {
+          const jobId = reqIds[reqUniqueKey][0]
+          for (let reqId of reqIds[reqUniqueKey]) {
+            handle(jobId, reqId)
           }
-
-          handlers[jobId].handled = true
-        })
-
-        Object.keys(handlers).map(handleId => {
-          const handler = handlers[handleId]
-          if (handler.handled) {
-            return
-          }
-
-          handler.reject()
-          handler.handled = true
-        })
+        }
       })
 
       return batchBody.length

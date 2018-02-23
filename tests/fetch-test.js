@@ -59,5 +59,26 @@ describe('api', () => {
           expect(api.getFetchCount()).toEqual(1)
         })
     })
+
+    it('skips duplicate requests', () => {
+      const api = tinhteApi()
+
+      const promises = []
+      let posts1 = 0
+      let posts2 = 0
+      const batchSize = api.fetchMultiple(() => {
+        promises.push(api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ }))
+        promises.push(api.fetchOne('posts/2').catch(e => e).then(() => { posts2++ }))
+        promises.push(api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ }))
+      })
+      expect(batchSize).toEqual(2)
+
+      return Promise.all(promises)
+        .then(() => {
+          expect(posts1).toEqual(2)
+          expect(posts2).toEqual(1)
+          expect(api.getFetchCount()).toEqual(1)
+        })
+    })
   })
 })

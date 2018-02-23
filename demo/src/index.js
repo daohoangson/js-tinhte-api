@@ -41,7 +41,11 @@ const Home = () => {
     const onClick = () => api.fetchMultiple(() => {
       get(api, 'threads/1')
       get(api, 'threads/2')
+      get(api, 'threads/2')
       get(api, 'threads/3')
+      get(api, 'threads/3')
+      get(api, 'threads/3')
+      get(api, 'threads/4')
     })
     return <button onClick={onClick}>POST `/batch`</button>
   }
