@@ -37,18 +37,7 @@ class Loader extends React.Component {
   }
 
   render () {
-    if (typeof window === 'undefined' ||
-      typeof window.location === 'undefined') {
-      return null
-    }
-
-    const callbackUrl = this.props.internalApi.getCallbackUrl()
-    if (!callbackUrl) {
-      return null
-    }
-
-    const redirectUri = `${callbackUrl}?targetOrigin=${window.location.origin}`
-    const authorizeUrl = this.props.internalApi.buildAuthorizeUrl(redirectUri)
+    const authorizeUrl = this.props.internalApi.buildAuthorizeUrl()
     if (!authorizeUrl) {
       return null
     }

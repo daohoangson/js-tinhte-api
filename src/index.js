@@ -1,3 +1,4 @@
+import React from 'react'
 import randomBytes from 'randombytes'
 import unfetch from 'isomorphic-unfetch'
 
@@ -13,6 +14,7 @@ export default (config = {}) => {
   const apiRoot = (typeof config.apiRoot === 'string') ? config.apiRoot : 'https://tinhte.vn/appforo/index.php'
   const callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
   const clientId = (typeof config.clientId === 'string') ? config.clientId : ''
+  const debug = (typeof config.debug === 'boolean') ? config.debug : false
   const scope = (typeof config.scope === 'string') ? config.scope : 'read'
 
   let auth = null
@@ -62,7 +64,7 @@ export default (config = {}) => {
   }
 
   const internalApi = {
-    buildAuthorizeUrl: (redirectUri) => {
+    buildAuthorizeUrl: () => {
       if (!clientId) {
         return null
       }
@@ -73,7 +75,7 @@ export default (config = {}) => {
 
       const authorizeUrl = `${apiRoot}?oauth/authorize&` +
         `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `redirect_uri=${encodeURIComponent(callbackUrl)}&` +
         'response_type=token&' +
         `scope=${encodeURIComponent(scope)}&` +
         `state=${secret}`
@@ -81,7 +83,7 @@ export default (config = {}) => {
       return authorizeUrl
     },
 
-    getCallbackUrl: () => callbackUrl,
+    isDebug: () => debug,
 
     setAuth: (newAuth) => {
       auth = {}
@@ -108,7 +110,7 @@ export default (config = {}) => {
   }
 
   const api = {
-    CallbackComponent: Callback,
+    CallbackComponent: () => <Callback internalApi={internalApi} />,
 
     getFetchCount: () => fetchCount,
 

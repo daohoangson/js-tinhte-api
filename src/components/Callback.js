@@ -8,13 +8,6 @@ const attemptToPostMessage = () => {
     return 'window'
   }
 
-  const s = window.location.search
-    ? querystring.parse(window.location.search.replace(/^\?/, ''))
-    : {}
-  if (!s.targetOrigin) {
-    return 'targetOrigin'
-  }
-
   const h = window.location.hash
     ? querystring.parse(window.location.hash.replace(/^#/, ''))
     : {}
@@ -24,13 +17,17 @@ const attemptToPostMessage = () => {
 
   window.top.postMessage({
     auth: h
-  }, s.targetOrigin)
+  }, window.location.origin)
 
   return 'success'
 }
 
-const Callback = () => {
+const Callback = ({internalApi}) => {
   const result = attemptToPostMessage()
+  if (!internalApi.isDebug()) {
+    return null
+  }
+
   return <span className='Callback' data-result={result} />
 }
 

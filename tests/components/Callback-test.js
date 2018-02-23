@@ -16,12 +16,12 @@ describe('components', () => {
       unmountComponentAtNode(node)
     })
 
-    it('renders targetOrigin error', () => {
-      const api = tinhteApi()
+    it('renders access_token error', () => {
+      const api = tinhteApi({debug: true})
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).toContain('<span class="Callback" data-result="targetOrigin"></span>')
+        expect(node.innerHTML).toContain('<span class="Callback" data-result="access_token"></span>')
       })
     })
   })
