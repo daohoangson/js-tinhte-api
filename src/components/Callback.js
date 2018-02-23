@@ -1,7 +1,9 @@
 import querystring from 'querystring'
 
 const attemptToPostMessage = () => {
-  if (!window || !window.location || !window.top) {
+  if (typeof window === 'undefined' ||
+      typeof window.location === 'undefined' ||
+      typeof window.top === 'undefined') {
     return false
   }
 

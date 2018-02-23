@@ -8,10 +8,6 @@ class Loader extends React.Component {
       userId: 0
     }
 
-    if (!window) {
-      return
-    }
-
     this.onWindowMessage = (e) => {
       if (!e || !e.data || !e.data.auth) {
         return
@@ -31,18 +27,28 @@ class Loader extends React.Component {
   }
 
   componentDidMount () {
-    if (window && window.addEventListener) {
-      window.addEventListener('message', this.onWindowMessage)
+    if (typeof window === 'undefined' ||
+      typeof window.addEventListener !== 'function') {
+      return
     }
+
+    window.addEventListener('message', this.onWindowMessage)
   }
 
   componentWillUnmount () {
-    if (window && window.removeEventListener) {
-      window.removeEventListener('message', this.onWindowMessage)
+    if (typeof window === 'undefined' ||
+      typeof window.removeEventListener !== 'function') {
+      return
     }
+
+    window.removeEventListener('message', this.onWindowMessage)
   }
 
   render () {
+    if (typeof window === 'undefined' ||
+      typeof window.location === 'undefined') {
+      return null
+    }
     const redirectUri = `${this.props.callbackUrl}?targetOrigin=${window.location.origin}`
 
     if (!this.props.buildAuthorizeUrl || !this.props.scope) {

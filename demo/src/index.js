@@ -8,13 +8,9 @@ import tinhteApi from '../../src'
 // extract clientId from request URL for demo reason
 // normally it should be set from app config directly
 let clientId = ''
-if (window && window.location && window.location.search) {
-  const s = window.location.search
-    ? querystring.parse(window.location.search.replace(/^\?/, ''))
-    : {}
-  if (s.client_id) {
-    clientId = s.client_id
-  }
+const s = querystring.parse(window.location.search.replace(/^\?/, ''))
+if (s.client_id) {
+  clientId = s.client_id
 }
 const api = tinhteApi(clientId)
 
@@ -24,10 +20,6 @@ const api = tinhteApi(clientId)
 const apiCallbackRoute = '/api-callback'
 
 const Home = () => {
-  if (!window || !window.location) {
-    return null
-  }
-
   const get = (uri) => {
     api.fetchOne(uri)
       .then((json) => console.log(uri, 'success', json))
