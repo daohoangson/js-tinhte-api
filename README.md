@@ -79,7 +79,7 @@ const App = () => (
 In children components of ApiProvider, use `hoc.ApiConsumer` or `api.hocApiConsumer` to prepare the API context and fetch data.
 
 ```js
-import hoc from 'tinhte-api/hoc'
+import hoc from 'tinhte-api/lib/hoc'
 
 const UsersMeBase = ({api}) => {
     const onClick = () => api.fetchOne('users/me')
