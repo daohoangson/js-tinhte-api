@@ -14,7 +14,6 @@ const apiFactory = (config = {}) => {
   const callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
   const clientId = (typeof config.clientId === 'string') ? config.clientId : ''
   const debug = (typeof config.debug === 'boolean') ? config.debug : false
-  const delayMs = (typeof config.delayMs === 'number') ? config.delayMs : 10
   const scope = (typeof config.scope === 'string') ? config.scope : 'read'
 
   let auth = null
@@ -71,18 +70,16 @@ const apiFactory = (config = {}) => {
       }
 
       const authorizeUrl = `${apiRoot}?oauth/authorize&` +
-        `client_id=${clientId}&` +
+        `client_id=${encodeURIComponent(clientId)}&` +
         `redirect_uri=${encodeURIComponent(callbackUrl)}&` +
         'response_type=token&' +
         `scope=${encodeURIComponent(scope)}&` +
-        `state=${uniqueId}`
+        `state=${encodeURIComponent(uniqueId)}`
 
       return authorizeUrl
     },
 
     getDebug: () => debug,
-
-    getDelayMs: () => delayMs,
 
     log: function () {
       if (!debug) {
@@ -129,6 +126,18 @@ const apiFactory = (config = {}) => {
     LoaderComponent: () => components.Loader(api, internalApi),
 
     ProviderHoc: (Component) => hoc.ApiProvider(api, Component),
+
+    getAccessToken: () => (auth && auth.access_token) ? auth.access_token : '',
+
+    getApiRoot: () => apiRoot,
+
+    getCallbackUrl: () => callbackUrl,
+
+    getClientId: () => clientId,
+
+    getDebug: () => debug,
+
+    getScope: () => scope,
 
     getFetchCount: () => fetchCount,
 

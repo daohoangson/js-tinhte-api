@@ -113,7 +113,6 @@ Params:
    - `callbackUrl` default=`''`
    - `clientId` default=`''`
    - `debug` default=`false`
-   - `delayMs` default=`10`
    - `scope` default=`'read'`
 
 Returns an `api` object.

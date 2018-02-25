@@ -16,39 +16,11 @@ describe('components', () => {
       unmountComponentAtNode(node)
     })
 
-    it('does not render without clientId', () => {
+    it('displays an iframe', (done) => {
       const api = apiFactory({
-        callbackUrl: 'callback url'
-      })
-
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
-
-      render(<ApiProvider />, node, () => {
-        expect(node.children.length).toEqual(1)
-      })
-    })
-
-    it('does not render without callbackUrl', () => {
-      const api = apiFactory({
-        clientId: 'clientId'
-      })
-
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
-
-      render(<ApiProvider />, node, () => {
-        expect(node.children.length).toEqual(1)
-      })
-    })
-
-    it('displays an iframe', () => {
-      const callbackUrl = 'callback url'
-      const clientId = 'clientId'
-      const api = apiFactory({
-        callbackUrl,
-        clientId,
-        delayMs: 0
+        callbackUrl: 'callback url',
+        clientId: 'client ID',
+        scope: 'scope1 scope2'
       })
 
       const Component = () => <div>foo</div>
@@ -56,43 +28,15 @@ describe('components', () => {
 
       render(<ApiProvider />, node, () => {
         expect(node.innerHTML).toContain('<iframe')
-        expect(node.innerHTML).toContain(`client_id=${clientId}`)
-        expect(node.innerHTML).toContain('redirect_uri=' + encodeURIComponent(callbackUrl))
-        expect(node.innerHTML).toContain('scope=read')
-      })
-    })
+        expect(node.innerHTML).toContain('src=""')
 
-    it('accepts apiRoot', () => {
-      const apiRoot = 'http://api.domain.com'
-      const api = apiFactory({
-        apiRoot,
-        callbackUrl: 'callback url',
-        clientId: 'clientId',
-        delayMs: 0
-      })
-
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
-
-      render(<ApiProvider />, node, () => {
-        expect(node.innerHTML).toContain(apiRoot)
-      })
-    })
-
-    it('accepts scope', () => {
-      const scope = 'read post'
-      const api = apiFactory({
-        callbackUrl: 'callback url',
-        clientId: 'clientId',
-        scope,
-        delayMs: 0
-      })
-
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
-
-      render(<ApiProvider />, node, () => {
-        expect(node.innerHTML).toContain('scope=' + encodeURIComponent(scope))
+        setTimeout(() => {
+          expect(node.innerHTML).toContain(api.getApiRoot())
+          expect(node.innerHTML).toContain(encodeURIComponent(api.getCallbackUrl()))
+          expect(node.innerHTML).toContain(encodeURIComponent(api.getClientId()))
+          expect(node.innerHTML).toContain(encodeURIComponent(api.getScope()))
+          done()
+        }, 10)
       })
     })
   })

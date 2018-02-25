@@ -8,52 +8,45 @@ describe('apiFactory', () => {
     expect(api).toBeAn('object')
   })
 
-  it('accepts auth.access_token', () => {
-    const accessToken = 'at' + Math.random()
-    const api = apiFactory({
-      auth: {access_token: accessToken},
-      apiRoot: 'https://httpbin.org/anything'
-    })
+  it('accepts apiRoot', () => {
+    const apiRoot = 'api root'
+    const api = apiFactory({apiRoot})
+    expect(api.getApiRoot()).toBe(apiRoot)
+  })
 
-    return api.fetchOne('test')
-      .then((json) => {
-        expect(json.args.oauth_token).toEqual(accessToken)
-      })
+  it('accepts auth.access_token', () => {
+    const accessToken = 'access token'
+    const api = apiFactory({auth: {access_token: accessToken}})
+    expect(api.getAccessToken()).toBe(accessToken)
   })
 
   it('accepts auth.user_id', () => {
-    const userId = Math.random()
+    const userId = 1
     const api = apiFactory({auth: {user_id: userId}})
-
-    expect(api.getUserId()).toEqual(userId)
+    expect(api.getUserId()).toBe(userId)
   })
 
-  describe('getUserId', () => {
-    it('returns default zero', () => {
-      const api = apiFactory({auth: {user_id: 0}})
-      const userId = api.getUserId()
-      expect(userId).toEqual(0)
-    })
+  it('accepts callbackUrl', () => {
+    const callbackUrl = 'callback url'
+    const api = apiFactory({callbackUrl})
+    expect(api.getCallbackUrl()).toBe(callbackUrl)
   })
 
-  describe('onAuthenticated', () => {
-    it('accepts non-func', () => {
-      const api = apiFactory()
-      api.onAuthenticated('foo')
-    })
+  it('accepts clientId', () => {
+    const clientId = 'client ID'
+    const api = apiFactory({clientId})
+    expect(api.getClientId()).toBe(clientId)
+  })
 
-    it('executes callback if already authenticated', () => {
-      const api = apiFactory({auth: {}})
-      let executed = false
-      api.onAuthenticated(() => { executed = true })
-      expect(executed).toBe(true)
-    })
+  it('accepts debug', () => {
+    const debug = true
+    const api = apiFactory({debug})
+    expect(api.getDebug()).toBe(debug)
+  })
 
-    it('delays callback if not authenticated', () => {
-      const api = apiFactory()
-      let executed = false
-      api.onAuthenticated(() => { executed = true })
-      expect(executed).toBe(false)
-    })
+  it('accepts scope', () => {
+    const scope = 'scope1 scope2'
+    const api = apiFactory({scope})
+    expect(api.getScope()).toBe(scope)
   })
 })
