@@ -16,12 +16,22 @@ describe('components', () => {
       unmountComponentAtNode(node)
     })
 
-    it('renders access_token error', () => {
-      const api = apiFactory({debug: true})
+    it('renders error', () => {
+      const api = apiFactory()
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).toContain('<span class="Callback" data-result="access_token"></span>')
+        expect(node.innerHTML).toContain('data-success="false"')
+      })
+    })
+
+    it('renders success', () => {
+      window.location.hash = '#access_token=yes'
+      const api = apiFactory()
+      const ApiCallback = api.CallbackComponent
+
+      render(<ApiCallback />, node, () => {
+        expect(node.innerHTML).toContain('data-success="true"')
       })
     })
   })

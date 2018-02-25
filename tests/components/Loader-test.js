@@ -39,5 +39,25 @@ describe('components', () => {
         }, 10)
       })
     })
+
+    it('sets auth', (done) => {
+      const api = apiFactory()
+      const Component = () => <div>foo</div>
+      const ApiProvider = api.ProviderHoc(Component)
+      const auth = {
+        access_token: 'access token',
+        user_id: Math.random(),
+        state: api.getUniqueId()
+      }
+
+      render(<ApiProvider />, node, () => {
+        window.postMessage({auth}, window.location.origin)
+
+        setTimeout(() => {
+          expect(node.innerHTML).toContain(`data-user-id="${auth.user_id}"`)
+          done()
+        }, 10)
+      })
+    })
   })
 })

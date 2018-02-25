@@ -204,6 +204,16 @@ Example:
 api.onAuthenticated(() => api.fetchOne('users/me'))
 ```
 
+### api.setAuth
+
+Params:
+
+ - `auth` required object
+   - `access_token` required string
+   - `state` required string
+
+Returns the number of auth callbacks that have been notified.
+
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api
 

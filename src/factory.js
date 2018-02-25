@@ -79,8 +79,6 @@ const apiFactory = (config = {}) => {
       return authorizeUrl
     },
 
-    getDebug: () => debug,
-
     log: function () {
       if (!debug) {
         return
@@ -90,30 +88,6 @@ const apiFactory = (config = {}) => {
       args[0] = `[api#${uniqueId}] ${args[0]}`
 
       console.log.apply(this, args)
-    },
-
-    setAuth: (newAuth) => {
-      auth = {}
-
-      const notifyWaitingForAuths = () => {
-        api.fetchMultiple(() => {
-          for (let callback of authCallbacks) {
-            callback()
-          }
-          authCallbacks.length = 0
-        })
-      }
-
-      if (!newAuth || !newAuth.access_token || !newAuth.state) {
-        return notifyWaitingForAuths()
-      }
-
-      if (newAuth.state !== uniqueId) {
-        return notifyWaitingForAuths()
-      }
-
-      auth = newAuth
-      return notifyWaitingForAuths()
     }
   }
 
@@ -140,6 +114,8 @@ const apiFactory = (config = {}) => {
     getScope: () => scope,
 
     getFetchCount: () => fetchCount,
+
+    getUniqueId: () => uniqueId,
 
     getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
 
@@ -213,10 +189,11 @@ const apiFactory = (config = {}) => {
 
       return fetchJson('/batch', {
         method: 'POST',
+        headers,
         body: JSON.stringify(batchBody)
       }).then(json => {
         if (typeof json.jobs !== 'object') {
-          return Promise.reject(new Error(json))
+          return Promise.reject(new Error(JSON.stringify(json)))
         }
         const jobs = json.jobs
 
@@ -254,12 +231,12 @@ const apiFactory = (config = {}) => {
 
     onAuthenticated: (callback) => {
       if (typeof callback !== 'function') {
-        return () => {}
+        return () => false
       }
 
       if (auth !== null) {
         callback()
-        return () => {}
+        return () => false
       }
 
       authCallbacks.push(callback)
@@ -267,13 +244,49 @@ const apiFactory = (config = {}) => {
 
       const cancel = () => {
         const i = authCallbacks.indexOf(callback)
-        if (i > -1) {
-          authCallbacks.splice(i, 1)
-          internalApi.log('Removed auth callback #%d, total=%d', i, authCallbacks.length)
+        if (i < 0) {
+          return false
         }
+
+        authCallbacks.splice(i, 1)
+        internalApi.log('Removed auth callback #%d, total=%d', i, authCallbacks.length)
+        return true
       }
 
       return cancel
+    },
+
+    setAuth: (newAuth) => {
+      auth = {}
+
+      const notifyWaitingForAuths = () => {
+        const callbackCount = authCallbacks.length
+
+        if (callbackCount > 0) {
+          api.fetchMultiple(() => {
+            for (let callback of authCallbacks) {
+              callback()
+            }
+          })
+          authCallbacks.length = 0
+        }
+
+        internalApi.log('Notified %d auth callbacks', callbackCount)
+        return callbackCount
+      }
+
+      if (typeof newAuth !== 'object' ||
+        typeof newAuth.access_token !== 'string' ||
+        typeof newAuth.state !== 'string') {
+        return notifyWaitingForAuths()
+      }
+
+      if (newAuth.state !== uniqueId) {
+        return notifyWaitingForAuths()
+      }
+
+      auth = newAuth
+      return notifyWaitingForAuths()
     }
   }
 
