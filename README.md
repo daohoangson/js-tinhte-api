@@ -76,10 +76,10 @@ const App = () => (
 
 ### Fetch from API
 
-In children components, use `hoc.ApiConsumer` or `api.ConsumerHoc` to prepare the API context and fetch data.
+In children components, use `apiHoc.ApiConsumer` or `api.ConsumerHoc` to prepare the API context and fetch data.
 
 ```js
-import { hoc } from 'tinhte-api'
+import { apiHoc } from 'tinhte-api'
 
 const UsersMeBase = ({api}) => {
     const onClick = () => api.fetchOne('users/me')
@@ -88,7 +88,7 @@ const UsersMeBase = ({api}) => {
     return <button onClick={onClick}>Fetch</button>
 }
 
-const UsersMeComponent = hoc.ApiConsumer(UsersMeBase)
+const UsersMeComponent = apiHoc.ApiConsumer(UsersMeBase)
 ```
 
 Use the newly built component anywhere under Provider HOC sub-tree and it will have `props.api` setup.

@@ -3,7 +3,7 @@ import {render} from 'react-dom'
 import {BrowserRouter as Router, Route} from 'react-router-dom'
 import querystring from 'querystring'
 
-import { apiFactory, hoc } from '../../src'
+import { apiFactory, apiHoc } from '../../src'
 
 // in order to load api authentication, a callback route is required
 // all pages should render api.LoaderComponent to trigger the auth process
@@ -34,7 +34,7 @@ const Home = () => {
     return <button onClick={onClick}>GET `{uri}`</button>
   }
 
-  const ButtonOne = hoc.ApiConsumer(ButtonOneBase)
+  const ButtonOne = apiHoc.ApiConsumer(ButtonOneBase)
 
   const ButtonMultipleBase = ({api}) => {
     const onClick = () => api.fetchMultiple(() => {
@@ -49,7 +49,7 @@ const Home = () => {
     return <button onClick={onClick}>POST `/batch`</button>
   }
 
-  const ButtonMultiple = hoc.ApiConsumer(ButtonMultipleBase)
+  const ButtonMultiple = apiHoc.ApiConsumer(ButtonMultipleBase)
 
   const Middleman = ({children}) => (
     <div className='middleman'>Inside middleman: {children}</div>
@@ -72,7 +72,7 @@ const Home = () => {
     }
   }
 
-  const AutoFetch = hoc.ApiConsumer(AutoFetchBase)
+  const AutoFetch = apiHoc.ApiConsumer(AutoFetchBase)
 
   return (
     <div>

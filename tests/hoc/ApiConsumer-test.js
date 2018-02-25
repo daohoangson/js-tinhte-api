@@ -2,7 +2,7 @@ import expect from 'expect'
 import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
-import { apiFactory, hoc } from 'src/'
+import { apiFactory, apiHoc } from 'src/'
 
 describe('hoc', () => {
   describe('ApiConsumer', () => {
@@ -24,7 +24,7 @@ describe('hoc', () => {
       const ApiProvider = api.ProviderHoc(Parent)
 
       const Child = ({api}) => <span className='userId'>{api.getUserId()}</span>
-      const ApiConsumer = hoc.ApiConsumer(Child)
+      const ApiConsumer = apiHoc.ApiConsumer(Child)
 
       const Test = () => (
         <ApiProvider>
