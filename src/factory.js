@@ -88,6 +88,39 @@ const apiFactory = (config = {}) => {
       args[0] = `[api#${uniqueId}] ${args[0]}`
 
       console.log.apply(this, args)
+    },
+
+    setAuth: (newAuth) => {
+      auth = {}
+
+      const notifyWaitingForAuths = () => {
+        const callbackCount = authCallbacks.length
+
+        if (callbackCount > 0) {
+          api.fetchMultiple(() => {
+            for (let callback of authCallbacks) {
+              callback()
+            }
+          })
+          authCallbacks.length = 0
+        }
+
+        internalApi.log('Notified %d auth callbacks', callbackCount)
+        return callbackCount
+      }
+
+      if (typeof newAuth !== 'object' ||
+        typeof newAuth.access_token !== 'string' ||
+        typeof newAuth.state !== 'string') {
+        return notifyWaitingForAuths()
+      }
+
+      if (newAuth.state !== uniqueId) {
+        return notifyWaitingForAuths()
+      }
+
+      auth = newAuth
+      return notifyWaitingForAuths()
     }
   }
 
@@ -257,36 +290,11 @@ const apiFactory = (config = {}) => {
     },
 
     setAuth: (newAuth) => {
-      auth = {}
-
-      const notifyWaitingForAuths = () => {
-        const callbackCount = authCallbacks.length
-
-        if (callbackCount > 0) {
-          api.fetchMultiple(() => {
-            for (let callback of authCallbacks) {
-              callback()
-            }
-          })
-          authCallbacks.length = 0
-        }
-
-        internalApi.log('Notified %d auth callbacks', callbackCount)
-        return callbackCount
+      if (!debug) {
+        return 0
       }
 
-      if (typeof newAuth !== 'object' ||
-        typeof newAuth.access_token !== 'string' ||
-        typeof newAuth.state !== 'string') {
-        return notifyWaitingForAuths()
-      }
-
-      if (newAuth.state !== uniqueId) {
-        return notifyWaitingForAuths()
-      }
-
-      auth = newAuth
-      return notifyWaitingForAuths()
+      return internalApi.setAuth(newAuth)
     }
   }
 

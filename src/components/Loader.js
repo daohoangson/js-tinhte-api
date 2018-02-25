@@ -17,7 +17,7 @@ class Loader extends React.Component {
       const {api, internalApi} = this.props
       internalApi.log('Received auth', auth)
 
-      api.setAuth(auth)
+      internalApi.setAuth(auth)
       this.setState({userId: api.getUserId()})
     }
   }

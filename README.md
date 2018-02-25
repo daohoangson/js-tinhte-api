@@ -214,6 +214,9 @@ Params:
 
 Returns the number of auth callbacks that have been notified.
 
+**Note:** This method will not work unless debugging is turned on (`debug=true`). 
+It is strongly recommended against altering API states from outside.
+
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api
 

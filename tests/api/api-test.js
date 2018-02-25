@@ -39,7 +39,7 @@ describe('api', () => {
     })
 
     it('delays callback if not authenticated', () => {
-      const api = apiFactory()
+      const api = apiFactory({debug: true})
       let executed = false
       api.onAuthenticated(() => { executed = true })
       expect(executed).toBe(false)
@@ -50,7 +50,7 @@ describe('api', () => {
 
     describe('cancel()', () => {
       it('prevents callback', () => {
-        const api = apiFactory()
+        const api = apiFactory({debug: true})
         let executed = false
         const cancel = api.onAuthenticated(() => { executed = true })
 
@@ -75,13 +75,27 @@ describe('api', () => {
   })
 
   describe('setAuth', () => {
+    it('does nothing if not debugging', () => {
+      const api = apiFactory()
+      api.onAuthenticated(() => {})
+      const callbackCount = api.setAuth()
+      expect(callbackCount).toBe(0)
+    })
+
+    it('returns callback count', () => {
+      const api = apiFactory({debug: true})
+      api.onAuthenticated(() => {})
+      const callbackCount = api.setAuth()
+      expect(callbackCount).toBe(1)
+    })
+
     it('accepts non-object', () => {
       // see onAuthenticated tests
     })
 
     it('accepts invalid state', () => {
       const accessToken = 'access token'
-      const api = apiFactory()
+      const api = apiFactory({debug: true})
       api.setAuth({
         access_token: accessToken,
         state: ''
@@ -92,7 +106,7 @@ describe('api', () => {
 
     it('updates access token', () => {
       const accessToken = 'access token'
-      const api = apiFactory()
+      const api = apiFactory({debug: true})
       api.setAuth({
         access_token: accessToken,
         state: api.getUniqueId()
