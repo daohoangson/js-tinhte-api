@@ -1,9 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import Loader from '../components/Loader'
-
-export default {
+const hoc = {
   ApiConsumer: (Component) => {
     const ApiConsumer = (props, context) => (
       <Component {...props} {...context} />
@@ -16,7 +14,7 @@ export default {
     return ApiConsumer
   },
 
-  ApiProvider: (api, internalApi, Component) => {
+  ApiProvider: (api, Component) => {
     class ApiProvider extends React.Component {
       getChildContext () {
         return {api}
@@ -26,7 +24,7 @@ export default {
         return (
           <div className='ApiProvider'>
             <Component {...this.props} />
-            <Loader api={api} internalApi={internalApi} />
+            <api.LoaderComponent />
           </div>
         )
       }
@@ -39,3 +37,5 @@ export default {
     return ApiProvider
   }
 }
+
+export default hoc

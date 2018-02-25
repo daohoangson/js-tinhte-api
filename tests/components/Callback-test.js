@@ -2,7 +2,7 @@ import expect from 'expect'
 import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
-import tinhteApi from 'src/'
+import { apiFactory } from 'src/'
 
 describe('components', () => {
   describe('Callback', () => {
@@ -16,12 +16,22 @@ describe('components', () => {
       unmountComponentAtNode(node)
     })
 
-    it('renders access_token error', () => {
-      const api = tinhteApi({debug: true})
+    it('renders error', () => {
+      const api = apiFactory()
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).toContain('<span class="Callback" data-result="access_token"></span>')
+        expect(node.innerHTML).toContain('data-success="false"')
+      })
+    })
+
+    it('renders success', () => {
+      window.location.hash = '#access_token=yes'
+      const api = apiFactory()
+      const ApiCallback = api.CallbackComponent
+
+      render(<ApiCallback />, node, () => {
+        expect(node.innerHTML).toContain('data-success="true"')
       })
     })
   })

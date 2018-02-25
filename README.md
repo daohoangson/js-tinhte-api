@@ -27,9 +27,9 @@ yarn add tinhte-api
 For proper operation, clientId and callbackUrl are both required. See below for callback explanation.
 
 ```js
-import tinhteApi from 'tinhte-api'
+import { apiFactory } from 'tinhte-api'
 
-const api = tinhteApi({
+const api = apiFactory({
     clientId: 'clientId',
     callbackUrl: 'http://app.domain.com/api-callback'
 })
@@ -50,12 +50,12 @@ const Home = () => (
     </div>
 )
 
-const HomeWithApi = api.hocApiProvider(Home)
+const HomeWithApi = api.ProviderHoc(Home)
 ```
 
 ### Render Callback
 
-The `api.LoaderComponent` will attempt to authenticate user using [OAuth2 implicit flow](https://tools.ietf.org/html/rfc6749#section-1.3.2) and that requires serving an additional page as the target redirection URL. We are going to use [React Router](https://reacttraining.com/react-router/) for this:
+The Provider HOC will attempt to authenticate user using [OAuth2 implicit flow](https://tools.ietf.org/html/rfc6749#section-1.3.2) and that requires serving an additional page as the target redirection URL. We are going to use [React Router](https://reacttraining.com/react-router/) below but you can use anything (next.js page, expressjs route, etc.):
 
 ```js
 import {BrowserRouter as Router, Route} from 'react-router-dom'
@@ -76,10 +76,10 @@ const App = () => (
 
 ### Fetch from API
 
-In children components of ApiProvider, use `hoc.ApiConsumer` or `api.hocApiConsumer` to prepare the API context and fetch data.
+In children components, use `hoc.ApiConsumer` or `api.ConsumerHoc` to prepare the API context and fetch data.
 
 ```js
-import hoc from 'tinhte-api/lib/hoc'
+import { hoc } from 'tinhte-api'
 
 const UsersMeBase = ({api}) => {
     const onClick = () => api.fetchOne('users/me')
@@ -91,7 +91,7 @@ const UsersMeBase = ({api}) => {
 const UsersMeComponent = hoc.ApiConsumer(UsersMeBase)
 ```
 
-Use the built component anywhere under ApiProvider sub-tree and it will always have access to `api`.
+Use the newly built component anywhere under Provider HOC sub-tree and it will have `props.api` setup.
 
 ```js
 const ContainerComponent = () => (
@@ -101,7 +101,7 @@ const ContainerComponent = () => (
 
 ## References
 
-### tinhteApi
+### apiFactory
 
 Params:
 
@@ -113,7 +113,6 @@ Params:
    - `callbackUrl` default=`''`
    - `clientId` default=`''`
    - `debug` default=`false`
-   - `delayMs` default=`10`
    - `scope` default=`'read'`
 
 Returns an `api` object.
@@ -122,6 +121,26 @@ Returns an `api` object.
 
 Returns a React component.
 
+### api.ConsumerHoc
+
+Params:
+
+ - `Component` required React component
+
+Returns a higher order React component.
+
+### api.LoaderComponent
+
+Returns a React component.
+
+### api.ProviderHoc
+
+Params:
+
+ - `Component` required React component
+
+Returns a higher order React component.
+
 ### api.getFetchCount
 
 Returns a number.
@@ -129,22 +148,6 @@ Returns a number.
 ### api.getUserId
 
 Returns a number.
-
-### api.hocApiConsumer
-
-Params:
-
- - `Component` required React component
-
-Returns a higher order React component.
-
-### api.hocApiProvider
-
-Params:
-
- - `Component` required React component
-
-Returns a higher order React component.
 
 ### api.fetchOne
 
@@ -171,7 +174,7 @@ Params:
 
  - `fetches` required func
 
-Returns the number of requests groupped together in the batch.
+Returns a `Promise`.
 
 Example:
 
@@ -193,11 +196,23 @@ Params:
 
  - `callback` required func
 
+Returns a `func` that can be used to cancel the callback.
+
 Example:
 
 ```js
 api.onAuthenticated(() => api.fetchOne('users/me'))
 ```
+
+### api.setAuth
+
+Params:
+
+ - `auth` required object
+   - `access_token` required string
+   - `state` required string
+
+Returns the number of auth callbacks that have been notified.
 
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api

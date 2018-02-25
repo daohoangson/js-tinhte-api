@@ -2,7 +2,7 @@ import expect from 'expect'
 import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
-import tinhteApi from 'src/'
+import { apiFactory, hoc } from 'src/'
 
 describe('hoc', () => {
   describe('ApiConsumer', () => {
@@ -18,13 +18,13 @@ describe('hoc', () => {
 
     it('populates props.api', () => {
       const userId = Math.random()
-      const api = tinhteApi({auth: {user_id: userId}})
+      const api = apiFactory({auth: {user_id: userId}})
 
       const Parent = ({children}) => <div>{children}</div>
-      const ApiProvider = api.hocApiProvider(Parent)
+      const ApiProvider = api.ProviderHoc(Parent)
 
       const Child = ({api}) => <span className='userId'>{api.getUserId()}</span>
-      const ApiConsumer = api.hocApiConsumer(Child)
+      const ApiConsumer = hoc.ApiConsumer(Child)
 
       const Test = () => (
         <ApiProvider>
