@@ -93,7 +93,7 @@ const apiFactory = (config = {}) => {
 
   const api = {
 
-    CallbackComponent: () => components.Callback(internalApi),
+    CallbackComponent: () => components.Callback(api, internalApi),
 
     ConsumerHoc: hoc.ApiConsumer,
 

@@ -4,7 +4,7 @@ import Callback from './Callback'
 import Loader from './Loader'
 
 const components = {
-  Callback: (internalApi) => <Callback internalApi={internalApi} />,
+  Callback: (api, internalApi) => <Callback api={api} internalApi={internalApi} />,
 
   Loader: (api, internalApi) => <Loader api={api} internalApi={internalApi} />
 }

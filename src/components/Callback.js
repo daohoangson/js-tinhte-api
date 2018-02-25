@@ -23,8 +23,13 @@ const attemptToPostMessage = (internalApi) => {
   return true
 }
 
-const Callback = ({internalApi}) => {
+const Callback = ({api, internalApi}) => {
   const success = attemptToPostMessage(internalApi)
+
+  if (!api.getDebug()) {
+    return <span className='ApiCallback' />
+  }
+
   return <span className='ApiCallback' data-success={success} />
 }
 
