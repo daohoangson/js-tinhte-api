@@ -24,7 +24,7 @@ const attemptToPostMessage = () => {
 
 const Callback = ({internalApi}) => {
   const result = attemptToPostMessage()
-  if (!internalApi.isDebug()) {
+  if (!internalApi.getDebug()) {
     return <span className='Callback' />
   }
 

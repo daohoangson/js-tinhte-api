@@ -197,6 +197,8 @@ Params:
 
  - `callback` required func
 
+Returns a `func` that can be used to cancel the callback.
+
 Example:
 
 ```js

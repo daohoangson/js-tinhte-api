@@ -27,10 +27,11 @@ const apiFactory = (config = {}) => {
   }
 
   const authCallbacks = []
+  const uniqueId = randomBytes(3).toString('hex')
+
   let batchRequests = null
   let fetchCount = 0
   let requestLatestId = 0
-  let secret = null
 
   const buildUrl = (url) => {
     if (url.match(/^https?:\/\//)) {
@@ -69,23 +70,30 @@ const apiFactory = (config = {}) => {
         return null
       }
 
-      if (secret === null) {
-        secret = randomBytes(32).toString('hex')
-      }
-
       const authorizeUrl = `${apiRoot}?oauth/authorize&` +
         `client_id=${clientId}&` +
         `redirect_uri=${encodeURIComponent(callbackUrl)}&` +
         'response_type=token&' +
         `scope=${encodeURIComponent(scope)}&` +
-        `state=${secret}`
+        `state=${uniqueId}`
 
       return authorizeUrl
     },
 
+    getDebug: () => debug,
+
     getDelayMs: () => delayMs,
 
-    isDebug: () => debug,
+    log: function () {
+      if (!debug) {
+        return
+      }
+
+      const args = arguments
+      args[0] = `[api#${uniqueId}] ${args[0]}`
+
+      console.log.apply(this, args)
+    },
 
     setAuth: (newAuth) => {
       auth = {}
@@ -95,6 +103,7 @@ const apiFactory = (config = {}) => {
           for (let callback of authCallbacks) {
             callback()
           }
+          authCallbacks.length = 0
         })
       }
 
@@ -102,7 +111,7 @@ const apiFactory = (config = {}) => {
         return notifyWaitingForAuths()
       }
 
-      if (newAuth.state !== secret) {
+      if (newAuth.state !== uniqueId) {
         return notifyWaitingForAuths()
       }
 
@@ -236,16 +245,30 @@ const apiFactory = (config = {}) => {
 
     onAuthenticated: (callback) => {
       if (typeof callback !== 'function') {
-        return
+        return () => {}
       }
 
       if (auth !== null) {
-        return callback()
+        callback()
+        return () => {}
       }
 
-      return authCallbacks.push(callback)
+      authCallbacks.push(callback)
+      internalApi.log('Added new auth callback, total=%d', authCallbacks.length)
+
+      const cancel = () => {
+        const i = authCallbacks.indexOf(callback)
+        if (i > -1) {
+          authCallbacks.splice(i, 1)
+          internalApi.log('Removed auth callback #%d, total=%d', i, authCallbacks.length)
+        }
+      }
+
+      return cancel
     }
   }
+
+  internalApi.log('Initialized')
 
   return api
 }

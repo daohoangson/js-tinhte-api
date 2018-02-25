@@ -55,10 +55,21 @@ const Home = () => {
     <div className='middleman'>Inside middleman: {children}</div>
   )
 
-  const AutoFetchBase = ({api, uri}) => {
-    api.onAuthenticated(() => get(api, uri))
+  class AutoFetchBase extends React.Component {
+    componentDidMount () {
+      const { api, uri } = this.props
+      this.cancel = api.onAuthenticated(() => get(api, uri))
+    }
 
-    return <span>GET `{uri}`</span>
+    componentWillUnmount () {
+      if (this.cancel) {
+        this.cancel()
+      }
+    }
+
+    render () {
+      return <span>GET `{this.props.uri}`</span>
+    }
   }
 
   const AutoFetch = hoc.ApiConsumer(AutoFetchBase)
@@ -95,7 +106,8 @@ class Demo extends Component {
   render () {
     const api = apiFactory({
       callbackUrl: window.location.origin + apiCallbackRoute,
-      clientId
+      clientId,
+      debug: true
     })
 
     return (
