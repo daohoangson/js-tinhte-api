@@ -1,11 +1,11 @@
 import expect from 'expect'
 
-import tinhteApi from 'src/'
+import { apiFactory } from 'src/'
 
 describe('api', () => {
   describe('fetchOne', () => {
     it('rejects empty uri', () => {
-      const api = tinhteApi()
+      const api = apiFactory()
       return api.fetchOne('')
         .then(
           (json) => Promise.reject(new Error(json)),
@@ -13,21 +13,25 @@ describe('api', () => {
         )
     })
 
-    it('keeps full url', async () => {
-      const api = tinhteApi()
-      const json = await api.fetchOne('https://httpbin.org/get?foo=bar')
-      expect(json.args.foo).toEqual('bar')
+    it('keeps full url', () => {
+      const api = apiFactory()
+      return api.fetchOne('https://httpbin.org/get?foo=bar')
+        .then((json) => {
+          expect(json.args.foo).toEqual('bar')
+        })
     })
 
-    it('replaces ? from uri', async () => {
+    it('replaces ? from uri', () => {
       const apiRoot = 'https://httpbin.org/anything'
-      const api = tinhteApi({apiRoot})
-      const json = await api.fetchOne('path?foo=bar')
-      expect(json.url).toEqual(apiRoot + '?path&foo=bar')
+      const api = apiFactory({apiRoot})
+      return api.fetchOne('path?foo=bar')
+        .then((json) => {
+          expect(json.url).toEqual(apiRoot + '?path&foo=bar')
+        })
     })
 
     it('rejects on error', () => {
-      const api = tinhteApi()
+      const api = apiFactory()
       return api.fetchOne('posts/1')
         .then(
           (json) => Promise.reject(new Error(json)),
@@ -38,43 +42,46 @@ describe('api', () => {
 
   describe('fetchMultiple', () => {
     it('does nothing if no fetches', () => {
-      const api = tinhteApi()
-      const batchSize = api.fetchMultiple(() => {})
-      expect(batchSize).toEqual(0)
+      const api = apiFactory()
+      const fetches = () => {}
+
+      return api.fetchMultiple(fetches)
+        .then(
+          (responses) => Promise.reject(new Error(responses)),
+          (reason) => expect(reason).toBeAn(Error)
+        )
     })
 
     it('sends all requests at once', () => {
-      const api = tinhteApi()
+      const api = apiFactory()
+      const fetches = () => {
+        api.fetchOne('index').catch(e => e)
+        api.fetchOne('threads/1').catch(e => e)
+        api.fetchOne('posts/1').catch(e => e)
+      }
 
-      const promises = []
-      const batchSize = api.fetchMultiple(() => {
-        promises.push(api.fetchOne('index').catch(e => e))
-        promises.push(api.fetchOne('threads/1').catch(e => e))
-        promises.push(api.fetchOne('posts/1').catch(e => e))
-      })
-      expect(batchSize).toEqual(promises.length)
-
-      return Promise.all(promises)
-        .then(() => {
+      return api.fetchMultiple(fetches)
+        .then((jobs) => {
+          expect(Object.keys(jobs).length).toEqual(3)
           expect(api.getFetchCount()).toEqual(1)
         })
     })
 
     it('skips duplicate requests', () => {
-      const api = tinhteApi()
+      const api = apiFactory()
 
-      const promises = []
       let posts1 = 0
       let posts2 = 0
-      const batchSize = api.fetchMultiple(() => {
-        promises.push(api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ }))
-        promises.push(api.fetchOne('posts/2').catch(e => e).then(() => { posts2++ }))
-        promises.push(api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ }))
-      })
-      expect(batchSize).toEqual(2)
+      const fetches = () => {
+        api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ })
+        api.fetchOne('posts/2').catch(e => e).then(() => { posts2++ })
+        api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ })
+      }
 
-      return Promise.all(promises)
-        .then(() => {
+      api.fetchMultiple(fetches)
+        .then((jobs) => {
+          expect(Object.keys(jobs).length).toEqual(2)
+
           expect(posts1).toEqual(2)
           expect(posts2).toEqual(1)
           expect(api.getFetchCount()).toEqual(1)

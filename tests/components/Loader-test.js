@@ -2,7 +2,7 @@ import expect from 'expect'
 import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
-import tinhteApi from 'src/'
+import { apiFactory } from 'src/'
 
 describe('components', () => {
   describe('Loader', () => {
@@ -17,12 +17,12 @@ describe('components', () => {
     })
 
     it('does not render without clientId', () => {
-      const api = tinhteApi({
+      const api = apiFactory({
         callbackUrl: 'callback url'
       })
 
       const Component = () => <div>foo</div>
-      const ApiProvider = api.hocApiProvider(Component)
+      const ApiProvider = api.ProviderHoc(Component)
 
       render(<ApiProvider />, node, () => {
         expect(node.children.length).toEqual(1)
@@ -30,12 +30,12 @@ describe('components', () => {
     })
 
     it('does not render without callbackUrl', () => {
-      const api = tinhteApi({
+      const api = apiFactory({
         clientId: 'clientId'
       })
 
       const Component = () => <div>foo</div>
-      const ApiProvider = api.hocApiProvider(Component)
+      const ApiProvider = api.ProviderHoc(Component)
 
       render(<ApiProvider />, node, () => {
         expect(node.children.length).toEqual(1)
@@ -45,14 +45,14 @@ describe('components', () => {
     it('displays an iframe', () => {
       const callbackUrl = 'callback url'
       const clientId = 'clientId'
-      const api = tinhteApi({
+      const api = apiFactory({
         callbackUrl,
         clientId,
         delayMs: 0
       })
 
       const Component = () => <div>foo</div>
-      const ApiProvider = api.hocApiProvider(Component)
+      const ApiProvider = api.ProviderHoc(Component)
 
       render(<ApiProvider />, node, () => {
         expect(node.innerHTML).toContain('<iframe')
@@ -64,7 +64,7 @@ describe('components', () => {
 
     it('accepts apiRoot', () => {
       const apiRoot = 'http://api.domain.com'
-      const api = tinhteApi({
+      const api = apiFactory({
         apiRoot,
         callbackUrl: 'callback url',
         clientId: 'clientId',
@@ -72,7 +72,7 @@ describe('components', () => {
       })
 
       const Component = () => <div>foo</div>
-      const ApiProvider = api.hocApiProvider(Component)
+      const ApiProvider = api.ProviderHoc(Component)
 
       render(<ApiProvider />, node, () => {
         expect(node.innerHTML).toContain(apiRoot)
@@ -81,7 +81,7 @@ describe('components', () => {
 
     it('accepts scope', () => {
       const scope = 'read post'
-      const api = tinhteApi({
+      const api = apiFactory({
         callbackUrl: 'callback url',
         clientId: 'clientId',
         scope,
@@ -89,7 +89,7 @@ describe('components', () => {
       })
 
       const Component = () => <div>foo</div>
-      const ApiProvider = api.hocApiProvider(Component)
+      const ApiProvider = api.ProviderHoc(Component)
 
       render(<ApiProvider />, node, () => {
         expect(node.innerHTML).toContain('scope=' + encodeURIComponent(scope))

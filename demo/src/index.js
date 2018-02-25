@@ -3,8 +3,7 @@ import {render} from 'react-dom'
 import {BrowserRouter as Router, Route} from 'react-router-dom'
 import querystring from 'querystring'
 
-import tinhteApi from '../../src'
-import hoc from '../../src/hoc'
+import { apiFactory, hoc } from '../../src'
 
 // in order to load api authentication, a callback route is required
 // all pages should render api.LoaderComponent to trigger the auth process
@@ -94,7 +93,7 @@ const Home = () => {
 
 class Demo extends Component {
   render () {
-    const api = tinhteApi({
+    const api = apiFactory({
       callbackUrl: window.location.origin + apiCallbackRoute,
       clientId
     })
@@ -102,7 +101,7 @@ class Demo extends Component {
     return (
       <Router>
         <div className='demo'>
-          <Route exact path='/' component={api.hocApiProvider(Home)} />
+          <Route exact path='/' component={api.ProviderHoc(Home)} />
           <Route path={apiCallbackRoute} component={api.CallbackComponent} />
         </div>
       </Router>

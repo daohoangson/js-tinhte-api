@@ -2,7 +2,7 @@ import expect from 'expect'
 import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
-import tinhteApi from 'src/'
+import { apiFactory } from 'src/'
 
 describe('components', () => {
   describe('Callback', () => {
@@ -17,7 +17,7 @@ describe('components', () => {
     })
 
     it('renders access_token error', () => {
-      const api = tinhteApi({debug: true})
+      const api = apiFactory({debug: true})
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
