@@ -88,7 +88,7 @@ const apiFactory = (config = {}) => {
           for (let callback of items) {
             callback()
           }
-        })
+        }).catch(e => e)
         items.length = 0
       }
 
@@ -301,7 +301,7 @@ const apiFactory = (config = {}) => {
             }
           }
 
-          return reject()
+          return reject(new Error('Could not find job ' + jobId))
         }
 
         for (let reqUniqueKey of Object.keys(reqIds)) {
