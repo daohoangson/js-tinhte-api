@@ -108,20 +108,21 @@ describe('api', () => {
     it('skips duplicate requests', () => {
       const api = apiFactory()
 
+      const promises = []
       let posts1 = 0
       let posts2 = 0
       const fetches = () => {
-        api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ })
-        api.fetchOne('posts/2').catch(e => e).then(() => { posts2++ })
-        api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ })
+        promises.push(api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ }))
+        promises.push(api.fetchOne('posts/2').catch(e => e).then(() => { posts2++ }))
+        promises.push(api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ }))
       }
 
-      api.fetchMultiple(fetches)
-        .then((jobs) => {
-          expect(Object.keys(jobs).length).toBe(2)
+      promises.push(api.fetchMultiple(fetches).then((jobs) => expect(Object.keys(jobs).length).toBe(2)))
 
-          expect(posts1).toBe(2)
-          expect(posts2).toBe(1)
+      return Promise.all(promises)
+        .then(() => {
+          expect(posts1).toBe(2, 'posts1 twice')
+          expect(posts2).toBe(1, 'posts2 once')
           expect(api.getFetchCount()).toBe(1)
         })
     })

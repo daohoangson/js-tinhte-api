@@ -12,6 +12,34 @@ describe('api', () => {
     })
   })
 
+  describe('getCookieName', () => {
+    it('returns default cookie prefix', () => {
+      const clientId = 'client ID'
+      const api = apiFactory({clientId})
+      expect(api.getCookieName()).toMatch(/^auth_/)
+    })
+
+    it('returns empty string without client ID', () => {
+      const cookiePrefix = 'cookie prefix'
+      const api = apiFactory({cookiePrefix})
+      expect(api.getCookieName()).toBe('')
+    })
+
+    it('returns empty string without cookie prefix', () => {
+      const clientId = 'client ID'
+      const cookiePrefix = ''
+      const api = apiFactory({clientId, cookiePrefix})
+      expect(api.getCookieName()).toBe('')
+    })
+
+    it('returns empty string with unsafe client ID', () => {
+      const clientId = '#'
+      const cookiePrefix = 'cookie prefix'
+      const api = apiFactory({clientId, cookiePrefix})
+      expect(api.getCookieName()).toBe('')
+    })
+  })
+
   describe('getUserId', () => {
     it('returns default zero', () => {
       const api = apiFactory()

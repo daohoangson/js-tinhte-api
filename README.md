@@ -112,6 +112,7 @@ Params:
      - `user_id` default=`0`
    - `callbackUrl` default=`''`
    - `clientId` default=`''`
+   - `cookiePrefix` default=`'auth_'`
    - `debug` default=`false`
    - `scope` default=`'read'`
 

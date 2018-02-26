@@ -13,6 +13,7 @@ const apiFactory = (config = {}) => {
   const apiRoot = (typeof config.apiRoot === 'string') ? config.apiRoot : 'https://tinhte.vn/appforo/index.php'
   const callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
   const clientId = (typeof config.clientId === 'string') ? config.clientId : ''
+  const cookiePrefix = (typeof config.cookiePrefix === 'string') ? config.cookiePrefix : 'auth_'
   const debug = (typeof config.debug === 'boolean') ? config.debug : false
   const scope = (typeof config.scope === 'string') ? config.scope : 'read'
 
@@ -92,6 +93,8 @@ const apiFactory = (config = {}) => {
         items.length = 0
       }
 
+      internalApi.log('Notified %d %s callbacks', callbackCount, list.name)
+
       return callbackCount
     }
   }
@@ -144,9 +147,7 @@ const apiFactory = (config = {}) => {
 
       const notify = () => {
         const { notifyAndFetch, listForAuth } = callbacks
-        const callbackCount = notifyAndFetch(listForAuth)
-        internalApi.log('Notified %d auth callbacks', callbackCount)
-        return callbackCount
+        return notifyAndFetch(listForAuth)
       }
 
       if (typeof newAuth !== 'object' ||
@@ -171,9 +172,7 @@ const apiFactory = (config = {}) => {
       providerMounted = true
 
       const { notifyAndFetch, listForProviderMount } = callbacks
-      const callbackCount = notifyAndFetch(listForProviderMount)
-      internalApi.log('Notified %d provider mount callbacks', callbackCount)
-      return callbackCount
+      return notifyAndFetch(listForProviderMount)
     }
   }
 
@@ -194,6 +193,19 @@ const apiFactory = (config = {}) => {
     getCallbackUrl: () => callbackUrl,
 
     getClientId: () => clientId,
+
+    getCookieName: () => {
+      if (!cookiePrefix || !clientId) {
+        return ''
+      }
+
+      const safeClientId = clientId.replace(/[^a-z0-9]/gi, '')
+      if (!safeClientId) {
+        return ''
+      }
+
+      return cookiePrefix + safeClientId
+    },
 
     getDebug: () => debug,
 

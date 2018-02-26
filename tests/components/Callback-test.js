@@ -14,6 +14,7 @@ describe('components', () => {
 
     afterEach(() => {
       unmountComponentAtNode(node)
+      window.location.hash = ''
     })
 
     it('renders error', () => {
@@ -27,11 +28,21 @@ describe('components', () => {
 
     it('renders success', () => {
       window.location.hash = '#access_token=yes'
+
       const api = apiFactory({debug: true})
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
         expect(node.innerHTML).toContain('data-success="true"')
+      })
+    })
+
+    it('renders without debugging info', () => {
+      const api = apiFactory()
+      const ApiCallback = api.CallbackComponent
+
+      render(<ApiCallback />, node, () => {
+        expect(node.innerHTML).toNotContain('data-success')
       })
     })
   })

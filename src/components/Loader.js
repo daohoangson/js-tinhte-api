@@ -1,4 +1,43 @@
+import Cookies from 'js-cookie'
 import React from 'react'
+
+const getCookie = (api) => {
+  const name = api.getCookieName()
+  if (!name) {
+    return null
+  }
+
+  const value = Cookies.getJSON(name)
+  if (typeof value !== 'object') {
+    return null
+  }
+
+  value._cookieName = name
+
+  return value
+}
+
+const setCookie = (api, auth) => {
+  if (!auth.access_token || !auth.expires_in || !auth.user_id) {
+    return null
+  }
+
+  const name = api.getCookieName()
+  if (!name) {
+    return null
+  }
+
+  const value = {
+    access_token: auth.access_token,
+    user_id: auth.user_id
+  }
+  // set TTL to half of expires_in to account for server issue
+  const ttl = auth.expires_in / 2
+  const expires = new Date(new Date().getTime() + ttl * 1000)
+  Cookies.set(name, value, { expires })
+
+  return { name, value, expires }
+}
 
 class Loader extends React.Component {
   constructor (props) {
@@ -15,14 +54,37 @@ class Loader extends React.Component {
       }
       const auth = e.data.auth
       const {api, internalApi} = this.props
-      internalApi.log('Received auth', auth)
+      internalApi.log('Received auth via window message', auth)
 
       internalApi.setAuth(auth)
       this.setState({userId: api.getUserId()})
+
+      const accessToken = api.getAccessToken()
+      if (accessToken && accessToken === auth.access_token) {
+        const cookie = setCookie(api, auth)
+        if (cookie !== null) {
+          internalApi.log('Set cookie %s until %s', cookie.name, cookie.expires)
+        }
+      }
     }
   }
 
   componentDidMount () {
+    const { api, internalApi } = this.props
+    const cookieAuth = getCookie(api)
+    if (cookieAuth !== null) {
+      internalApi.log('Restored auth from cookie', cookieAuth)
+
+      internalApi.setAuth({
+        ...cookieAuth,
+        state: api.getUniqueId()
+      })
+      this.setState({userId: api.getUserId()})
+
+      // skip initializing further once we have recovered auth from cookie
+      return
+    }
+
     const authorizeUrl = this.props.internalApi.buildAuthorizeUrl()
     if (authorizeUrl) {
       this.setState({src: authorizeUrl})
