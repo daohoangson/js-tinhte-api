@@ -28,7 +28,7 @@ const hoc = {
         return (
           <div className='ApiProvider'>
             <Component {...this.props} />
-            <api.LoaderComponent />
+            { api.getAccessToken() === '' && <api.LoaderComponent /> }
           </div>
         )
       }

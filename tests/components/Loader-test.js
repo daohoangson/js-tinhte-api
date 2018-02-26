@@ -40,6 +40,22 @@ describe('components', () => {
       })
     })
 
+    it('does not show up with access token already set', () => {
+      const api = apiFactory({
+        auth: {access_token: 'access token'},
+        callbackUrl: 'callback url',
+        clientId: 'client ID',
+        scope: 'scope1 scope2'
+      })
+
+      const Component = () => <div>foo</div>
+      const ApiProvider = api.ProviderHoc(Component)
+
+      render(<ApiProvider />, node, () => {
+        expect(node.innerHTML).toNotContain('<iframe')
+      })
+    })
+
     it('handles message without auth', (done) => {
       const api = apiFactory()
       const Component = () => <div>foo</div>
