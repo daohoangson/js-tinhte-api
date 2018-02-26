@@ -1,4 +1,6 @@
 import expect from 'expect'
+import React from 'react'
+import {render, unmountComponentAtNode} from 'react-dom'
 
 import { apiFactory } from 'src/'
 
@@ -71,6 +73,57 @@ describe('api', () => {
         const canceled2 = cancel()
         expect(canceled2).toBe(false)
       })
+    })
+  })
+
+  describe('onProviderMounted', () => {
+    let node
+
+    beforeEach(() => {
+      node = document.createElement('div')
+    })
+
+    afterEach(() => {
+      unmountComponentAtNode(node)
+    })
+
+    it('executes callback', () => {
+      const api = apiFactory()
+      const Parent = ({ children }) => <div>{children}</div>
+      const ApiProvider = api.ProviderHoc(Parent)
+
+      let executed = false
+      const Child = class extends React.Component {
+        componentWillMount () {
+          this.props.api.onProviderMounted(() => {
+            executed = true
+          })
+        }
+
+        render () {
+          return <div>foo</div>
+        }
+      }
+      const ApiConsumer = api.ConsumerHoc(Child)
+
+      const App = () => (
+        <ApiProvider>
+          <ApiConsumer />
+        </ApiProvider>
+      )
+
+      render(<App />, node, () => {
+        expect(executed).toBe(true)
+      })
+    })
+
+    it('delays callback', () => {
+      const api = apiFactory()
+      let executed = false
+      api.onProviderMounted(() => {
+        executed = true
+      })
+      expect(executed).toBe(false)
     })
   })
 

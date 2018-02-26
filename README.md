@@ -204,6 +204,39 @@ Example:
 api.onAuthenticated(() => api.fetchOne('users/me'))
 ```
 
+### api.onProviderMounted
+
+Params:
+
+ - `callback` required function
+
+Returns a `function` that can be used to cancel the callback.
+
+Example:
+
+```js
+class Component extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = { link: '' }
+  }
+
+  componentWillMount () {
+    const { api } = this.props
+    api.onProviderMounted(() => {
+      api.fetchOne('navigation')
+        .then((json) => {
+          this.setState({ link: json.elements[0].links.permalink })
+        })
+    })
+  }
+
+  render () {
+    return <span>link=<a href={this.state.link} target='_blank'>{this.state.link}</a></span>
+  }
+}
+```
+
 ### api.setAuth
 
 Params:

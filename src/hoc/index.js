@@ -14,10 +14,14 @@ const hoc = {
     return ApiConsumer
   },
 
-  ApiProvider: (api, Component) => {
+  ApiProvider: (Component, api, internalApi) => {
     class ApiProvider extends React.Component {
       getChildContext () {
         return {api}
+      }
+
+      componentDidMount () {
+        internalApi.setProviderMounted()
       }
 
       render () {

@@ -25,11 +25,11 @@ const apiFactory = (config = {}) => {
     }
   }
 
-  const authCallbacks = []
   const uniqueId = randomBytes(3).toString('hex')
 
   let batchRequests = null
   let fetchCount = 0
+  let providerMounted = false
   let requestLatestId = 0
 
   const buildUrl = (url) => {
@@ -45,6 +45,55 @@ const apiFactory = (config = {}) => {
     const finalUrl = `${apiRoot}?${urlQuery}`
 
     return finalUrl
+  }
+
+  const callbacks = {
+    listForAuth: { name: 'auth', items: [] },
+    listForProviderMount: { name: 'provider mount', items: [] },
+
+    add: (list, callback, triggerNow) => {
+      if (typeof callback !== 'function') {
+        return () => false
+      }
+
+      if (triggerNow) {
+        callback()
+        return () => false
+      }
+
+      const { items } = list
+      items.push(callback)
+      internalApi.log('Added new %s callback, total=%d', list.name, items.length)
+
+      const cancel = () => {
+        const i = items.indexOf(callback)
+        if (i < 0) {
+          return false
+        }
+
+        items.splice(i, 1)
+        internalApi.log('Removed %s callback #%d, remaining=%d', list.name, i, items.length)
+        return true
+      }
+
+      return cancel
+    },
+
+    notifyAndFetch: (list) => {
+      const { items } = list
+      const callbackCount = items.length
+
+      if (callbackCount > 0) {
+        api.fetchMultiple(() => {
+          for (let callback of items) {
+            callback()
+          }
+        })
+        items.length = 0
+      }
+
+      return callbackCount
+    }
   }
 
   const fetchJson = (url, options) => {
@@ -93,18 +142,9 @@ const apiFactory = (config = {}) => {
     setAuth: (newAuth) => {
       auth = {}
 
-      const notifyWaitingForAuths = () => {
-        const callbackCount = authCallbacks.length
-
-        if (callbackCount > 0) {
-          api.fetchMultiple(() => {
-            for (let callback of authCallbacks) {
-              callback()
-            }
-          })
-          authCallbacks.length = 0
-        }
-
+      const notify = () => {
+        const { notifyAndFetch, listForAuth } = callbacks
+        const callbackCount = notifyAndFetch(listForAuth)
         internalApi.log('Notified %d auth callbacks', callbackCount)
         return callbackCount
       }
@@ -112,15 +152,28 @@ const apiFactory = (config = {}) => {
       if (typeof newAuth !== 'object' ||
         typeof newAuth.access_token !== 'string' ||
         typeof newAuth.state !== 'string') {
-        return notifyWaitingForAuths()
+        return notify()
       }
 
       if (newAuth.state !== uniqueId) {
-        return notifyWaitingForAuths()
+        return notify()
       }
 
       auth = newAuth
-      return notifyWaitingForAuths()
+      return notify()
+    },
+
+    setProviderMounted: () => {
+      if (providerMounted) {
+        return 0
+      }
+
+      providerMounted = true
+
+      const { notifyAndFetch, listForProviderMount } = callbacks
+      const callbackCount = notifyAndFetch(listForProviderMount)
+      internalApi.log('Notified %d provider mount callbacks', callbackCount)
+      return callbackCount
     }
   }
 
@@ -132,7 +185,7 @@ const apiFactory = (config = {}) => {
 
     LoaderComponent: () => components.Loader(api, internalApi),
 
-    ProviderHoc: (Component) => hoc.ApiProvider(api, Component),
+    ProviderHoc: (Component) => hoc.ApiProvider(Component, api, internalApi),
 
     getAccessToken: () => (auth && auth.access_token) ? auth.access_token : '',
 
@@ -263,30 +316,13 @@ const apiFactory = (config = {}) => {
     },
 
     onAuthenticated: (callback) => {
-      if (typeof callback !== 'function') {
-        return () => false
-      }
+      const { add, listForAuth } = callbacks
+      return add(listForAuth, callback, auth !== null)
+    },
 
-      if (auth !== null) {
-        callback()
-        return () => false
-      }
-
-      authCallbacks.push(callback)
-      internalApi.log('Added new auth callback, total=%d', authCallbacks.length)
-
-      const cancel = () => {
-        const i = authCallbacks.indexOf(callback)
-        if (i < 0) {
-          return false
-        }
-
-        authCallbacks.splice(i, 1)
-        internalApi.log('Removed auth callback #%d, total=%d', i, authCallbacks.length)
-        return true
-      }
-
-      return cancel
+    onProviderMounted: (callback) => {
+      const { add, listForProviderMount } = callbacks
+      return add(listForProviderMount, callback, providerMounted)
     },
 
     setAuth: (newAuth) => {

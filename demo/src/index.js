@@ -55,7 +55,7 @@ const Home = () => {
     <div className='middleman'>Inside middleman: {children}</div>
   )
 
-  class AutoFetchBase extends React.Component {
+  class AutoFetchOnAuthenticatedBase extends React.Component {
     componentDidMount () {
       const { api, uri } = this.props
       this.cancel = api.onAuthenticated(() => get(api, uri))
@@ -72,7 +72,26 @@ const Home = () => {
     }
   }
 
-  const AutoFetch = apiHoc.ApiConsumer(AutoFetchBase)
+  const AutoFetchOnAuthenticated = apiHoc.ApiConsumer(AutoFetchOnAuthenticatedBase)
+
+  class AutoFetchOnProviderMountedBase extends React.Component {
+    componentWillMount () {
+      const { api, uri } = this.props
+      this.cancel = api.onProviderMounted(() => get(api, uri))
+    }
+
+    componentWillUnmount () {
+      if (this.cancel) {
+        this.cancel()
+      }
+    }
+
+    render () {
+      return <span>GET `{this.props.uri}`</span>
+    }
+  }
+
+  const AutoFetchOnProviderMounted = apiHoc.ApiConsumer(AutoFetchOnProviderMountedBase)
 
   return (
     <div>
@@ -93,10 +112,17 @@ const Home = () => {
       </Middleman><br />
 
       <p>
-        auto fetch:
-        <AutoFetch uri='posts/1' />
-        <AutoFetch uri='posts/2' />
-        <AutoFetch uri='posts/3' />
+        auto fetch on authenticated:
+        <AutoFetchOnAuthenticated uri='posts/1' />
+        <AutoFetchOnAuthenticated uri='posts/2' />
+        <AutoFetchOnAuthenticated uri='posts/3' />
+      </p>
+
+      <p>
+        auto fetch on provider mounted:
+        <AutoFetchOnProviderMounted uri='posts/4' />
+        <AutoFetchOnProviderMounted uri='posts/5' />
+        <AutoFetchOnProviderMounted uri='posts/6' />
       </p>
     </div>
   )
