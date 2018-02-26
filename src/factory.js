@@ -24,6 +24,25 @@ const apiFactory = (config = {}) => {
       access_token: (typeof ca.access_token === 'string') ? ca.access_token : '',
       user_id: (typeof ca.user_id === 'number') ? ca.user_id : 0
     }
+
+    if (auth.access_token.length > 0 && auth.user_id === 0) {
+      // detect XenForo environments
+      if (typeof global.XenForo === 'object' && global.XenForo !== null &&
+        typeof global.XenForo.visitor === 'object' &&
+        typeof global.XenForo.visitor.user_id === 'number' &&
+        typeof global.XenForo._csrfToken === 'string') {
+        // XenForo 1.x
+        auth.user_id = global.XenForo.visitor.user_id
+        auth._xf1 = global.XenForo
+      } else if (typeof global.XF === 'object' && global.XF !== null &&
+        typeof global.XF.config === 'object' &&
+        typeof global.XF.config.userId === 'number' &&
+        typeof global.XF.config.csrf === 'string') {
+        // XenForo 2.x
+        auth.user_id = global.XF.config.userId
+        auth._xf2 = global.XF
+      }
+    }
   }
 
   const uniqueId = randomBytes(3).toString('hex')
@@ -39,8 +58,15 @@ const apiFactory = (config = {}) => {
     }
 
     let urlQuery = url.replace('?', '&')
-    if (auth && auth.access_token) {
-      urlQuery += `&oauth_token=${auth.access_token}`
+    if (auth) {
+      if (auth.access_token) {
+        urlQuery += `&oauth_token=${encodeURIComponent(auth.access_token)}`
+      }
+      if (auth._xf1) {
+        urlQuery += `&_xfToken=${encodeURIComponent(auth._xf1._csrfToken)}`
+      } else if (auth._xf2) {
+        urlQuery += `&_xfToken=${encodeURIComponent(auth._xf2.config.csrf)}`
+      }
     }
 
     const finalUrl = `${apiRoot}?${urlQuery}`

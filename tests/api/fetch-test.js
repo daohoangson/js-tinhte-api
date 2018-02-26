@@ -4,6 +4,11 @@ import { apiFactory } from 'src/'
 
 describe('api', () => {
   describe('fetchOne', () => {
+    afterEach(() => {
+      global.XenForo = null
+      global.XF = null
+    })
+
     it('rejects empty uri', () => {
       const api = apiFactory()
       return api.fetchOne('')
@@ -41,6 +46,46 @@ describe('api', () => {
       return api.fetchOne('path')
         .then((json) => {
           expect(json.args.oauth_token).toBe(accessToken)
+        })
+    })
+
+    it('includes XenForo 1 csrf token', () => {
+      const csrfToken = `csrf token ${Math.random()}`
+      global.XenForo = {
+        visitor: {
+          user_id: Math.random()
+        },
+        _csrfToken: csrfToken
+      }
+
+      const apiRoot = 'https://httpbin.org/anything'
+      const api = apiFactory({
+        apiRoot,
+        auth: {access_token: 'access token'}
+      })
+      return api.fetchOne('xenforo1')
+        .then((json) => {
+          expect(json.args._xfToken).toBe(csrfToken)
+        })
+    })
+
+    it('includes XenForo 2 csrf token', () => {
+      const csrf = `csrf token ${Math.random()}`
+      global.XF = {
+        config: {
+          csrf,
+          userId: Math.random()
+        }
+      }
+
+      const apiRoot = 'https://httpbin.org/anything'
+      const api = apiFactory({
+        apiRoot,
+        auth: {access_token: 'access token'}
+      })
+      return api.fetchOne('xenforo2')
+        .then((json) => {
+          expect(json.args._xfToken).toBe(csrf)
         })
     })
 
