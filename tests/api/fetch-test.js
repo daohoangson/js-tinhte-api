@@ -3,7 +3,9 @@ import expect from 'expect'
 import { apiFactory } from 'src/'
 
 describe('api', () => {
-  describe('fetchOne', () => {
+  describe('fetchOne', function () {
+    this.timeout(10000)
+
     afterEach(() => {
       global.XenForo = null
       global.XF = null
@@ -99,7 +101,9 @@ describe('api', () => {
     })
   })
 
-  describe('fetchMultiple', () => {
+  describe('fetchMultiple', function () {
+    this.timeout(10000)
+
     it('does nothing if no fetches', () => {
       const api = apiFactory()
       const fetches = () => {}
