@@ -1,10 +1,7 @@
-import randomBytes from 'randombytes'
 import unfetch from 'isomorphic-unfetch'
 
 import components from './components'
 import hoc from './hoc'
-
-require('es6-promise').polyfill()
 
 const apiFactory = (config = {}) => {
   if (typeof config !== 'object') {
@@ -27,25 +24,25 @@ const apiFactory = (config = {}) => {
 
     if (auth.access_token.length > 0 && auth.user_id === 0) {
       // detect XenForo environments
-      if (typeof global.XenForo === 'object' && global.XenForo !== null &&
-        typeof global.XenForo.visitor === 'object' &&
-        typeof global.XenForo.visitor.user_id === 'number' &&
-        typeof global.XenForo._csrfToken === 'string') {
+      if (typeof XenForo === 'object' && XenForo !== null &&
+        typeof XenForo.visitor === 'object' &&
+        typeof XenForo.visitor.user_id === 'number' &&
+        typeof XenForo._csrfToken === 'string') {
         // XenForo 1.x
-        auth.user_id = global.XenForo.visitor.user_id
-        auth._xf1 = global.XenForo
-      } else if (typeof global.XF === 'object' && global.XF !== null &&
-        typeof global.XF.config === 'object' &&
-        typeof global.XF.config.userId === 'number' &&
-        typeof global.XF.config.csrf === 'string') {
+        auth.user_id = XenForo.visitor.user_id
+        auth._xf1 = XenForo
+      } else if (typeof XF === 'object' && XF !== null &&
+        typeof XF.config === 'object' &&
+        typeof XF.config.userId === 'number' &&
+        typeof XF.config.csrf === 'string') {
         // XenForo 2.x
-        auth.user_id = global.XF.config.userId
-        auth._xf2 = global.XF
+        auth.user_id = XF.config.userId
+        auth._xf2 = XF
       }
     }
   }
 
-  const uniqueId = randomBytes(3).toString('hex')
+  const uniqueId = ('' + Math.random()).substr(2, 6)
 
   let batchRequests = null
   let fetchCount = 0
@@ -112,9 +109,7 @@ const apiFactory = (config = {}) => {
 
       if (callbackCount > 0) {
         api.fetchMultiple(() => {
-          for (let callback of items) {
-            callback()
-          }
+          items.forEach((callback) => callback())
         }).catch(e => e)
         items.length = 0
       }
@@ -281,10 +276,10 @@ const apiFactory = (config = {}) => {
       const handlers = {}
       const batchBody = []
       const reqIds = {}
-      for (let req of batchRequests) {
-        for (let headerKey of Object.keys(req.options.headers)) {
+      batchRequests.forEach((req) => {
+        Object.keys(req.options.headers).forEach((headerKey) => {
           headers[headerKey] = req.options.headers[headerKey]
-        }
+        })
 
         const id = req.id
         const uri = req.options.uri
@@ -302,7 +297,7 @@ const apiFactory = (config = {}) => {
         } else {
           reqIds[reqUniqueKey].push(id)
         }
-      }
+      })
 
       // reset batchRequests to handle future requests normally
       batchRequests = null
@@ -342,12 +337,10 @@ const apiFactory = (config = {}) => {
           return reject(new Error('Could not find job ' + jobId))
         }
 
-        for (let reqUniqueKey of Object.keys(reqIds)) {
+        Object.keys(reqIds).forEach((reqUniqueKey) => {
           const jobId = reqIds[reqUniqueKey][0]
-          for (let reqId of reqIds[reqUniqueKey]) {
-            handle(jobId, reqId)
-          }
-        }
+          reqIds[reqUniqueKey].forEach((reqId) => handle(jobId, reqId))
+        })
 
         return jobs
       })

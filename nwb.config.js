@@ -1,5 +1,8 @@
 const config = {
   type: 'react-component',
+  babel: {
+    runtime: true
+  },
   npm: {
     esModules: true,
     umd: {
