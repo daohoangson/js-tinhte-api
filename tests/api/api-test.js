@@ -68,18 +68,23 @@ describe('api', () => {
       expect(canceled).toBe(false)
     })
 
-    it('delays callback if not authenticated', () => {
-      const api = apiFactory({debug: true})
+    it('delays callback if not authenticated', (done) => {
+      const debug = true
+      const api = apiFactory({debug})
       let executed = false
       api.onAuthenticated(() => { executed = true })
       expect(executed).toBe(false)
 
       api.setAuth()
-      expect(executed).toBe(true)
+
+      setTimeout(() => {
+        expect(executed).toBe(true)
+        done()
+      }, 10)
     })
 
     describe('cancel()', () => {
-      it('prevents callback', () => {
+      it('prevents callback', (done) => {
         const api = apiFactory({debug: true})
         let executed = false
         const cancel = api.onAuthenticated(() => { executed = true })
@@ -88,7 +93,11 @@ describe('api', () => {
         expect(canceled).toBe(true)
 
         api.setAuth()
-        expect(executed).toBe(false)
+
+        setTimeout(() => {
+          expect(executed).toBe(false)
+          done()
+        }, 10)
       })
 
       it('works once', () => {
@@ -115,7 +124,7 @@ describe('api', () => {
       unmountComponentAtNode(node)
     })
 
-    it('executes callback', () => {
+    it('executes callback', (done) => {
       const api = apiFactory()
       const Parent = ({ children }) => <div>{children}</div>
       const ApiProvider = api.ProviderHoc(Parent)
@@ -141,7 +150,10 @@ describe('api', () => {
       )
 
       render(<App />, node, () => {
-        expect(executed).toBe(true)
+        setTimeout(() => {
+          expect(executed).toBe(true)
+          done()
+        }, 10)
       })
     })
 
@@ -153,21 +165,104 @@ describe('api', () => {
       })
       expect(executed).toBe(false)
     })
+
+    it('merge batch with onAuthenticated', (done) => {
+      const clientId = 'client ID'
+      const cookiePrefix = `auth${Math.random()}_`
+      const api = apiFactory({clientId, cookiePrefix})
+
+      const Parent = ({ children }) => <div>{children}</div>
+      const ApiProvider = api.ProviderHoc(Parent)
+
+      const promises = []
+      const onProviderMounted = class extends React.Component {
+        componentWillMount () {
+          const { api } = this.props
+          api.onProviderMounted(() => {
+            promises.push(api.fetchOne('posts/1').catch(e => e))
+          })
+        }
+
+        render () {
+          return <div>foo</div>
+        }
+      }
+      const ApiConsumer1 = api.ConsumerHoc(onProviderMounted)
+
+      const onAuthenticated = class extends React.Component {
+        componentWillMount () {
+          const { api } = this.props
+          api.onAuthenticated(() => {
+            promises.push(api.fetchOne('posts/2').catch(e => e))
+          })
+        }
+
+        render () {
+          return <div>bar</div>
+        }
+      }
+      const ApiConsumer2 = api.ConsumerHoc(onAuthenticated)
+
+      const auth = {
+        access_token: 'access token',
+        user_id: Math.random()
+      }
+      document.cookie = `${api.getCookieName()}=${JSON.stringify(auth)}`
+
+      const App = () => (
+        <ApiProvider>
+          <ApiConsumer1 />
+          <ApiConsumer2 />
+        </ApiProvider>
+      )
+
+      render(<App />, node, () => {
+        setTimeout(() => {
+          expect(promises.length).toBe(2)
+
+          Promise.all(promises)
+            .then(() => {
+              expect(api.getFetchCount()).toBe(1)
+              done()
+            })
+        }, 10)
+      })
+    })
   })
 
   describe('setAuth', () => {
-    it('does nothing if not debugging', () => {
+    it('throws error if not debugging', () => {
       const api = apiFactory()
       api.onAuthenticated(() => {})
-      const callbackCount = api.setAuth()
-      expect(callbackCount).toBe(0)
+
+      let e
+      try {
+        api.setAuth()
+      } catch (something) {
+        e = something
+      }
+
+      expect(e).toBeAn(Error)
     })
 
     it('returns callback count', () => {
       const api = apiFactory({debug: true})
-      api.onAuthenticated(() => {})
-      const callbackCount = api.setAuth()
-      expect(callbackCount).toBe(1)
+
+      const promises = []
+      let resolve1
+      promises.push(new Promise((resolve) => {
+        resolve1 = resolve
+      }))
+
+      promises.push(new Promise((resolve) => {
+        api.onAuthenticated(() => resolve())
+        const callbackCount = api.setAuth()
+        expect(callbackCount).toBe(1)
+
+        resolve1()
+      }))
+
+      return Promise.all(promises)
     })
 
     it('accepts non-object', () => {

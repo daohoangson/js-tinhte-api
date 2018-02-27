@@ -74,6 +74,7 @@ const apiFactory = (config = {}) => {
   const callbacks = {
     listForAuth: { name: 'auth', items: [] },
     listForProviderMount: { name: 'provider mount', items: [] },
+    sharedQueue: [],
 
     add: (list, callback, triggerNow) => {
       if (typeof callback !== 'function') {
@@ -82,6 +83,7 @@ const apiFactory = (config = {}) => {
 
       if (triggerNow) {
         callback()
+        internalApi.log('Triggered %s callback without adding', list.name)
         return () => false
       }
 
@@ -103,18 +105,36 @@ const apiFactory = (config = {}) => {
       return cancel
     },
 
-    notifyAndFetch: (list) => {
+    enqueueToFetch: (list) => {
       const { items } = list
       const callbackCount = items.length
 
       if (callbackCount > 0) {
-        api.fetchMultiple(() => {
-          items.forEach((callback) => callback())
-        }).catch(e => e)
+        const { sharedQueue } = callbacks
+        items.forEach((callback) => sharedQueue.push(callback))
+
+        const sharedQueueLength = sharedQueue.length
+        setTimeout(() => {
+          if (sharedQueue.length !== sharedQueueLength) {
+            // another invocation has altered the shared queue,
+            // stop running now and let that handle the fetch
+            return
+          }
+
+          api.fetchMultiple(() => {
+            sharedQueue.forEach((callback) => callback())
+            internalApi.log('Triggered %d callbacks', sharedQueueLength)
+
+            sharedQueue.length = 0
+          }).catch(reason => {
+            internalApi.log(reason)
+          })
+        }, 0)
+
         items.length = 0
       }
 
-      internalApi.log('Notified %d %s callbacks', callbackCount, list.name)
+      internalApi.log('Queued %d %s callbacks', callbackCount, list.name)
 
       return callbackCount
     }
@@ -167,8 +187,8 @@ const apiFactory = (config = {}) => {
       auth = {}
 
       const notify = () => {
-        const { notifyAndFetch, listForAuth } = callbacks
-        return notifyAndFetch(listForAuth)
+        const { enqueueToFetch, listForAuth } = callbacks
+        return enqueueToFetch(listForAuth)
       }
 
       if (typeof newAuth !== 'object' ||
@@ -192,8 +212,8 @@ const apiFactory = (config = {}) => {
 
       providerMounted = true
 
-      const { notifyAndFetch, listForProviderMount } = callbacks
-      return notifyAndFetch(listForProviderMount)
+      const { enqueueToFetch, listForProviderMount } = callbacks
+      return enqueueToFetch(listForProviderMount)
     }
   }
 
@@ -358,7 +378,7 @@ const apiFactory = (config = {}) => {
 
     setAuth: (newAuth) => {
       if (!debug) {
-        return 0
+        throw new Error('Access denied')
       }
 
       return internalApi.setAuth(newAuth)

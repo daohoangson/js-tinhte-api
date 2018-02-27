@@ -146,7 +146,7 @@ describe('components', () => {
     it('restores auth from cookie', (done) => {
       const clientId = 'client ID'
       const cookiePrefix = `auth${Math.random()}_`
-      const api = apiFactory({clientId, cookiePrefix, debug: true})
+      const api = apiFactory({clientId, cookiePrefix})
       const Component = () => <div>foo</div>
       const ApiProvider = api.ProviderHoc(Component)
       const auth = {
