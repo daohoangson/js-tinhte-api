@@ -107,7 +107,7 @@ Params:
 
  - `config` object
    - `apiRoot` default=`'https://tinhte.vn/appforo/index.php'`
-   - `auth` default=`null`
+   - `auth` object
      - `access_token` default=`''`
      - `user_id` default=`0`
    - `callbackUrl` default=`''`
@@ -174,6 +174,9 @@ api.fetchOne('users/me')
 Params:
 
  - `fetches` required func
+ - `options` object
+   - `cacheJson` default=`false`
+   - `triggerHandlers` default=`true`
 
 Returns a `Promise`.
 

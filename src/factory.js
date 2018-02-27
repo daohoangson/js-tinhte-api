@@ -1,3 +1,4 @@
+import md5 from 'md5'
 import unfetch from 'isomorphic-unfetch'
 
 import components from './components'
@@ -121,14 +122,15 @@ const apiFactory = (config = {}) => {
             return
           }
 
-          api.fetchMultiple(() => {
+          const fetches = () => {
             sharedQueue.forEach((callback) => callback())
             internalApi.log('Triggered %d callbacks', sharedQueueLength)
 
             sharedQueue.length = 0
-          }).catch(reason => {
-            internalApi.log(reason)
-          })
+          }
+
+          api.fetchMultiple(fetches, {cacheJson: true})
+            .catch(reason => internalApi.log(reason))
         }, 0)
 
         items.length = 0
@@ -152,8 +154,37 @@ const apiFactory = (config = {}) => {
           throw new Error(json.errors)
         }
 
+        internalApi.log('Fetched and parsed %s successfully, total=%d', url, fetchCount)
+
         return json
       })
+  }
+
+  const fetchMultipleInMemoryCache = {
+    items: [],
+
+    get: (body) => {
+      let found = null
+
+      fetchMultipleInMemoryCache.items.forEach((cache) => {
+        if (cache.body !== body) {
+          return
+        }
+
+        found = JSON.parse(cache.json)
+      })
+
+      if (found !== null) {
+        found._fromCache = true
+        internalApi.log('Found cached json for %s', body)
+      }
+
+      return found
+    },
+
+    reset: () => (fetchMultipleInMemoryCache.items.length = 0),
+
+    set: (body, json) => fetchMultipleInMemoryCache.items.push({body, json: JSON.stringify(json)})
   }
 
   const internalApi = {
@@ -281,14 +312,21 @@ const apiFactory = (config = {}) => {
             options,
             id: '_req' + requestLatestId,
             resolve,
-            reject
+            reject,
+            uniqueId: md5(method + uri)
           })
         })
       }
     },
 
-    fetchMultiple: (fetches) => {
-      // initialize batchRequests as we are having a pending batch
+    fetchMultiple: (fetches, options = {}) => {
+      if (typeof options !== 'object') {
+        options = {}
+      }
+      const cacheJson = typeof options.cacheJson === 'boolean' ? options.cacheJson : false
+      const triggerHandlers = typeof options.triggerHandlers === 'boolean' ? options.triggerHandlers : true
+
+      // initialize batchRequests to indicate that we are having a pending batch
       batchRequests = []
       fetches()
 
@@ -301,21 +339,22 @@ const apiFactory = (config = {}) => {
           headers[headerKey] = req.options.headers[headerKey]
         })
 
-        const id = req.id
+        const { id, uniqueId } = req
         const uri = req.options.uri
         const method = req.options.method.toUpperCase()
 
         handlers[id] = {
+          method,
           resolve: req.resolve,
-          reject: req.reject
+          reject: req.reject,
+          uri
         }
 
-        const reqUniqueKey = uri + method
-        if (typeof reqIds[reqUniqueKey] === 'undefined') {
-          reqIds[reqUniqueKey] = [id]
-          batchBody.push({ id, uri, method })
+        if (typeof reqIds[uniqueId] === 'undefined') {
+          reqIds[uniqueId] = [id]
+          batchBody.push({ id: uniqueId, uri, method })
         } else {
-          reqIds[reqUniqueKey].push(id)
+          reqIds[uniqueId].push(id)
         }
       })
 
@@ -326,22 +365,32 @@ const apiFactory = (config = {}) => {
         return Promise.reject(new Error('There is no fetches'))
       }
 
-      return fetchJson('/batch', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(batchBody)
-      }).then(json => {
-        if (typeof json.jobs !== 'object') {
-          return Promise.reject(new Error(JSON.stringify(json)))
-        }
-        const jobs = json.jobs
+      const body = JSON.stringify(batchBody)
+
+      const processJobs = (json) => {
+        const jobs = typeof json.jobs === 'object' ? json.jobs : {}
+        json._handled = 0
 
         const handle = (jobId, reqId) => {
-          if (typeof handlers[reqId] === 'undefined') {
+          if (!triggerHandlers) {
             return
           }
 
-          const { resolve, reject } = handlers[reqId]
+          const handler = handlers[reqId]
+
+          const resolve = (job) => {
+            json._handled++
+            internalApi.log('Resolving %s %s...', handler.method, handler.uri)
+
+            return handler.resolve(job)
+          }
+
+          const reject = (reason) => {
+            json._handled++
+            internalApi.log('Rejecting %s %s (%s)...', handler.method, handler.uri, reason)
+
+            return handler.reject(reason)
+          }
 
           if (typeof jobs[jobId] === 'object') {
             const job = jobs[jobId]
@@ -357,13 +406,30 @@ const apiFactory = (config = {}) => {
           return reject(new Error('Could not find job ' + jobId))
         }
 
-        Object.keys(reqIds).forEach((reqUniqueKey) => {
-          const jobId = reqIds[reqUniqueKey][0]
-          reqIds[reqUniqueKey].forEach((reqId) => handle(jobId, reqId))
+        Object.keys(reqIds).forEach((uniqueId) => {
+          reqIds[uniqueId].forEach((reqId) => handle(uniqueId, reqId))
         })
 
-        return jobs
-      })
+        return json
+      }
+
+      if (!cacheJson) {
+        fetchMultipleInMemoryCache.reset()
+      } else {
+        const json = fetchMultipleInMemoryCache.get(body)
+        if (json !== null) {
+          return new Promise((resolve) => resolve(processJobs(json)))
+        }
+      }
+
+      return fetchJson('/batch', {method: 'POST', headers, body})
+        .then(json => {
+          if (cacheJson) {
+            fetchMultipleInMemoryCache.set(body, json)
+          }
+
+          return processJobs(json)
+        })
     },
 
     onAuthenticated: (callback) => {

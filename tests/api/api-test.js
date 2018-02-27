@@ -129,11 +129,11 @@ describe('api', () => {
       const Parent = ({ children }) => <div>{children}</div>
       const ApiProvider = api.ProviderHoc(Parent)
 
-      let executed = false
+      let executedCount = 0
       const Child = class extends React.Component {
         componentWillMount () {
           this.props.api.onProviderMounted(() => {
-            executed = true
+            executedCount++
           })
         }
 
@@ -149,12 +149,21 @@ describe('api', () => {
         </ApiProvider>
       )
 
-      render(<App />, node, () => {
-        setTimeout(() => {
-          expect(executed).toBe(true)
-          done()
-        }, 10)
-      })
+      const test = (expectedExecutedCount, next) => {
+        const testNode = document.createElement('div')
+
+        render(<App />, testNode, () => {
+          setTimeout(() => {
+            expect(executedCount).toBe(expectedExecutedCount)
+            unmountComponentAtNode(testNode)
+
+            next()
+          }, 10)
+        })
+      }
+
+      // run the test twice
+      test(1, () => test(2, done))
     })
 
     it('delays callback', () => {

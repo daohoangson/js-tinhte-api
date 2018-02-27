@@ -110,7 +110,7 @@ describe('api', () => {
 
       return api.fetchMultiple(fetches)
         .then(
-          (jobs) => Promise.reject(new Error(JSON.stringify(jobs))),
+          (json) => Promise.reject(new Error(JSON.stringify(json))),
           (reason) => expect(reason).toBeAn(Error)
         )
     })
@@ -124,8 +124,9 @@ describe('api', () => {
       }
 
       return api.fetchMultiple(fetches)
-        .then((jobs) => {
-          expect(Object.keys(jobs).length).toBe(3)
+        .then((json) => {
+          expect(Object.keys(json.jobs).length).toBe(3)
+          expect(json._handled).toBe(3)
           expect(api.getFetchCount()).toBe(1)
         })
     })
@@ -141,17 +142,13 @@ describe('api', () => {
       }
 
       return api.fetchMultiple(fetches)
-        .then(
-          (jobs) => Promise.reject(new Error(JSON.stringify(jobs))),
-          (reason) => {
-            const json = JSON.parse(reason.message)
-            expect(json).toContainKey('headers')
+        .then((json) => {
+          expect(json).toContainKey('headers')
 
-            const { headers } = json
-            expect(headers).toContain(oneHeaders)
-            expect(headers).toContain(twoHeaders)
-          }
-        )
+          const { headers } = json
+          expect(headers).toContain(oneHeaders)
+          expect(headers).toContain(twoHeaders)
+        })
     })
 
     it('skips duplicate requests', () => {
@@ -166,12 +163,73 @@ describe('api', () => {
         promises.push(api.fetchOne('posts/1').catch(e => e).then(() => { posts1++ }))
       }
 
-      promises.push(api.fetchMultiple(fetches).then((jobs) => expect(Object.keys(jobs).length).toBe(2)))
+      promises.push(api.fetchMultiple(fetches).then((json) => {
+        expect(Object.keys(json.jobs).length).toBe(2)
+        expect(json._handled).toBe(3)
+      }))
 
       return Promise.all(promises)
         .then(() => {
           expect(posts1).toBe(2, 'posts1 twice')
           expect(posts2).toBe(1, 'posts2 once')
+          expect(api.getFetchCount()).toBe(1)
+        })
+    })
+
+    it('accepts non-object options', () => {
+      const api = apiFactory()
+      const fetches = () => {}
+
+      return api.fetchMultiple(fetches, 'foo')
+        .then(
+          (json) => Promise.reject(new Error(JSON.stringify(json))),
+          (reason) => expect(reason).toBeAn(Error)
+        )
+    })
+
+    it('caches json', () => {
+      const api = apiFactory()
+
+      const fetches1 = () => {
+        api.fetchOne('posts/1').catch(e => e)
+        api.fetchOne('posts/2').catch(e => e)
+      }
+
+      const fetches2 = () => {
+        api.fetchOne('posts/3').catch(e => e)
+        api.fetchOne('posts/4').catch(e => e)
+      }
+
+      const options = {cacheJson: true}
+
+      return api.fetchMultiple(fetches1, options)
+        .then(() => expect(api.getFetchCount()).toBe(1))
+        .then(() => {
+          return api.fetchMultiple(fetches2, options)
+            .then(() => expect(api.getFetchCount()).toBe(2))
+        })
+        .then(() => {
+          return api.fetchMultiple(fetches1, options)
+            .then((json) => {
+              expect(json._fromCache).toBe(true)
+              expect(api.getFetchCount()).toBe(2)
+            })
+        })
+    })
+
+    it('does not trigger handlers', () => {
+      const api = apiFactory()
+
+      const fetches = () => {
+        api.fetchOne('posts/1').catch(e => e)
+        api.fetchOne('posts/2').catch(e => e)
+        api.fetchOne('posts/3').catch(e => e)
+      }
+
+      return api.fetchMultiple(fetches, {triggerHandlers: false})
+        .then((json) => {
+          expect(Object.keys(json.jobs).length).toBe(3)
+          expect(json._handled).toBe(0)
           expect(api.getFetchCount()).toBe(1)
         })
     })
