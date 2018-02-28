@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "tinhte-api React component",
   "main": "lib/index.js",
   "module": "es/index.js",

@@ -17,7 +17,7 @@ const processCallback = (log) => {
 }
 
 const Callback = ({api, internalApi}) => {
-  const success = processCallback(internalApi.log)
+  const success = process.browser ? processCallback(internalApi.log) : false
 
   if (!api.getDebug()) {
     return <span className='ApiCallback' />
