@@ -122,6 +122,7 @@ Params:
    - `clientId` default=`''`
    - `cookiePrefix` default=`'auth_'`
    - `debug` default=`false`
+   - `ott` default=`''`
    - `scope` default=`'read'`
 
 Returns an `api` object.
@@ -157,14 +158,6 @@ Params:
  - `Component` required React component
 
 Returns a higher order React component.
-
-### api.getFetchCount
-
-Returns a number.
-
-### api.getUserId
-
-Returns a number.
 
 ### api.fetchOne
 
@@ -209,6 +202,63 @@ api.fetchMultiple(() => {
         .catch((reason) => console.warn('conversations error', reason))
 })
 ```
+
+### api.generateOneTimeToken
+
+Params:
+
+ - `clientSecret` string
+ - `ttl` number|Date
+
+Returns a string.
+
+**Note:** This method will not work in browser unless debugging is turned on (`debug=true`).
+It is strongly recommended against exposing client secret to visitors.
+
+### api.getAccessToken
+
+Returns the authenticated access token or empty string.
+
+### api.getApiRoot
+
+Returns the configured API root string.
+
+### api.getCallbackUrl
+
+Returns the configured callback URL string.
+
+### api.getClientId
+
+Returns the configured client ID string.
+
+### api.getCookieName
+
+Returns cookie name if cookie prefix and client ID have been configured,
+or empty string otherwise.
+
+### api.getDebug
+
+Returns `true` if debugging is turned on, or `false` otherwise.
+
+### api.getOtt
+
+Returns the configured one time token string.
+
+### api.getScope
+
+Returns the configured scope string.
+
+### api.getFetchCount
+
+Returns the number of fetches have been made since initialization.
+
+### api.getUniqueId
+
+Returns the unique ID string of this api instance.
+
+### api.getUserId
+
+Returns the authenticated access token or `0`.
 
 ### api.onAuthenticated
 
@@ -269,6 +319,14 @@ Returns the number of auth callbacks that have been notified.
 
 **Note:** This method will not work unless debugging is turned on (`debug=true`). 
 It is strongly recommended against altering API states from outside.
+
+### api.setOneTimeToken
+
+Params:
+
+ - `ott` required string
+
+Returns `true` if ott has been updated, `false` otherwise.
 
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api

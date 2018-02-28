@@ -5,6 +5,56 @@ import {render, unmountComponentAtNode} from 'react-dom'
 import { apiFactory } from 'src/'
 
 describe('api', () => {
+  describe('generateOneTimeToken', () => {
+    it('throws error if not debugging', () => {
+      const api = apiFactory()
+
+      let e
+      try {
+        api.generateOneTimeToken()
+      } catch (something) {
+        e = something
+      }
+
+      expect(e).toBeAn(Error)
+    })
+
+    it('returns token', () => {
+      const clientId = 'ci'
+      const clientSecret = 'cs'
+      const userId = 123
+      const api = apiFactory({
+        auth: {user_id: userId},
+        clientId,
+        debug: true
+      })
+      const regEx = new RegExp(`^${userId},\\d+,\\w{32},${clientId}`)
+
+      expect(api.generateOneTimeToken(clientSecret)).toMatch(regEx)
+    })
+
+    it('accepts ttl', () => {
+      const api = apiFactory({debug: true})
+      const ott = api.generateOneTimeToken('cs', 0)
+
+      const m = ott.match(/^0,(\d+),/)
+      const timestamp = parseInt(m[1])
+      expect(timestamp).toBe(Math.floor(new Date().getTime() / 1000))
+    })
+
+    it('accepts exact date', () => {
+      const clientId = 'ci'
+      const api = apiFactory({
+        clientId,
+        debug: true
+      })
+      const timestamp = 123456
+      const date = new Date(timestamp * 1000)
+
+      expect(api.generateOneTimeToken('cs', date)).toBe(`0,${timestamp},54aeb4733955fe782fd69b1b2d30235d,${clientId}`)
+    })
+  })
+
   describe('getAccessToken', () => {
     it('returns default empty string', () => {
       const api = apiFactory()
@@ -242,7 +292,6 @@ describe('api', () => {
   describe('setAuth', () => {
     it('throws error if not debugging', () => {
       const api = apiFactory()
-      api.onAuthenticated(() => {})
 
       let e
       try {
@@ -298,6 +347,20 @@ describe('api', () => {
       })
 
       expect(api.getAccessToken()).toBe(accessToken)
+    })
+  })
+
+  describe('setOneTimeToken', () => {
+    it('accepts non-string', () => {
+      const api = apiFactory()
+      expect(api.setOneTimeToken(0)).toBe(false)
+    })
+
+    it('accepts string', () => {
+      const api = apiFactory()
+      const ott = `${Math.random()}`
+      expect(api.setOneTimeToken(ott)).toBe(true)
+      expect(api.getOtt()).toBe(ott)
     })
   })
 })

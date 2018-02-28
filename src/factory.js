@@ -1,4 +1,5 @@
 import md5 from 'md5'
+import querystring from 'querystring'
 import unfetch from 'isomorphic-unfetch'
 
 import components from './components'
@@ -13,6 +14,7 @@ const apiFactory = (config = {}) => {
   const clientId = (typeof config.clientId === 'string') ? config.clientId : ''
   const cookiePrefix = (typeof config.cookiePrefix === 'string') ? config.cookiePrefix : 'auth_'
   const debug = (typeof config.debug === 'boolean') ? config.debug : false
+  let ott = (typeof config.ott === 'string') ? config.ott : ''
   const scope = (typeof config.scope === 'string') ? config.scope : 'read'
 
   let auth = null
@@ -56,15 +58,24 @@ const apiFactory = (config = {}) => {
     }
 
     let urlQuery = url.replace('?', '&')
+    const queryParams = querystring.parse(urlQuery)
+    let hasOauthToken = !!queryParams.oauth_token
+
     if (auth) {
-      if (auth.access_token) {
+      if (!hasOauthToken && auth.access_token) {
         urlQuery += `&oauth_token=${encodeURIComponent(auth.access_token)}`
+        hasOauthToken = true
       }
       if (auth._xf1) {
         urlQuery += `&_xfToken=${encodeURIComponent(auth._xf1._csrfToken)}`
       } else if (auth._xf2) {
         urlQuery += `&_xfToken=${encodeURIComponent(auth._xf2.config.csrf)}`
       }
+    }
+
+    if (!hasOauthToken && ott) {
+      urlQuery += `&oauth_token=${encodeURIComponent(ott)}`
+      hasOauthToken = true
     }
 
     const finalUrl = `${apiRoot}?${urlQuery}`
@@ -258,37 +269,6 @@ const apiFactory = (config = {}) => {
 
     ProviderHoc: (Component) => hoc.ApiProvider(Component, api, internalApi),
 
-    getAccessToken: () => (auth && auth.access_token) ? auth.access_token : '',
-
-    getApiRoot: () => apiRoot,
-
-    getCallbackUrl: () => callbackUrl,
-
-    getClientId: () => clientId,
-
-    getCookieName: () => {
-      if (!cookiePrefix || !clientId) {
-        return ''
-      }
-
-      const safeClientId = clientId.replace(/[^a-z0-9]/gi, '')
-      if (!safeClientId) {
-        return ''
-      }
-
-      return cookiePrefix + safeClientId
-    },
-
-    getDebug: () => debug,
-
-    getScope: () => scope,
-
-    getFetchCount: () => fetchCount,
-
-    getUniqueId: () => uniqueId,
-
-    getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
-
     fetchOne: (uri, method = 'GET', headers = {}, body = null) => {
       if (!uri) {
         return Promise.reject(new Error('uri is required'))
@@ -432,6 +412,65 @@ const apiFactory = (config = {}) => {
         })
     },
 
+    generateOneTimeToken: (clientSecret, ttl) => {
+      if (process.browser) {
+        const message = 'Running on browser is not allowed'
+        if (debug) {
+          console.error(message)
+        } else {
+          throw new Error(message)
+        }
+      }
+
+      const userId = api.getUserId()
+
+      let timestamp
+      if (typeof ttl === 'object' && typeof ttl.getTime === 'function') {
+        // ttl is a Date, use its value directly
+        timestamp = Math.floor(ttl.getTime() / 1000)
+      } else {
+        timestamp = Math.floor(new Date().getTime() / 1000) + (typeof ttl === 'number' ? ttl : 3600)
+      }
+
+      const once = md5(`${userId}${timestamp}${clientSecret}`)
+      const ott = `${userId},${timestamp},${once},${clientId}`
+
+      return ott
+    },
+
+    getAccessToken: () => (auth && auth.access_token) ? auth.access_token : '',
+
+    getApiRoot: () => apiRoot,
+
+    getCallbackUrl: () => callbackUrl,
+
+    getClientId: () => clientId,
+
+    getCookieName: () => {
+      if (!cookiePrefix || !clientId) {
+        return ''
+      }
+
+      const safeClientId = clientId.replace(/[^a-z0-9]/gi, '')
+      if (!safeClientId) {
+        return ''
+      }
+
+      return cookiePrefix + safeClientId
+    },
+
+    getDebug: () => debug,
+
+    getOtt: () => ott,
+
+    getScope: () => scope,
+
+    getFetchCount: () => fetchCount,
+
+    getUniqueId: () => uniqueId,
+
+    getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
+
     onAuthenticated: (callback) => {
       const { add, listForAuth } = callbacks
       return add(listForAuth, callback, auth !== null)
@@ -448,10 +487,17 @@ const apiFactory = (config = {}) => {
       }
 
       return internalApi.setAuth(newAuth)
+    },
+
+    setOneTimeToken: (newOtt) => {
+      if (typeof newOtt !== 'string') {
+        return false
+      }
+
+      ott = newOtt
+      return true
     }
   }
-
-  internalApi.log('Initialized')
 
   return api
 }

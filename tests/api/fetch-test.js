@@ -38,7 +38,21 @@ describe('api', () => {
         })
     })
 
-    it('includes token', () => {
+    it('keeps oauth_token in url', () => {
+      const accessToken = 'access token'
+      const apiRoot = 'https://httpbin.org/anything'
+      const api = apiFactory({
+        apiRoot,
+        auth: {access_token: accessToken}
+      })
+      const oauthToken = `${Math.random()}`
+      return api.fetchOne(`path?oauth_token=${oauthToken}`)
+        .then((json) => {
+          expect(json.args.oauth_token).toBe(oauthToken)
+        })
+    })
+
+    it('includes access token', () => {
       const accessToken = 'access token'
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({
@@ -48,6 +62,16 @@ describe('api', () => {
       return api.fetchOne('path')
         .then((json) => {
           expect(json.args.oauth_token).toBe(accessToken)
+        })
+    })
+
+    it('includes one time token', () => {
+      const ott = 'one time token'
+      const apiRoot = 'https://httpbin.org/anything'
+      const api = apiFactory({apiRoot, ott})
+      return api.fetchOne('path')
+        .then((json) => {
+          expect(json.args.oauth_token).toBe(ott)
         })
     })
 
