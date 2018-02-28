@@ -6,7 +6,7 @@ const config = {
   npm: {
     esModules: true,
     umd: {
-      global: 'TinhteApiReact',
+      global: 'TinhteApi',
       externals: {
         react: 'React'
       }

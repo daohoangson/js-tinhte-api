@@ -74,6 +74,14 @@ const App = () => (
 )
 ```
 
+You can also trigger the function `processCallback` directly on the callback page, 
+
+```html
+<script type="text/javascript" src="https://unpkg.com/react@^16/umd/react.production.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/tinhte-api@^2.2.3/umd/tinhte-api.min.js" />
+<script type="text/javascript">TinhteApi.processCallback();</script>
+```
+
 ### Fetch from API
 
 In children components, use `apiHoc.ApiConsumer` or `api.ConsumerHoc` to prepare the API context and fetch data.
@@ -117,6 +125,14 @@ Params:
    - `scope` default=`'read'`
 
 Returns an `api` object.
+
+Example:
+
+```js
+import { apiFactory } from 'tinhte-api'
+
+const api = apiFactory()
+```
 
 ### api.CallbackComponent
 

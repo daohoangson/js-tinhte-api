@@ -1,2 +1,11 @@
-export { default as apiFactory } from './factory'
-export { default as apiHoc } from './hoc'
+import apiFactory from './factory'
+import apiHoc from './hoc'
+import { processCallback } from './components/Callback'
+
+export { apiFactory, apiHoc, processCallback }
+
+export default {
+  apiFactory,
+  apiHoc,
+  processCallback
+}
