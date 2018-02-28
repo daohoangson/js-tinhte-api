@@ -1,6 +1,7 @@
 import expect from 'expect'
 import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
+import reactTreeWalker from 'react-tree-walker'
 
 import { apiFactory } from 'src/'
 
@@ -182,22 +183,15 @@ describe('api', () => {
       let executedCount = 0
       const Child = class extends React.Component {
         componentWillMount () {
-          this.props.api.onProviderMounted(() => {
-            executedCount++
-          })
+          api.onProviderMounted(() => (executedCount++))
         }
 
         render () {
           return <div>foo</div>
         }
       }
-      const ApiConsumer = api.ConsumerHoc(Child)
 
-      const App = () => (
-        <ApiProvider>
-          <ApiConsumer />
-        </ApiProvider>
-      )
+      const App = () => <ApiProvider><Child /></ApiProvider>
 
       const test = (expectedExecutedCount, next) => {
         const testNode = document.createElement('div')
@@ -289,6 +283,39 @@ describe('api', () => {
     })
   })
 
+  describe('preFetchProviderMounted', () => {
+    it('fetches', () => {
+      const api = apiFactory()
+      const Parent = ({ children }) => <div>{children}</div>
+      const ApiProvider = api.ProviderHoc(Parent)
+
+      const Child = class extends React.Component {
+        componentWillMount () {
+          api.onProviderMounted(() => api.fetchOne(this.props.uri))
+        }
+
+        render () {
+          return <div>foo</div>
+        }
+      }
+
+      const App = () => (
+        <ApiProvider>
+          <Child uri='posts/1' />
+          <Child uri='posts/2' />
+          <Child uri='posts/3' />
+        </ApiProvider>
+      )
+
+      return reactTreeWalker(<App />, () => true, {}, {componentWillUnmount: true})
+        .then(() => api.preFetchProviderMounted())
+        .then((json) => {
+          expect(Object.keys(json.jobs).length).toBe(3)
+          expect(json._handled).toBe(0)
+        })
+    })
+  })
+
   describe('setAuth', () => {
     it('throws error if not debugging', () => {
       const api = apiFactory()
@@ -305,22 +332,9 @@ describe('api', () => {
 
     it('returns callback count', () => {
       const api = apiFactory({debug: true})
-
-      const promises = []
-      let resolve1
-      promises.push(new Promise((resolve) => {
-        resolve1 = resolve
-      }))
-
-      promises.push(new Promise((resolve) => {
-        api.onAuthenticated(() => resolve())
-        const callbackCount = api.setAuth()
-        expect(callbackCount).toBe(1)
-
-        resolve1()
-      }))
-
-      return Promise.all(promises)
+      api.onAuthenticated(() => {})
+      return api.setAuth()
+        .then((callbackCount) => expect(callbackCount).toBe(1))
     })
 
     it('accepts non-object', () => {
@@ -330,23 +344,23 @@ describe('api', () => {
     it('accepts invalid state', () => {
       const accessToken = 'access token'
       const api = apiFactory({debug: true})
-      api.setAuth({
+      const auth = {
         access_token: accessToken,
         state: ''
-      })
-
-      expect(api.getAccessToken()).toBe('')
+      }
+      return api.setAuth(auth)
+        .then(() => expect(api.getAccessToken()).toBe(''))
     })
 
     it('updates access token', () => {
       const accessToken = 'access token'
       const api = apiFactory({debug: true})
-      api.setAuth({
+      const auth = {
         access_token: accessToken,
         state: api.getUniqueId()
-      })
-
-      expect(api.getAccessToken()).toBe(accessToken)
+      }
+      return api.setAuth(auth)
+        .then(() => expect(api.getAccessToken()).toBe(accessToken))
     })
   })
 

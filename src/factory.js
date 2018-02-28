@@ -2,6 +2,7 @@ import md5 from 'md5'
 
 import components from './components'
 import fetchesInit from './fetches'
+import helperCallbacksInit from './helpers/callbacks'
 import hoc from './hoc'
 
 const apiFactory = (config = {}) => {
@@ -45,78 +46,10 @@ const apiFactory = (config = {}) => {
   }
 
   const uniqueId = ('' + Math.random()).substr(2, 6)
+  const callbackListForAuth = { name: 'auth', items: [] }
+  const callbackListForProviderMount = { name: 'provider mount', items: [] }
 
   let providerMounted = false
-
-  const callbacks = {
-    listForAuth: { name: 'auth', items: [] },
-    listForProviderMount: { name: 'provider mount', items: [] },
-    sharedQueue: [],
-
-    add: (list, callback, triggerNow) => {
-      if (typeof callback !== 'function') {
-        return () => false
-      }
-
-      if (triggerNow) {
-        callback()
-        internalApi.log('Triggered %s callback without adding', list.name)
-        return () => false
-      }
-
-      const { items } = list
-      items.push(callback)
-      internalApi.log('Added new %s callback, total=%d', list.name, items.length)
-
-      const cancel = () => {
-        const i = items.indexOf(callback)
-        if (i < 0) {
-          return false
-        }
-
-        items.splice(i, 1)
-        internalApi.log('Removed %s callback #%d, remaining=%d', list.name, i, items.length)
-        return true
-      }
-
-      return cancel
-    },
-
-    enqueueToFetch: (list) => {
-      const { items } = list
-      const callbackCount = items.length
-
-      if (callbackCount > 0) {
-        const { sharedQueue } = callbacks
-        items.forEach((callback) => sharedQueue.push(callback))
-
-        const sharedQueueLength = sharedQueue.length
-        setTimeout(() => {
-          if (sharedQueue.length !== sharedQueueLength) {
-            // another invocation has altered the shared queue,
-            // stop running now and let that handle the fetch
-            return
-          }
-
-          const fetches = () => {
-            sharedQueue.forEach((callback) => callback())
-            internalApi.log('Triggered %d callbacks', sharedQueueLength)
-
-            sharedQueue.length = 0
-          }
-
-          api.fetchMultiple(fetches, {useCache: true})
-            .catch(reason => internalApi.log(reason))
-        }, 0)
-
-        items.length = 0
-      }
-
-      internalApi.log('Queued %d %s callbacks', callbackCount, list.name)
-
-      return callbackCount
-    }
-  }
 
   const internalApi = {
     buildAuthorizeUrl: () => {
@@ -150,10 +83,7 @@ const apiFactory = (config = {}) => {
     setAuth: (newAuth) => {
       auth = {}
 
-      const notify = () => {
-        const { enqueueToFetch, listForAuth } = callbacks
-        return enqueueToFetch(listForAuth)
-      }
+      const notify = () => callbacks.fetchList(callbackListForAuth)
 
       if (typeof newAuth !== 'object' ||
         typeof newAuth.access_token !== 'string' ||
@@ -176,8 +106,7 @@ const apiFactory = (config = {}) => {
 
       providerMounted = true
 
-      const { enqueueToFetch, listForProviderMount } = callbacks
-      return enqueueToFetch(listForProviderMount)
+      return callbacks.fetchList(callbackListForProviderMount)
     }
   }
 
@@ -249,13 +178,20 @@ const apiFactory = (config = {}) => {
     getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
 
     onAuthenticated: (callback) => {
-      const { add, listForAuth } = callbacks
-      return add(listForAuth, callback, auth !== null)
+      return callbacks.add(callbackListForAuth, callback, auth !== null)
     },
 
     onProviderMounted: (callback) => {
-      const { add, listForProviderMount } = callbacks
-      return add(listForProviderMount, callback, providerMounted)
+      return callbacks.add(callbackListForProviderMount, callback, providerMounted)
+    },
+
+    preFetchProviderMounted: () => {
+      const { items } = callbackListForProviderMount
+      const options = {
+        triggerHandlers: false,
+        useCache: true
+      }
+      return callbacks.fetchItems(items, options)
     },
 
     setAuth: (newAuth) => {
@@ -280,6 +216,8 @@ const apiFactory = (config = {}) => {
   api.fetchOne = fetches.fetchOne
   api.fetchMultiple = fetches.fetchMultiple
   api.getFetchCount = fetches.getFetchCount
+
+  const callbacks = helperCallbacksInit(api, internalApi)
 
   return api
 }

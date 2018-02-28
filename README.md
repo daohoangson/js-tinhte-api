@@ -168,7 +168,7 @@ Params:
  - `headers` default=`{}`
  - `body` default=`null`
 
-Returns a `Promise`.
+Returns a `Promise` that will resolve to the responsed `JSON` object.
 
 Example:
 
@@ -187,7 +187,7 @@ Params:
    - `triggerHandlers` default=`true`
    - `useCache` default=`false`
 
-Returns a `Promise`.
+Returns a `Promise` that will resolve to the responsed `JSON` object.
 
 Example:
 
@@ -307,6 +307,13 @@ class Component extends React.Component {
 }
 ```
 
+### api.preFetchProviderMounted
+
+Executes requests that have been scheduled via `api.onProviderMounted` without triggering promise resolution.
+Useful for server side rendering, see tests for this method for some ideas.
+
+Returns a `Promise` from `api.fetchMultiple`.
+
 ### api.setAuth
 
 Params:
@@ -315,7 +322,7 @@ Params:
    - `access_token` required string
    - `state` required string
 
-Returns the number of auth callbacks that have been notified.
+Returns a `Promise` that will resolve to the number of auth callbacks.
 
 **Note:** This method will not work unless debugging is turned on (`debug=true`). 
 It is strongly recommended against altering API states from outside.
