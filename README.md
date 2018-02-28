@@ -184,8 +184,8 @@ Params:
 
  - `fetches` required func
  - `options` object
-   - `cacheJson` default=`false`
    - `triggerHandlers` default=`true`
+   - `useCache` default=`false`
 
 Returns a `Promise`.
 

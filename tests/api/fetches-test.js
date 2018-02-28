@@ -224,7 +224,7 @@ describe('api', () => {
         api.fetchOne('posts/4').catch(e => e)
       }
 
-      const options = {cacheJson: true}
+      const options = {useCache: true}
 
       return api.fetchMultiple(fetches1, options)
         .then(() => expect(api.getFetchCount()).toBe(1))
