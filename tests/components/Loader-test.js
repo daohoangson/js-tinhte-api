@@ -23,10 +23,9 @@ describe('components', () => {
         scope: 'scope1 scope2'
       })
 
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
+      const P = api.ProviderHoc(() => 'foo')
 
-      render(<ApiProvider />, node, () => {
+      render(<P />, node, () => {
         expect(node.innerHTML).toContain('<iframe')
         expect(node.innerHTML).toContain('src=""')
 
@@ -48,98 +47,103 @@ describe('components', () => {
         scope: 'scope1 scope2'
       })
 
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
+      const P = api.ProviderHoc(() => 'foo')
 
-      render(<ApiProvider />, node, () => {
+      render(<P />, node, () => {
         expect(node.innerHTML).toNotContain('<iframe')
       })
     })
 
-    it('handles message without auth', (done) => {
-      const api = apiFactory()
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
+    describe('receives message', () => {
+      const testReceiveMessage = (apiConfig, messageFactory, callback) => {
+        const api = apiFactory(apiConfig)
+        const P = api.ProviderHoc(() => 'foo')
 
-      render(<ApiProvider />, node, () => {
-        window.postMessage({foo: 'bar'}, window.location.origin)
+        render(<P />, node, () => {
+          const message = messageFactory(api)
+          window.postMessage(message, window.location.origin)
 
-        setTimeout(() => {
+          setTimeout(() => {
+            callback()
+          }, 10)
+        })
+      }
+
+      it('without auth', (done) => {
+        const apiConfig = {}
+        const messageFactory = () => ({foo: 'bar'})
+        testReceiveMessage(apiConfig, messageFactory, () => {
           expect(node.innerHTML).toContain(`data-user-id="0"`)
           done()
-        }, 10)
+        })
       })
-    })
 
-    it('sets auth and cookie', (done) => {
-      const clientId = 'client ID'
-      const cookiePrefix = `auth${Math.random()}_`
-      const api = apiFactory({clientId, cookiePrefix})
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
-      const auth = {
-        access_token: 'access token',
-        expires_in: 3600,
-        user_id: Math.random(),
-        state: api.getUniqueId()
-      }
+      it('with valid auth', (done) => {
+        const clientId = 'client ID'
+        const cookiePrefix = `auth${Math.random()}_`
+        const apiConfig = {clientId, cookiePrefix}
+        const userId = Math.random()
+        const messageFactory = (api) => {
+          const auth = {
+            access_token: 'access token',
+            expires_in: 3600,
+            user_id: userId,
+            state: api.getUniqueId()
+          }
+          const message = {auth}
+          return message
+        }
 
-      expect(document.cookie).toNotContain(cookiePrefix)
-
-      render(<ApiProvider />, node, () => {
-        window.postMessage({auth}, window.location.origin)
-
-        setTimeout(() => {
-          expect(node.innerHTML).toContain(`data-user-id="${auth.user_id}"`)
+        expect(document.cookie).toNotContain(cookiePrefix)
+        testReceiveMessage(apiConfig, messageFactory, () => {
+          expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
           expect(document.cookie).toContain(cookiePrefix)
           done()
-        }, 10)
+        })
       })
-    })
 
-    it('does not set cookie without expires_in', (done) => {
-      const clientId = 'client ID'
-      const cookiePrefix = `auth${Math.random()}_`
-      const api = apiFactory({clientId, cookiePrefix})
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
-      const auth = {
-        access_token: 'access token',
-        user_id: Math.random(),
-        state: api.getUniqueId()
-      }
+      it('without expires_in -> no cookie', (done) => {
+        const clientId = 'client ID'
+        const cookiePrefix = `auth${Math.random()}_`
+        const apiConfig = {clientId, cookiePrefix}
+        const userId = Math.random()
+        const messageFactory = (api) => {
+          const auth = {
+            access_token: 'access token',
+            user_id: userId,
+            state: api.getUniqueId()
+          }
+          const message = {auth}
+          return message
+        }
 
-      render(<ApiProvider />, node, () => {
-        window.postMessage({auth}, window.location.origin)
-
-        setTimeout(() => {
-          expect(node.innerHTML).toContain(`data-user-id="${auth.user_id}"`)
+        testReceiveMessage(apiConfig, messageFactory, () => {
+          expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
           expect(document.cookie).toNotContain(cookiePrefix)
           done()
-        }, 10)
+        })
       })
-    })
 
-    it('does not set cookie without client ID', (done) => {
-      const cookiePrefix = `auth${Math.random()}_`
-      const api = apiFactory({cookiePrefix})
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
-      const auth = {
-        access_token: 'access token',
-        expires_in: 3600,
-        user_id: Math.random(),
-        state: api.getUniqueId()
-      }
+      it('without client ID -> no cookie', (done) => {
+        const cookiePrefix = `auth${Math.random()}_`
+        const apiConfig = {cookiePrefix}
+        const userId = Math.random()
+        const messageFactory = (api) => {
+          const auth = {
+            access_token: 'access token',
+            expires_in: 3600,
+            user_id: userId,
+            state: api.getUniqueId()
+          }
+          const message = {auth}
+          return message
+        }
 
-      render(<ApiProvider />, node, () => {
-        window.postMessage({auth}, window.location.origin)
-
-        setTimeout(() => {
-          expect(node.innerHTML).toContain(`data-user-id="${auth.user_id}"`)
+        testReceiveMessage(apiConfig, messageFactory, () => {
+          expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
           expect(document.cookie).toNotContain(cookiePrefix)
           done()
-        }, 10)
+        })
       })
     })
 
@@ -147,8 +151,7 @@ describe('components', () => {
       const clientId = 'client ID'
       const cookiePrefix = `auth${Math.random()}_`
       const api = apiFactory({clientId, cookiePrefix})
-      const Component = () => <div>foo</div>
-      const ApiProvider = api.ProviderHoc(Component)
+      const P = api.ProviderHoc(() => 'foo')
       const auth = {
         access_token: 'access token',
         user_id: Math.random()
@@ -157,7 +160,7 @@ describe('components', () => {
       expect(document.cookie).toNotContain(cookiePrefix)
       document.cookie = `${api.getCookieName()}=${JSON.stringify(auth)}`
 
-      render(<ApiProvider />, node, () => {
+      render(<P />, node, () => {
         setTimeout(() => {
           expect(node.innerHTML).toContain(`data-user-id="${auth.user_id}"`)
           done()

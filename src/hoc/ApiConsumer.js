@@ -2,11 +2,24 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 const executeFetches = (apiConsumer, fetches) => {
+  const { api } = apiConsumer.context
   const promises = []
   const fetchedData = {}
   Object.keys(fetches).forEach((key) => {
-    const { uri, method, headers, body, success, error } = fetches[key]
-    let promise = apiConsumer.context.api.fetchOne(uri, method, headers, body)
+    let fetch = fetches[key]
+    if (typeof fetch === 'function') {
+      fetch = fetch(api)
+    }
+    if (typeof fetch !== 'object' || fetch === null) {
+      return
+    }
+
+    const { uri, method, headers, body, success, error } = fetch
+    if (!uri) {
+      return
+    }
+
+    let promise = api.fetchOne(uri, method, headers, body)
 
     promise = promise.catch(error || (() => ({})))
     if (success) {
@@ -30,12 +43,20 @@ const executeFetches = (apiConsumer, fetches) => {
 }
 
 const useApiData = (apiConsumer, fetches) => {
-  const { apiData, internalApi } = apiConsumer.context
+  const { api, apiData, internalApi } = apiConsumer.context
 
   const foundJobs = {}
   const fetchKeys = Object.keys(fetches)
   fetchKeys.forEach((key) => {
-    const reqOptions = { ...fetches[key] }
+    let fetch = fetches[key]
+    if (typeof fetch === 'function') {
+      fetch = fetch(api)
+    }
+    if (typeof fetch !== 'object' || fetch === null) {
+      return
+    }
+
+    const reqOptions = { ...fetch }
     const uniqueId = internalApi.standardizeReqOptions(reqOptions)
     if (typeof apiData[uniqueId] !== 'object') {
       return
@@ -105,7 +126,7 @@ const hocApiConsumer = (Component) => {
       const eventName = 'onAuthenticated'
       const { apiFetchesWithAuth } = Component
       const { onFetchedWithAuth } = this.props
-      this.cancelFetches = executeFetchesIfNeeded(this, eventName, apiFetchesWithAuth, onFetchedWithAuth)
+      this.cancelFetchesWithAuth = executeFetchesIfNeeded(this, eventName, apiFetchesWithAuth, onFetchedWithAuth)
     }
 
     componentWillUnmount () {

@@ -187,6 +187,7 @@ const Component = api.ConsumerHoc(ComponentBase)
 The ones declared in `apiFetches` will be fetched as soon as the parent `ApiProvider` is mounted.
 While the ones in `apiFetchesWithAuth` wait until authentication complete before being fetched.
 Please note that it's not guaranteed that fetches in `apiFetchesWithAuth` will have a valid token (a non-logged in user visit your app for example).
+Each fetch can also be configured with a `function`, it will receive an `api` as param and must return a valid object with `uri`, `method`, etc. for the fetch to work.
 
 The HOC will do the fetches and pass data as props for the component to use (in the example above, `props.someKey` will become available).
 By default, the HOC will use the response `JSON` object as the value, you can do some normalization via `success` to make it easier to render.

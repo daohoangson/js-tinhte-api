@@ -36,6 +36,7 @@ const helperCallbacksInit = (api, internalApi) => {
     }
 
     return api.fetchMultiple(fetches, options)
+      .catch((reason) => internalApi.log(reason))
   }
 
   const fetchList = (list) => {
@@ -58,12 +59,10 @@ const helperCallbacksInit = (api, internalApi) => {
           return
         }
 
-        return fetchItems(sharedItems)
-          .then((json) => {
-            sharedResolves.forEach((sqr) => sqr(json))
+        fetchItems(sharedItems)
+          .then((result) => {
+            sharedResolves.forEach((sqr) => sqr(result))
             sharedResolves.length = 0
-
-            return json
           })
       }, 0)
 

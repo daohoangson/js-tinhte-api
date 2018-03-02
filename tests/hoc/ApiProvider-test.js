@@ -17,47 +17,47 @@ describe('hoc', () => {
     })
 
     describe('apiConfig', () => {
-      const test = (apiConfig, callback) => {
+      const testApiConfig = (apiConfig, callback) => {
         const api = apiFactory()
-        const ApiProvider = api.ProviderHoc(() => <div>foo</div>)
-        render(<ApiProvider apiConfig={apiConfig} />, node, () => callback(api))
+        const P = api.ProviderHoc(() => <div className='P'>ok</div>)
+        render(<P apiConfig={apiConfig} />, node, () => callback(api))
       }
 
       it('accepts non-object', () => {
         const apiConfig = 'bar'
-        test(apiConfig, () => {
-          expect(node.innerHTML).toContain('foo')
+        testApiConfig(apiConfig, () => {
+          expect(node.innerHTML).toContain('<div class="P">ok</div>')
         })
       })
 
       it('accepts apiRoot', () => {
         const apiRoot = 'api root'
         const apiConfig = {apiRoot}
-        test(apiConfig, (api) => expect(api.getApiRoot()).toBe(apiRoot))
+        testApiConfig(apiConfig, (api) => expect(api.getApiRoot()).toBe(apiRoot))
       })
 
       it('accepts auth.access_token', () => {
         const accessToken = 'access token'
         const apiConfig = {auth: {access_token: accessToken}}
-        test(apiConfig, (api) => expect(api.getAccessToken()).toBe(accessToken))
+        testApiConfig(apiConfig, (api) => expect(api.getAccessToken()).toBe(accessToken))
       })
 
       it('accepts auth.user_id', () => {
         const userId = 1
         const apiConfig = {auth: {user_id: userId}}
-        test(apiConfig, (api) => expect(api.getUserId()).toBe(userId))
+        testApiConfig(apiConfig, (api) => expect(api.getUserId()).toBe(userId))
       })
 
       it('accepts callbackUrl', () => {
         const callbackUrl = 'callback url'
         const apiConfig = {callbackUrl}
-        test(apiConfig, (api) => expect(api.getCallbackUrl()).toBe(callbackUrl))
+        testApiConfig(apiConfig, (api) => expect(api.getCallbackUrl()).toBe(callbackUrl))
       })
 
       it('accepts clientId', () => {
         const clientId = 'client ID'
         const apiConfig = {clientId}
-        test(apiConfig, (api) => expect(api.getClientId()).toBe(clientId))
+        testApiConfig(apiConfig, (api) => expect(api.getClientId()).toBe(clientId))
       })
 
       it('accepts cookiePrefix', () => {
@@ -65,46 +65,46 @@ describe('hoc', () => {
         const clientId = 'client ID'
         const apiConfig = {clientId, cookiePrefix}
         const regEx = new RegExp('^' + cookiePrefix)
-        test(apiConfig, (api) => expect(api.getCookieName()).toMatch(regEx))
+        testApiConfig(apiConfig, (api) => expect(api.getCookieName()).toMatch(regEx))
       })
 
       it('accepts debug', () => {
         const debug = true
         const apiConfig = {debug}
-        test(apiConfig, (api) => expect(api.getDebug()).toBe(debug))
+        testApiConfig(apiConfig, (api) => expect(api.getDebug()).toBe(debug))
       })
 
       it('accepts ott', () => {
         const ott = 'ott'
         const apiConfig = {ott}
-        test(apiConfig, (api) => expect(api.getOtt()).toBe(ott))
+        testApiConfig(apiConfig, (api) => expect(api.getOtt()).toBe(ott))
       })
 
       it('accepts scope', () => {
         const scope = 'scope1 scope2'
         const apiConfig = {scope}
-        test(apiConfig, (api) => expect(api.getScope()).toBe(scope))
+        testApiConfig(apiConfig, (api) => expect(api.getScope()).toBe(scope))
       })
     })
 
     describe('apiData', () => {
-      const test = (apiData, callback) => {
+      const testApiData = (apiData, callback) => {
         const api = apiFactory()
-        const ApiProvider = api.ProviderHoc(() => <div>foo</div>)
-        render(<ApiProvider apiData={apiData} />, node, () => callback(api))
+        const P = api.ProviderHoc(() => <div className='P'>ok</div>)
+        render(<P apiData={apiData} />, node, () => callback(api))
       }
 
       it('accepts non-object', () => {
-        const apiData = 'foo'
-        test(apiData, () => {
-          expect(node.innerHTML).toContain('<div>foo</div')
+        const apiData = 'bar'
+        testApiData(apiData, () => {
+          expect(node.innerHTML).toContain('<div class="P">ok</div')
         })
       })
 
       it('accepts empty object', () => {
         const apiData = {}
-        test(apiData, () => {
-          expect(node.innerHTML).toContain('<div>foo</div')
+        testApiData(apiData, () => {
+          expect(node.innerHTML).toContain('<div class="P">ok</div')
         })
       })
 
@@ -112,7 +112,7 @@ describe('hoc', () => {
         const testBadData = (apiData) => {
           const api = apiFactory()
 
-          const Child = () => <div>foo</div>
+          const Child = () => 'foo'
           Child.apiFetches = {index: {uri: 'index'}}
           const C = api.ConsumerHoc(Child)
 
@@ -133,7 +133,7 @@ describe('hoc', () => {
         })
       })
 
-      it('renders from apiData', (done) => {
+      it('renders', (done) => {
         const api = apiFactory()
 
         const Child = ({ test1a, test1b }) => (
@@ -143,17 +143,11 @@ describe('hoc', () => {
           </div>
         )
         Child.apiFetches = {
-          test1a: {
-            uri: 'index'
-          },
-          test1b: {
-            uri: 'index',
-            success: () => 'test1b'
-          }
+          test1a: {uri: 'index'},
+          test1b: {uri: 'index', success: () => 'test1b'}
         }
         const C = api.ConsumerHoc(Child)
-        const Parent = () => <div className='Parent'><C /></div>
-        const P = api.ProviderHoc(Parent)
+        const P = api.ProviderHoc(() => <C />)
 
         const api2 = apiFactory()
         const Child2 = ({ test2a, test2b }) => (
@@ -163,17 +157,12 @@ describe('hoc', () => {
           </div>
         )
         Child2.apiFetches = {
-          test2a: {
-            uri: 'index'
-          },
-          test2b: {
-            uri: 'navigation'
-          }
+          test2a: {uri: 'index'},
+          test2b: {uri: 'navigation'}
         }
         const C2 = api2.ConsumerHoc(Child2)
         let onC2Fetched = null
-        const Parent2 = () => <div className='Parent2'><C2 onFetched={onC2Fetched} /></div>
-        const P2 = api2.ProviderHoc(Parent2)
+        const P2 = api2.ProviderHoc(() => <C2 onFetched={onC2Fetched} />)
 
         api.fetchApiDataForProvider(<P />)
           .then((apiData) => {

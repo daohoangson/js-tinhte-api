@@ -7,19 +7,12 @@ describe('api', () => {
   describe('fetchApiDataForProvider', () => {
     it('returns jobs', () => {
       const api = apiFactory()
-
-      const Child = () => <div>foo</div>
-      Child.apiFetches = {
-        index: {
-          uri: 'index'
-        }
-      }
+      const Child = () => 'child'
+      Child.apiFetches = {index: {uri: 'index'}}
       const C = api.ConsumerHoc(Child)
+      const P = api.ProviderHoc(() => <C />)
 
-      const Parent = ({ children }) => <div>{children}</div>
-      const P = api.ProviderHoc(Parent)
-
-      return api.fetchApiDataForProvider(<P><C /></P>)
+      return api.fetchApiDataForProvider(<P />)
         .then((apiData) => {
           expect(Object.keys(apiData)).toContain('de160058e184557c638f82156445ceb2')
         })
@@ -27,9 +20,7 @@ describe('api', () => {
 
     it('handles no children', () => {
       const api = apiFactory()
-      const Component = () => <div>foo</div>
-      const P = api.ProviderHoc(Component)
-
+      const P = api.ProviderHoc(() => 'foo')
       return api.fetchApiDataForProvider(<P />)
         .then((apiData) => {
           expect(Object.keys(apiData).length).toBe(0)

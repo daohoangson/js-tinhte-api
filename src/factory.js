@@ -83,15 +83,16 @@ const apiFactory = (config = {}) => {
 
     getAuth: () => auth,
 
-    log: function () {
+    log: function (message) {
       if (!debug) {
-        return
+        return message
       }
 
       const args = arguments
       args[0] = `[api#${uniqueId}] ${args[0]}`
 
       console.log.apply(this, args)
+      return message
     },
 
     onAuthenticated: (callback) => {
@@ -169,13 +170,7 @@ const apiFactory = (config = {}) => {
           const options = {triggerHandlers: false}
           return callbacks.fetchItems(items, options)
         })
-        .then(
-          (json) => json.jobs,
-          (reason) => {
-            internalApi.log(reason)
-            return {}
-          }
-        )
+        .then((json) => json && json.jobs ? json.jobs : {})
     },
 
     generateOneTimeToken: (clientSecret, ttl) => {
