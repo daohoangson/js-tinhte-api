@@ -12,18 +12,13 @@ const FeaturePage = ({ page }) => (
   </li>
 )
 
-const FeaturePages = ({ apiData }) => {
-  const { pages } = apiData
-  if (!pages) {
-    return null
-  }
-
-  return (
-    <ul>
+const FeaturePages = ({ pages }) => (
+  pages
+    ? <ul>
       { pages.map((page) => <FeaturePage page={page} key={page.tagText} />) }
     </ul>
-  )
-}
+    : null
+)
 
 FeaturePages.apiFetches = {
   'pages': {

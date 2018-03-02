@@ -157,7 +157,7 @@ Props:
  - `onFetched` function
  - `onFetchedWithAuth` function
 
-Returns a higher order React component, the underlying component will receive `api` and `apiData` as props.
+Returns a higher order React component, the underlying component will receive `api` and api data as props.
 It can use `api` directly (`api.fetchOne()`, `api.fetchMultiple()`, etc.)
 or it can let the HOC make the requests and benefit from multiple requests
 from different components being batched together automatically.
@@ -188,7 +188,7 @@ The ones declared in `apiFetches` will be fetched as soon as the parent `ApiProv
 While the ones in `apiFetchesWithAuth` wait until authentication complete before being fetched.
 Please note that it's not guaranteed that fetches in `apiFetchesWithAuth` will have a valid token (a non-logged in user visit your app for example).
 
-The HOC will do the fetches and update `apiData` prop for the component to use (in the example above, `apiData.someKey` will become available).
+The HOC will do the fetches and pass data as props for the component to use (in the example above, `props.someKey` will become available).
 By default, the HOC will use the response `JSON` object as the value, you can do some normalization via `success` to make it easier to render.
 Additionally, you can specify the `error` callback to provide some default value in case of a failed request.
 

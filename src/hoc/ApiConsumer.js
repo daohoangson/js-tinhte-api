@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 const executeFetches = (apiConsumer, fetches) => {
   const promises = []
-  const apiData = {}
+  const fetchedData = {}
   Object.keys(fetches).forEach((key) => {
     const { uri, method, headers, body, success, error } = fetches[key]
     let promise = apiConsumer.context.api.fetchOne(uri, method, headers, body)
@@ -13,17 +13,20 @@ const executeFetches = (apiConsumer, fetches) => {
       promise = promise.then(success)
     }
 
-    promise = promise.then((value) => (apiData[key] = value))
+    promise = promise.then((value) => (fetchedData[key] = value))
 
     promises.push(promise)
   })
 
   return Promise.all(promises)
-    .then(() => apiConsumer.setState((prevState) => {
-      const { prevApiData } = prevState
-      const newApiData = {...prevApiData, ...apiData}
-      return {apiData: newApiData}
-    }))
+    .then(() => apiConsumer.setState((prevState) => (
+      {
+        fetchedData: {
+          ...prevState.fetchedData,
+          ...fetchedData
+        }
+      }
+    )))
 }
 
 const attemptToUseApiData = (apiConsumer, fetches) => {
@@ -60,13 +63,13 @@ const attemptToUseApiData = (apiConsumer, fetches) => {
     return false
   }
 
-  const newApiData = {}
+  const fetchedData = {}
   fetchKeys.forEach((key) => {
     const { success } = fetches[key]
-    newApiData[key] = success ? success(foundJobs[key]) : foundJobs[key]
+    fetchedData[key] = success ? success(foundJobs[key]) : foundJobs[key]
   })
 
-  apiConsumer.setState(() => ({apiData: newApiData}))
+  apiConsumer.setState(() => ({fetchedData}))
   return true
 }
 
@@ -76,7 +79,9 @@ const hocApiConsumer = (Component) => {
       super(props, context)
       this.cancelFetches = null
       this.cancelFetchesWithAuth = null
-      this.state = {apiData: {}}
+
+      const fetchedData = {}
+      this.state = {fetchedData}
     }
 
     componentWillMount () {
@@ -132,17 +137,7 @@ const hocApiConsumer = (Component) => {
     }
 
     render () {
-      const props = {
-        api: this.context.api,
-
-        ...this.props
-      }
-
-      if (this.state.apiData !== null) {
-        props.apiData = this.state.apiData
-      }
-
-      return <Component {...props} />
+      return <Component api={this.context.api} {...this.state.fetchedData} {...this.props} />
     }
   }
 

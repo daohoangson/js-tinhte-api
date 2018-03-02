@@ -68,7 +68,7 @@ describe('hoc', () => {
         const Parent = ({ children }) => <div>{children}</div>
         const P = api.ProviderHoc(Parent)
 
-        const Child = ({ apiData }) => <div>foo</div>
+        const Child = () => <div>foo</div>
         Child.apiFetchesWithAuth = {
           'index': {
             uri: 'index'
@@ -85,7 +85,7 @@ describe('hoc', () => {
         const Parent = ({ children }) => <div>{children}</div>
         const P = api.ProviderHoc(Parent)
 
-        const Child = ({ apiData }) => <div>foo</div>
+        const Child = () => <div>foo</div>
         let successCount = 0
         Child.apiFetchesWithAuth = {
           'index': {
@@ -108,7 +108,7 @@ describe('hoc', () => {
         const Parent = ({ children }) => <div>{children}</div>
         const P = api.ProviderHoc(Parent)
 
-        const Child = ({ apiData }) => <div>foo</div>
+        const Child = () => <div>foo</div>
         Child.apiFetchesWithAuth = {
           'index': {
             uri: 'index'
@@ -131,7 +131,7 @@ describe('hoc', () => {
         const Parent = ({ children }) => <div>{children}</div>
         const P = api.ProviderHoc(Parent)
 
-        const Child = ({ apiData }) => <div>foo</div>
+        const Child = () => <div>foo</div>
         Child.apiFetches = {
           'index': {
             uri: 'index'
@@ -161,7 +161,7 @@ describe('hoc', () => {
         const Parent = ({ children }) => <div>{children}</div>
         const P = api.ProviderHoc(Parent)
 
-        const Child = ({ apiData }) => <div>foo</div>
+        const Child = () => <div>foo</div>
         Child.apiFetchesWithAuth = {
           'apiFetchesWithAuth': {
             uri: 'posts/1',

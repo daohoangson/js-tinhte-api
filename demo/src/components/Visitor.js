@@ -1,14 +1,7 @@
 import React from 'react'
 import { apiHoc } from '../../../src'
 
-const Visitor = ({ apiData }) => {
-  const { user } = apiData
-  if (!user) {
-    return null
-  }
-
-  return <h1>Hello {user.username}</h1>
-}
+const Visitor = ({ user }) => user ? <h1>Hello {user.username}</h1> : null
 
 Visitor.apiFetchesWithAuth = {
   'user': {

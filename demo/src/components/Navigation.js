@@ -72,14 +72,7 @@ const List = ({ elements, parentId }) => {
   )
 }
 
-const Navigation = ({ apiData }) => {
-  const { elements } = apiData
-  if (!elements) {
-    return null
-  }
-
-  return <List elements={elements} parentId={0} />
-}
+const Navigation = ({ elements }) => elements ? <List elements={elements} parentId={0} /> : null
 
 Navigation.apiFetches = {
   'elements': {

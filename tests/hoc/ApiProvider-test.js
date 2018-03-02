@@ -121,9 +121,9 @@ describe('hoc', () => {
       it('renders from apiData', (done) => {
         const api = apiFactory()
 
-        const Child = ({ apiData }) => <div className='Child'>{apiData.index ? 'ok' : 'not'}</div>
+        const Child = ({ test1 }) => <div className='Child'>{test1 ? 'ok' : 'not'}</div>
         Child.apiFetches = {
-          'index': {
+          test1: {
             uri: 'index'
           }
         }
@@ -132,17 +132,17 @@ describe('hoc', () => {
         const P = api.ProviderHoc(Parent)
 
         const api2 = apiFactory()
-        const Child2 = ({ apiData }) => (
+        const Child2 = ({ test2a, test2b }) => (
           <div className='Child2'>
-            <div className='index'>{apiData.index ? 'ok' : 'not'}</div>
-            <div className='navigation'>{apiData.navigation ? 'ok' : 'not'}</div>
+            <div className='test2a'>{test2a ? 'ok' : 'not'}</div>
+            <div className='test2b'>{test2b ? 'ok' : 'not'}</div>
           </div>
         )
         Child2.apiFetches = {
-          'index': {
+          test2a: {
             uri: 'index'
           },
-          'navigation': {
+          test2b: {
             uri: 'navigation'
           }
         }
@@ -165,8 +165,8 @@ describe('hoc', () => {
               render(<P2 apiData={apiData} />, node2)
               onC2Fetched = () => {
                 setTimeout(() => {
-                  expect(node2.innerHTML).toContain('<div class="index">ok</div>')
-                  expect(node2.innerHTML).toContain('<div class="navigation">ok</div>')
+                  expect(node2.innerHTML).toContain('<div class="test2a">ok</div>')
+                  expect(node2.innerHTML).toContain('<div class="test2b">ok</div>')
                   expect(api.getFetchCount()).toBe(1)
                   expect(api2.getFetchCount()).toBe(1)
 
