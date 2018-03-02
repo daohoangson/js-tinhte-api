@@ -3,10 +3,6 @@ const helperCallbacksInit = (api, internalApi) => {
   const sharedResolves = []
 
   const add = (list, callback, triggerNow) => {
-    if (typeof callback !== 'function') {
-      return () => false
-    }
-
     if (triggerNow) {
       callback()
       internalApi.log('Triggered %s callback without adding', list.name)
@@ -62,8 +58,7 @@ const helperCallbacksInit = (api, internalApi) => {
           return
         }
 
-        return fetchItems(sharedItems, {useCache: true})
-          .catch(reason => internalApi.log(reason))
+        return fetchItems(sharedItems)
           .then((json) => {
             sharedResolves.forEach((sqr) => sqr(json))
             sharedResolves.length = 0

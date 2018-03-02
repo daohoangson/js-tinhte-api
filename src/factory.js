@@ -1,4 +1,5 @@
 import md5 from 'md5'
+import reactTreeWalker from 'react-tree-walker'
 
 import components from './components'
 import fetchesInit from './fetches'
@@ -9,13 +10,13 @@ const apiFactory = (config = {}) => {
   if (typeof config !== 'object') {
     config = {}
   }
-  const apiRoot = (typeof config.apiRoot === 'string') ? config.apiRoot : 'https://tinhte.vn/appforo/index.php'
-  const callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
-  const clientId = (typeof config.clientId === 'string') ? config.clientId : ''
-  const cookiePrefix = (typeof config.cookiePrefix === 'string') ? config.cookiePrefix : 'auth_'
-  const debug = (typeof config.debug === 'boolean') ? config.debug : false
+  let apiRoot = (typeof config.apiRoot === 'string') ? config.apiRoot : 'https://tinhte.vn/appforo/index.php'
+  let callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
+  let clientId = (typeof config.clientId === 'string') ? config.clientId : ''
+  let cookiePrefix = (typeof config.cookiePrefix === 'string') ? config.cookiePrefix : 'auth_'
+  let debug = (typeof config.debug === 'boolean') ? config.debug : false
   let ott = (typeof config.ott === 'string') ? config.ott : ''
-  const scope = (typeof config.scope === 'string') ? config.scope : 'read'
+  let scope = (typeof config.scope === 'string') ? config.scope : 'read'
 
   let auth = null
   if (typeof config.auth === 'object') {
@@ -52,6 +53,8 @@ const apiFactory = (config = {}) => {
   let providerMounted = false
 
   const internalApi = {
+    LoaderComponent: () => components.Loader(api, internalApi),
+
     buildAuthorizeUrl: () => {
       if (!clientId) {
         return null
@@ -67,6 +70,17 @@ const apiFactory = (config = {}) => {
       return authorizeUrl
     },
 
+    standardizeReqOptions: (options) => {
+      let { uri, method, headers, body } = options
+      if (typeof uri !== 'string') options.uri = ''
+      if (typeof method !== 'string') options.method = 'GET'
+      if (typeof headers !== 'object') options.headers = {}
+      if (typeof body !== 'object') options.body = null
+      const uniqueId = md5(options.method + options.uri)
+
+      return uniqueId
+    },
+
     getAuth: () => auth,
 
     log: function () {
@@ -78,6 +92,14 @@ const apiFactory = (config = {}) => {
       args[0] = `[api#${uniqueId}] ${args[0]}`
 
       console.log.apply(this, args)
+    },
+
+    onAuthenticated: (callback) => {
+      return callbacks.add(callbackListForAuth, callback, auth !== null)
+    },
+
+    onProviderMounted: (callback) => {
+      return callbacks.add(callbackListForProviderMount, callback, providerMounted)
     },
 
     setAuth: (newAuth) => {
@@ -107,6 +129,28 @@ const apiFactory = (config = {}) => {
       providerMounted = true
 
       return callbacks.fetchList(callbackListForProviderMount)
+    },
+
+    updateConfig: (config) => {
+      if (typeof config !== 'object') {
+        config = {}
+      }
+
+      if (typeof config.apiRoot === 'string') apiRoot = config.apiRoot
+      if (typeof config.auth === 'object') {
+        const ca = config.auth
+        if (auth === null) auth = {}
+        if (typeof ca.access_token === 'string') auth.access_token = ca.access_token
+        if (typeof ca.user_id === 'number') auth.user_id = ca.user_id
+      }
+      if (typeof config.callbackUrl === 'string') callbackUrl = config.callbackUrl
+      if (typeof config.clientId === 'string') clientId = config.clientId
+      if (typeof config.cookiePrefix === 'string') cookiePrefix = config.cookiePrefix
+      if (typeof config.debug === 'boolean') debug = config.debug
+      if (typeof config.ott === 'string') ott = config.ott
+      if (typeof config.scope === 'string') scope = config.scope
+
+      internalApi.log('Updated config')
     }
   }
 
@@ -116,9 +160,23 @@ const apiFactory = (config = {}) => {
 
     ConsumerHoc: hoc.ApiConsumer,
 
-    LoaderComponent: () => components.Loader(api, internalApi),
-
     ProviderHoc: (Component) => hoc.ApiProvider(Component, api, internalApi),
+
+    fetchApiDataForProvider: (rootElement) => {
+      return reactTreeWalker(rootElement, () => true)
+        .then(() => {
+          const { items } = callbackListForProviderMount
+          const options = {triggerHandlers: false}
+          return callbacks.fetchItems(items, options)
+        })
+        .then(
+          (json) => json,
+          (reason) => {
+            internalApi.log(reason)
+            return {}
+          }
+        )
+    },
 
     generateOneTimeToken: (clientSecret, ttl) => {
       if (process.browser) {
@@ -177,23 +235,6 @@ const apiFactory = (config = {}) => {
 
     getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
 
-    onAuthenticated: (callback) => {
-      return callbacks.add(callbackListForAuth, callback, auth !== null)
-    },
-
-    onProviderMounted: (callback) => {
-      return callbacks.add(callbackListForProviderMount, callback, providerMounted)
-    },
-
-    preFetchProviderMounted: () => {
-      const { items } = callbackListForProviderMount
-      const options = {
-        triggerHandlers: false,
-        useCache: true
-      }
-      return callbacks.fetchItems(items, options)
-    },
-
     setAuth: (newAuth) => {
       if (!debug) {
         throw new Error('Access denied')
@@ -203,12 +244,9 @@ const apiFactory = (config = {}) => {
     },
 
     setOneTimeToken: (newOtt) => {
-      if (typeof newOtt !== 'string') {
-        return false
-      }
+      internalApi.updateConfig({ott: newOtt})
 
-      ott = newOtt
-      return true
+      return ott === newOtt
     }
   }
 

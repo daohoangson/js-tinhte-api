@@ -89,11 +89,12 @@ In children components, use `apiHoc.ApiConsumer` or `api.ConsumerHoc` to prepare
 ```js
 import { apiHoc } from 'tinhte-api'
 
-const UsersMeBase = ({api}) => {
-    const onClick = () => api.fetchOne('users/me')
+const UsersMeBase = ({ api }) => {
+    const fetch = () => api.fetchOne('users/me')
         .then((json) => console.log(json))
+        .error(reason) => console.error(reason))
 
-    return <button onClick={onClick}>Fetch</button>
+    return <button onClick={fetch}>Fetch</button>
 }
 
 const UsersMeComponent = apiHoc.ApiConsumer(UsersMeBase)
@@ -141,15 +142,51 @@ Returns a React component.
 
 ### api.ConsumerHoc
 
+Alias: `apiHoc.ApiConsumer`
+
 Params:
 
  - `Component` required React component
 
-Returns a higher order React component.
+Props:
 
-### api.LoaderComponent
+ - `onFetched` function
+ - `onFetchedWithAuth` function
 
-Returns a React component.
+Returns a higher order React component, the underlying component will receive `api` and `apiData` as props.
+It can use `api` directly (`api.fetchOne()`, `api.fetchMultiple()`, etc.)
+or it can let the HOC make the requests and benefit from multiple requests
+from different components being batched together automatically.
+
+Currenty, `ApiConsumer` supports 2 types of requests: `apiFetches` and `apiFetchesWithAuth`.
+They can be configured this way:
+
+```js
+// const ComponentBase = ...
+
+ComponentBase.apiFetches = {
+  someKey: {
+    uri: 'some-uri',
+    method: 'GET',
+    headers: [],
+    body: {},
+    success: (json) => json.jsonKey,
+    error: (reason) => someDefaultValue
+  }
+}
+
+// ComponentBase.apiFetchesWithAuth = { ... }
+
+const Component = api.ConsumerHoc(ComponentBase)
+```
+
+The ones declared in `apiFetches` will be fetched as soon as the parent `ApiProvider` is mounted.
+While the ones in `apiFetchesWithAuth` wait until authentication complete before being fetched.
+Please note that it's not guaranteed that fetches in `apiFetchesWithAuth` will have a valid token (a non-logged in user visit your app for example).
+
+The HOC will do the fetches and update `apiData` prop for the component to use (in the example above, `apiData.someKey` will become available).
+By default, the HOC will use the response `JSON` object as the value, you can do some normalization via `success` to make it easier to render.
+Additionally, you can specify the `error` callback to provide some default value in case of a failed request.
 
 ### api.ProviderHoc
 
@@ -157,7 +194,43 @@ Params:
 
  - `Component` required React component
 
-Returns a higher order React component.
+Props:
+
+ - `apiConfig` object
+ - `apiData` object
+
+Returns a higher order React component, the underlying component will receive no additional props.
+
+The props are completely optional and using them is considered advanced usage (yes, they are a bit complicated).
+The general use case for these props are server side rendering, you can safely ignore them for client only app
+(if you use `apiFetches` and `apiFetchesWithAuth`, it will be very easy to add SSR to your app later). A few examples:
+
+ - **You need to pass the one time token from the server to client?** You may generate OTT per request and put it into `apiConfig`:
+ ```js
+ const ott = api.generateOneTimeToken(clientSecret)
+
+ return <ApiProvider apiConfig={{ott}} />
+ ```
+ - **You want to render components on the server but they need api data to work?** You may use `fetchApiDataForProvider`, it will give you the `apiData` object, ready to be use with `ApiProvider`.
+
+### api.fetchApiDataForProvider
+
+Params:
+
+ - `rootElement` required React root element
+
+Returns a `Promise` that will resolve to the usable ApiProvider props object.
+
+Example for Next.js:
+
+```js
+const ApiProvider = api.ProviderHoc(Page)
+
+ApiProvider.getInitialProps = async () => {
+  const props = await api.fetchApiDataForProvider(<ApiProvider />)
+  return props
+}
+```
 
 ### api.fetchOne
 
@@ -168,7 +241,7 @@ Params:
  - `headers` default=`{}`
  - `body` default=`null`
 
-Returns a `Promise` that will resolve to the responsed `JSON` object.
+Returns a `Promise` that will resolve to the response `JSON` object.
 
 Example:
 
@@ -185,9 +258,8 @@ Params:
  - `fetches` required func
  - `options` object
    - `triggerHandlers` default=`true`
-   - `useCache` default=`false`
 
-Returns a `Promise` that will resolve to the responsed `JSON` object.
+Returns a `Promise` that will resolve to the response `JSON` object.
 
 Example:
 
@@ -259,60 +331,6 @@ Returns the unique ID string of this api instance.
 ### api.getUserId
 
 Returns the authenticated access token or `0`.
-
-### api.onAuthenticated
-
-Params:
-
- - `callback` required func
-
-Returns a `func` that can be used to cancel the callback.
-
-Example:
-
-```js
-api.onAuthenticated(() => api.fetchOne('users/me'))
-```
-
-### api.onProviderMounted
-
-Params:
-
- - `callback` required function
-
-Returns a `function` that can be used to cancel the callback.
-
-Example:
-
-```js
-class Component extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = { link: '' }
-  }
-
-  componentWillMount () {
-    const { api } = this.props
-    api.onProviderMounted(() => {
-      api.fetchOne('navigation')
-        .then((json) => {
-          this.setState({ link: json.elements[0].links.permalink })
-        })
-    })
-  }
-
-  render () {
-    return <span>link=<a href={this.state.link} target='_blank'>{this.state.link}</a></span>
-  }
-}
-```
-
-### api.preFetchProviderMounted
-
-Executes requests that have been scheduled via `api.onProviderMounted` without triggering promise resolution.
-Useful for server side rendering, see tests for this method for some ideas.
-
-Returns a `Promise` from `api.fetchMultiple`.
 
 ### api.setAuth
 

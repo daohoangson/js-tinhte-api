@@ -18,7 +18,8 @@ describe('components', () => {
     })
 
     it('renders error', () => {
-      const api = apiFactory({debug: true})
+      const debug = true
+      const api = apiFactory({debug})
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
@@ -29,7 +30,8 @@ describe('components', () => {
     it('renders success', () => {
       window.location.hash = '#access_token=yes'
 
-      const api = apiFactory({debug: true})
+      const debug = true
+      const api = apiFactory({debug})
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {

@@ -1,39 +1,12 @@
 const fetchMultipleInit = (fetchJson, batch, internalApi) => {
-  const cache = {
-    items: [],
-
-    get: (body) => {
-      let found = null
-
-      cache.items.forEach((cache) => {
-        if (cache.body !== body) {
-          return
-        }
-
-        found = JSON.parse(cache.json)
-      })
-
-      if (found !== null) {
-        found._fromCache = true
-        internalApi.log('Found cached json for %s', body)
-      }
-
-      return found
-    },
-
-    reset: () => (cache.items.length = 0),
-
-    set: (body, json) => cache.items.push({body, json: JSON.stringify(json)})
-  }
-
   const fetchMultiple = (fetches, options = {}) => {
     if (typeof options !== 'object') {
       options = {}
     }
     const triggerHandlers = typeof options.triggerHandlers === 'boolean' ? options.triggerHandlers : true
-    const useCache = typeof options.useCache === 'boolean' ? options.useCache : false
 
     batch.init()
+    const batchId = batch.id
     fetches()
 
     const headers = {}
@@ -99,6 +72,10 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
 
         if (typeof jobs[jobId] === 'object') {
           const job = jobs[jobId]
+          if (job._req.method !== handler.method || job._req.uri !== handler.uri) {
+            return reject(new Error('Detected mismatched job and request data'))
+          }
+
           if (typeof job._job_result === 'string') {
             if (job._job_result === 'ok') {
               return resolve(job)
@@ -111,6 +88,20 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
         return reject(new Error('Could not find job ' + jobId))
       }
 
+      Object.keys(jobs).forEach((jobId) => {
+        if (typeof reqIds[jobId] !== 'object') {
+          return
+        }
+        const jobReqIds = reqIds[jobId]
+        const firstReqId = jobReqIds[0]
+        const handler = handlers[firstReqId]
+
+        jobs[jobId]._req = {
+          method: handler.method,
+          uri: handler.uri
+        }
+      })
+
       Object.keys(reqIds).forEach((uniqueId) => {
         reqIds[uniqueId].forEach((reqId) => handle(uniqueId, reqId))
       })
@@ -118,21 +109,9 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       return json
     }
 
-    if (!useCache) {
-      cache.reset()
-    } else {
-      const json = cache.get(body)
-      if (json !== null) {
-        return new Promise((resolve) => resolve(processJobs(json)))
-      }
-    }
-
+    internalApi.log('Batch #%d is being fetched...', batchId)
     return fetchJson('/batch', {method: 'POST', headers, body})
       .then(json => {
-        if (useCache) {
-          cache.set(body, json)
-        }
-
         return processJobs(json)
       })
   }

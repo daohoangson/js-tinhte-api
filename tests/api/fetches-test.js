@@ -11,9 +11,9 @@ describe('api', () => {
       global.XF = null
     })
 
-    it('rejects empty uri', () => {
+    it('rejects bad params', () => {
       const api = apiFactory()
-      return api.fetchOne('')
+      return api.fetchOne(false, false, false, false)
         .then(
           (json) => Promise.reject(new Error(JSON.stringify(json))),
           (reason) => expect(reason).toBeAn(Error)
@@ -209,36 +209,6 @@ describe('api', () => {
           (json) => Promise.reject(new Error(JSON.stringify(json))),
           (reason) => expect(reason).toBeAn(Error)
         )
-    })
-
-    it('caches json', () => {
-      const api = apiFactory()
-
-      const fetches1 = () => {
-        api.fetchOne('posts/1').catch(e => e)
-        api.fetchOne('posts/2').catch(e => e)
-      }
-
-      const fetches2 = () => {
-        api.fetchOne('posts/3').catch(e => e)
-        api.fetchOne('posts/4').catch(e => e)
-      }
-
-      const options = {useCache: true}
-
-      return api.fetchMultiple(fetches1, options)
-        .then(() => expect(api.getFetchCount()).toBe(1))
-        .then(() => {
-          return api.fetchMultiple(fetches2, options)
-            .then(() => expect(api.getFetchCount()).toBe(2))
-        })
-        .then(() => {
-          return api.fetchMultiple(fetches1, options)
-            .then((json) => {
-              expect(json._fromCache).toBe(true)
-              expect(api.getFetchCount()).toBe(2)
-            })
-        })
     })
 
     it('does not trigger handlers', () => {
