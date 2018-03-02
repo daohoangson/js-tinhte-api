@@ -133,6 +133,11 @@ const apiFactory = (config = {}) => {
       }
       if (typeof newAuth.user_id === 'number') {
         auth.userId = newAuth.user_id
+      } else if (typeof newAuth.user_id === 'string') {
+        const userId = parseInt(newAuth.user_id)
+        if (userId > 0) {
+          auth.userId = userId
+        }
       }
 
       return notify()

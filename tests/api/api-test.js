@@ -188,5 +188,30 @@ describe('api', () => {
       return api.setAuth(auth)
         .then(() => expect(api.getAccessToken()).toBe(accessToken))
     })
+
+    it('updates user id', () => {
+      const userId = Math.random()
+      const debug = true
+      const api = apiFactory({debug})
+      const auth = {
+        user_id: userId,
+        state: api.getUniqueId()
+      }
+      return api.setAuth(auth)
+        .then(() => expect(api.getUserId()).toBe(userId))
+    })
+
+    it('updates user id from string', () => {
+      const userIdNumber = Math.floor(Math.random() * 1000)
+      const userId = `${userIdNumber}`
+      const debug = true
+      const api = apiFactory({debug})
+      const auth = {
+        user_id: userId,
+        state: api.getUniqueId()
+      }
+      return api.setAuth(auth)
+        .then(() => expect(api.getUserId()).toBe(userIdNumber))
+    })
   })
 })
