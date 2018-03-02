@@ -21,7 +21,7 @@ const FeaturePages = ({ pages }) => (
 )
 
 FeaturePages.apiFetches = {
-  'pages': {
+  pages: {
     // this request won't work without OTT
     uri: 'feature-pages',
     success: (json) => json.pages

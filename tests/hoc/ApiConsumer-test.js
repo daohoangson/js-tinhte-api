@@ -70,7 +70,7 @@ describe('hoc', () => {
 
         const Child = () => <div>foo</div>
         Child.apiFetchesWithAuth = {
-          'index': {
+          index: {
             uri: 'index'
           }
         }
@@ -88,7 +88,7 @@ describe('hoc', () => {
         const Child = () => <div>foo</div>
         let successCount = 0
         Child.apiFetchesWithAuth = {
-          'index': {
+          index: {
             uri: 'index',
             success: () => {
               successCount++
@@ -110,7 +110,7 @@ describe('hoc', () => {
 
         const Child = () => <div>foo</div>
         Child.apiFetchesWithAuth = {
-          'index': {
+          index: {
             uri: 'index'
           }
         }
@@ -133,7 +133,7 @@ describe('hoc', () => {
 
         const Child = () => <div>foo</div>
         Child.apiFetches = {
-          'index': {
+          index: {
             uri: 'index'
           }
         }
@@ -146,6 +146,38 @@ describe('hoc', () => {
 
         // run the test twice
         return Promise.all([test(), test()])
+      })
+
+      it('returns empty object on error', () => {
+        const api = apiFactory()
+        const Parent = ({ children }) => <div>{children}</div>
+        const P = api.ProviderHoc(Parent)
+
+        const Child = ({ post1 }) => (
+          <div className='post1'>
+            {
+              post1 !== null &&
+              typeof post1 === 'object' &&
+              Object.keys(post1).length === 0 &&
+              'ok'
+            }
+          </div>
+        )
+        Child.apiFetches = {
+          post1: {
+            uri: 'posts/1'
+          }
+        }
+        const C = apiHoc.ApiConsumer(Child)
+
+        return new Promise((resolve) => {
+          const check = () => {
+            expect(node.innerHTML).toContain('<div class="post1">ok</div>')
+            resolve()
+          }
+
+          render(<P><C onFetched={check} /></P>, node)
+        })
       })
 
       it('merge batch with apiFetchesWithAuth', () => {
@@ -163,15 +195,13 @@ describe('hoc', () => {
 
         const Child = () => <div>foo</div>
         Child.apiFetchesWithAuth = {
-          'apiFetchesWithAuth': {
-            uri: 'posts/1',
-            error: () => {}
+          post1: {
+            uri: 'posts/1'
           }
         }
         Child.apiFetches = {
-          'apiFetches': {
-            uri: 'posts/2',
-            error: () => {}
+          post2: {
+            uri: 'posts/2'
           }
         }
         const C = apiHoc.ApiConsumer(Child)

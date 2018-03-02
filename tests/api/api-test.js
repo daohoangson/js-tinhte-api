@@ -5,12 +5,12 @@ import { apiFactory } from 'src/'
 
 describe('api', () => {
   describe('fetchApiDataForProvider', () => {
-    it('returns props', () => {
+    it('returns jobs', () => {
       const api = apiFactory()
 
       const Child = () => <div>foo</div>
       Child.apiFetches = {
-        'index': {
+        index: {
           uri: 'index'
         }
       }
@@ -21,7 +21,7 @@ describe('api', () => {
 
       return api.fetchApiDataForProvider(<P><C /></P>)
         .then((apiData) => {
-          expect(Object.keys(apiData.jobs).length).toBe(1)
+          expect(Object.keys(apiData)).toContain('de160058e184557c638f82156445ceb2')
         })
     })
 

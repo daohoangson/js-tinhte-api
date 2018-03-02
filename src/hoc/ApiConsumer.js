@@ -29,25 +29,19 @@ const executeFetches = (apiConsumer, fetches) => {
     )))
 }
 
-const attemptToUseApiData = (apiConsumer, fetches) => {
+const useApiData = (apiConsumer, fetches) => {
   const { apiData, internalApi } = apiConsumer.context
-  if (apiData === null ||
-    typeof apiData !== 'object' ||
-    typeof apiData.jobs !== 'object') {
-    return false
-  }
 
-  const { jobs } = apiData
   const foundJobs = {}
   const fetchKeys = Object.keys(fetches)
   fetchKeys.forEach((key) => {
     const reqOptions = { ...fetches[key] }
     const uniqueId = internalApi.standardizeReqOptions(reqOptions)
-    if (typeof jobs[uniqueId] !== 'object') {
+    if (typeof apiData[uniqueId] !== 'object') {
       return
     }
 
-    const job = jobs[uniqueId]
+    const job = apiData[uniqueId]
     if (typeof job._req !== 'object' ||
       job._req.method !== reqOptions.method ||
       job._req.uri !== reqOptions.uri ||
@@ -73,6 +67,22 @@ const attemptToUseApiData = (apiConsumer, fetches) => {
   return true
 }
 
+const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
+  const notify = () => onFetched && onFetched()
+
+  if (fetches === null || typeof fetches !== 'object') {
+    return notify()
+  }
+
+  if (useApiData(apiConsumer, fetches)) {
+    return notify()
+  }
+
+  const { internalApi } = apiConsumer.context
+  const onEvent = internalApi[eventName]
+  return onEvent(() => executeFetches(apiConsumer, fetches).then(notify))
+}
+
 const hocApiConsumer = (Component) => {
   class ApiConsumer extends React.Component {
     constructor (props, context) {
@@ -85,43 +95,17 @@ const hocApiConsumer = (Component) => {
     }
 
     componentWillMount () {
-      const { api, internalApi } = this.context
-      if (typeof api !== 'object' ||
-        typeof internalApi !== 'object') {
-        return
-      }
-
-      if (typeof Component.apiFetches === 'object' &&
-        this.cancelFetches === null) {
-        if (!attemptToUseApiData(this, Component.apiFetches)) {
-          this.cancelFetches = internalApi.onProviderMounted(
-            () => executeFetches(this, Component.apiFetches)
-              .then(() => {
-                const { onFetched } = this.props
-                return onFetched ? onFetched() : false
-              })
-          )
-        }
-      }
+      const eventName = 'onProviderMounted'
+      const { apiFetches } = Component
+      const { onFetched } = this.props
+      this.cancelFetches = executeFetchesIfNeeded(this, eventName, apiFetches, onFetched)
     }
 
     componentDidMount () {
-      const { api, internalApi } = this.context
-      if (typeof api !== 'object' ||
-        typeof internalApi !== 'object') {
-        return
-      }
-
-      if (typeof Component.apiFetchesWithAuth === 'object' &&
-        this.cancelFetchesWithAuth === null) {
-        this.cancelFetchesWithAuth = internalApi.onAuthenticated(
-          () => executeFetches(this, Component.apiFetchesWithAuth)
-            .then(() => {
-              const { onFetchedWithAuth } = this.props
-              return onFetchedWithAuth ? onFetchedWithAuth() : false
-            })
-        )
-      }
+      const eventName = 'onAuthenticated'
+      const { apiFetchesWithAuth } = Component
+      const { onFetchedWithAuth } = this.props
+      this.cancelFetches = executeFetchesIfNeeded(this, eventName, apiFetchesWithAuth, onFetchedWithAuth)
     }
 
     componentWillUnmount () {

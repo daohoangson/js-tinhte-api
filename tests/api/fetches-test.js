@@ -158,8 +158,8 @@ describe('api', () => {
     it('sends sub-request headers', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({apiRoot})
-      const oneHeaders = {'One': `${Math.random()}`}
-      const twoHeaders = {'Two': `${Math.random()}`}
+      const oneHeaders = {One: `${Math.random()}`}
+      const twoHeaders = {Two: `${Math.random()}`}
       const fetches = () => {
         api.fetchOne('one', 'GET', oneHeaders).catch(e => e)
         api.fetchOne('two', 'GET', twoHeaders).catch(e => e)

@@ -170,7 +170,7 @@ const apiFactory = (config = {}) => {
           return callbacks.fetchItems(items, options)
         })
         .then(
-          (json) => json,
+          (json) => json.jobs,
           (reason) => {
             internalApi.log(reason)
             return {}

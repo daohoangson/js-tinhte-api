@@ -4,7 +4,7 @@ import { apiHoc } from '../../../src'
 const Visitor = ({ user }) => user ? <h1>Hello {user.username}</h1> : null
 
 Visitor.apiFetchesWithAuth = {
-  'user': {
+  user: {
     uri: 'users/me?fields_include=username',
     success: (json) => json.user
   }
