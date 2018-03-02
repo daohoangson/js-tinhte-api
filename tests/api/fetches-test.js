@@ -41,10 +41,7 @@ describe('api', () => {
     it('keeps oauth_token in url', () => {
       const accessToken = 'access token'
       const apiRoot = 'https://httpbin.org/anything'
-      const api = apiFactory({
-        apiRoot,
-        auth: {access_token: accessToken}
-      })
+      const api = apiFactory({apiRoot, auth: {accessToken}})
       const oauthToken = `${Math.random()}`
       return api.fetchOne(`path?oauth_token=${oauthToken}`)
         .then((json) => {
@@ -55,10 +52,7 @@ describe('api', () => {
     it('includes access token', () => {
       const accessToken = 'access token'
       const apiRoot = 'https://httpbin.org/anything'
-      const api = apiFactory({
-        apiRoot,
-        auth: {access_token: accessToken}
-      })
+      const api = apiFactory({apiRoot, auth: {accessToken}})
       return api.fetchOne('path')
         .then((json) => {
           expect(json.args.oauth_token).toBe(accessToken)
@@ -87,7 +81,7 @@ describe('api', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({
         apiRoot,
-        auth: {access_token: 'access token'}
+        auth: {accessToken: 'access token'}
       })
       return api.fetchOne('xenforo1')
         .then((json) => {
@@ -107,7 +101,7 @@ describe('api', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({
         apiRoot,
-        auth: {access_token: 'access token'}
+        auth: {accessToken: 'access token'}
       })
       return api.fetchOne('xenforo2')
         .then((json) => {

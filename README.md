@@ -121,8 +121,8 @@ Params:
  - `config` object
    - `apiRoot` default=`'https://tinhte.vn/appforo/index.php'`
    - `auth` object
-     - `access_token` default=`''`
-     - `user_id` default=`0`
+     - `accessToken` default=`''`
+     - `userId` default=`0`
    - `callbackUrl` default=`''`
    - `clientId` default=`''`
    - `cookiePrefix` default=`'auth_'`
@@ -218,6 +218,10 @@ The general use case for these props are server side rendering, you can safely i
  ```
  - **You want to render components on the server but they need api data to work?** You may use `fetchApiDataForProvider`, it will give you the `apiData` object, ready to be use with `ApiProvider`.
 
+### api.clone
+
+Returns a new api instance with the same configuration.
+
 ### api.fetchApiDataForProvider
 
 Params:
@@ -232,8 +236,18 @@ Example for Next.js:
 const ApiProvider = api.ProviderHoc(Page)
 
 ApiProvider.getInitialProps = async () => {
-  const props = await api.fetchApiDataForProvider(<ApiProvider />)
-  return props
+  // clone api instance for security reason
+  const reqApi = api.clone()
+  const ReqApiProvider = reqApi.ProviderHoc(Page)
+  
+  const apiConfig = {}
+  if (!process.browser) {
+    // client secret should be accessible on server only
+    apiConfig.ott = reqApi.generateOneTimeToken(clientSecret)
+  }
+
+  const apiData = await api.fetchApiDataForProvider(<ReqApiProvider apiConfig={apiConfig} />)
+  return {apiConfig, apiData}
 }
 ```
 
@@ -336,19 +350,6 @@ Returns the unique ID string of this api instance.
 ### api.getUserId
 
 Returns the authenticated access token or `0`.
-
-### api.setAuth
-
-Params:
-
- - `auth` required object
-   - `access_token` required string
-   - `state` required string
-
-Returns a `Promise` that will resolve to the number of auth callbacks.
-
-**Note:** This method will not work unless debugging is turned on (`debug=true`). 
-It is strongly recommended against altering API states from outside.
 
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api

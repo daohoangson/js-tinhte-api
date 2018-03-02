@@ -34,8 +34,8 @@ const fetchesInit = (api, internalApi) => {
     const auth = internalApi.getAuth()
 
     if (auth) {
-      if (!hasOauthToken && auth.access_token) {
-        urlQuery += `&oauth_token=${encodeURIComponent(auth.access_token)}`
+      if (!hasOauthToken && auth.accessToken) {
+        urlQuery += `&oauth_token=${encodeURIComponent(auth.accessToken)}`
         hasOauthToken = true
       }
       if (auth._xf1) {

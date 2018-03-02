@@ -28,20 +28,22 @@ const ApiProvider = api.ProviderHoc(Index)
 
 ApiProvider.getInitialProps = async ({ query }) => {
   const clientId = query.client_id
-  const scopedConfig = {clientId}
-  const scopedApi = apiFactory({...apiConfig, ...scopedConfig})
+  const reqConfig = {clientId}
+  const reqApi = api.clone(reqConfig)
 
-  const clientSecret = query.client_secret
-  if (typeof clientSecret === 'string') {
-    scopedConfig.ott = scopedApi.generateOneTimeToken(clientSecret)
+  if (!process.browser) {
+    const clientSecret = query.client_secret
+    if (typeof clientSecret === 'string') {
+      reqConfig.ott = reqApi.generateOneTimeToken(clientSecret)
+    }
   }
 
-  const ScopedApiProvider = scopedApi.ProviderHoc(Index)
+  const ReqApiProvider = reqApi.ProviderHoc(Index)
 
-  return scopedApi.fetchApiDataForProvider(<ScopedApiProvider />)
+  return reqApi.fetchApiDataForProvider(<ReqApiProvider apiConfig={reqConfig} />)
     .then((apiData) => {
       Head.rewind()
-      return {apiConfig: scopedConfig, apiData}
+      return {apiConfig: reqConfig, apiData}
     })
 }
 

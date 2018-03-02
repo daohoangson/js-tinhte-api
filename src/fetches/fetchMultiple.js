@@ -1,8 +1,8 @@
+import { isObject, mustBeObject } from '../helpers'
+
 const fetchMultipleInit = (fetchJson, batch, internalApi) => {
   const fetchMultiple = (fetches, options = {}) => {
-    if (typeof options !== 'object') {
-      options = {}
-    }
+    options = mustBeObject(options)
     const triggerHandlers = typeof options.triggerHandlers === 'boolean' ? options.triggerHandlers : true
 
     batch.init()
@@ -46,7 +46,8 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     const body = JSON.stringify(batchBody)
 
     const processJobs = (json) => {
-      const jobs = typeof json.jobs === 'object' ? json.jobs : {}
+      let { jobs } = json
+      jobs = mustBeObject(jobs)
       json._handled = 0
 
       const handle = (jobId, reqId) => {
@@ -70,9 +71,11 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
           return handler.reject(reason)
         }
 
-        if (typeof jobs[jobId] === 'object') {
-          const job = jobs[jobId]
-          if (job._req.method !== handler.method || job._req.uri !== handler.uri) {
+        const job = jobs[jobId]
+        if (isObject(job)) {
+          if (!isObject(job._req) ||
+            job._req.method !== handler.method ||
+            job._req.uri !== handler.uri) {
             return reject(new Error('Detected mismatched job and request data'))
           }
 
@@ -89,10 +92,10 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       }
 
       Object.keys(jobs).forEach((jobId) => {
-        if (typeof reqIds[jobId] !== 'object') {
+        const jobReqIds = reqIds[jobId]
+        if (!Array.isArray(jobReqIds) || jobReqIds.length === 0) {
           return
         }
-        const jobReqIds = reqIds[jobId]
         const firstReqId = jobReqIds[0]
         const handler = handlers[firstReqId]
 

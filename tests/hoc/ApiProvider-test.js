@@ -16,78 +16,17 @@ describe('hoc', () => {
       unmountComponentAtNode(node)
     })
 
-    describe('apiConfig', () => {
-      const testApiConfig = (apiConfig, callback) => {
-        const api = apiFactory()
-        const P = api.ProviderHoc(() => <div className='P'>ok</div>)
-        render(<P apiConfig={apiConfig} />, node, () => callback(api))
-      }
-
-      it('accepts non-object', () => {
-        const apiConfig = 'bar'
-        testApiConfig(apiConfig, () => {
-          expect(node.innerHTML).toContain('<div class="P">ok</div>')
-        })
-      })
-
-      it('accepts apiRoot', () => {
-        const apiRoot = 'api root'
-        const apiConfig = {apiRoot}
-        testApiConfig(apiConfig, (api) => expect(api.getApiRoot()).toBe(apiRoot))
-      })
-
-      it('accepts auth.access_token', () => {
-        const accessToken = 'access token'
-        const apiConfig = {auth: {access_token: accessToken}}
-        testApiConfig(apiConfig, (api) => expect(api.getAccessToken()).toBe(accessToken))
-      })
-
-      it('accepts auth.user_id', () => {
-        const userId = 1
-        const apiConfig = {auth: {user_id: userId}}
-        testApiConfig(apiConfig, (api) => expect(api.getUserId()).toBe(userId))
-      })
-
-      it('accepts callbackUrl', () => {
-        const callbackUrl = 'callback url'
-        const apiConfig = {callbackUrl}
-        testApiConfig(apiConfig, (api) => expect(api.getCallbackUrl()).toBe(callbackUrl))
-      })
-
-      it('accepts clientId', () => {
-        const clientId = 'client ID'
-        const apiConfig = {clientId}
-        testApiConfig(apiConfig, (api) => expect(api.getClientId()).toBe(clientId))
-      })
-
-      it('accepts cookiePrefix', () => {
-        const cookiePrefix = 'cookie prefix'
-        const clientId = 'client ID'
-        const apiConfig = {clientId, cookiePrefix}
-        const regEx = new RegExp('^' + cookiePrefix)
-        testApiConfig(apiConfig, (api) => expect(api.getCookieName()).toMatch(regEx))
-      })
-
-      it('accepts debug', () => {
-        const debug = true
-        const apiConfig = {debug}
-        testApiConfig(apiConfig, (api) => expect(api.getDebug()).toBe(debug))
-      })
-
-      it('accepts ott', () => {
-        const ott = 'ott'
-        const apiConfig = {ott}
-        testApiConfig(apiConfig, (api) => expect(api.getOtt()).toBe(ott))
-      })
-
-      it('accepts scope', () => {
-        const scope = 'scope1 scope2'
-        const apiConfig = {scope}
-        testApiConfig(apiConfig, (api) => expect(api.getScope()).toBe(scope))
+    it('swallows apiConfig prop', () => {
+      const api = apiFactory()
+      const apiConfig = {}
+      const prop = 'foo'
+      const P = api.ProviderHoc((props) => <div className='P'>{JSON.stringify(props)}</div>)
+      render(<P prop={prop} apiConfig={apiConfig} />, node, () => {
+        expect(node.innerHTML).toContain('<div class="P">' + JSON.stringify({prop}) + '</div>')
       })
     })
 
-    describe('apiData', () => {
+    describe('apiData prop', () => {
       const testApiData = (apiData, callback) => {
         const api = apiFactory()
         const P = api.ProviderHoc(() => <div className='P'>ok</div>)

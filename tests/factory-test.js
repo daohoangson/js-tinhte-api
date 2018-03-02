@@ -14,15 +14,15 @@ describe('apiFactory', () => {
     expect(api.getApiRoot()).toBe(apiRoot)
   })
 
-  it('accepts auth.access_token', () => {
+  it('accepts auth.accessToken', () => {
     const accessToken = 'access token'
-    const api = apiFactory({auth: {access_token: accessToken}})
+    const api = apiFactory({auth: {accessToken}})
     expect(api.getAccessToken()).toBe(accessToken)
   })
 
-  it('accepts auth.user_id', () => {
+  it('accepts auth.userId', () => {
     const userId = 1
-    const api = apiFactory({auth: {user_id: userId}})
+    const api = apiFactory({auth: {userId}})
     expect(api.getUserId()).toBe(userId)
   })
 

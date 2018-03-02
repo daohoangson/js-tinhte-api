@@ -3,6 +3,7 @@ import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
 import { apiFactory, apiHoc } from 'src/'
+import { isObject } from 'src/helpers'
 
 describe('hoc', () => {
   describe('ApiConsumer', () => {
@@ -18,7 +19,7 @@ describe('hoc', () => {
 
     it('populates api', () => {
       const userId = Math.random()
-      const api = apiFactory({auth: {user_id: userId}})
+      const api = apiFactory({auth: {userId: userId}})
 
       const Child = ({api}) => <span className='userId'>{api.getUserId()}</span>
       const C = apiHoc.ApiConsumer(Child)
@@ -157,8 +158,7 @@ describe('hoc', () => {
         const Child = ({ post1 }) => (
           <div className='post1'>
             {
-              post1 !== null &&
-              typeof post1 === 'object' &&
+              isObject(post1) &&
               Object.keys(post1).length === 0 &&
               'ok'
             }

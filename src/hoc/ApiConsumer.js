@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { isObject } from '../helpers'
+
 const executeFetches = (apiConsumer, fetches) => {
   const { api } = apiConsumer.context
   const promises = []
@@ -10,7 +12,7 @@ const executeFetches = (apiConsumer, fetches) => {
     if (typeof fetch === 'function') {
       fetch = fetch(api)
     }
-    if (typeof fetch !== 'object' || fetch === null) {
+    if (!isObject(fetch)) {
       return
     }
 
@@ -52,18 +54,16 @@ const useApiData = (apiConsumer, fetches) => {
     if (typeof fetch === 'function') {
       fetch = fetch(api)
     }
-    if (typeof fetch !== 'object' || fetch === null) {
+    if (!isObject(fetch)) {
       return
     }
 
     const reqOptions = { ...fetch }
     const uniqueId = internalApi.standardizeReqOptions(reqOptions)
-    if (typeof apiData[uniqueId] !== 'object') {
-      return
-    }
-
     const job = apiData[uniqueId]
-    if (typeof job._req !== 'object' ||
+
+    if (!isObject(job) ||
+      !isObject(job._req) ||
       job._req.method !== reqOptions.method ||
       job._req.uri !== reqOptions.uri ||
       typeof job._job_result !== 'string' ||
@@ -91,11 +91,8 @@ const useApiData = (apiConsumer, fetches) => {
 const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
   const notify = () => onFetched && onFetched()
 
-  if (fetches === null || typeof fetches !== 'object') {
-    return notify()
-  }
-
-  if (useApiData(apiConsumer, fetches)) {
+  if (!isObject(fetches) ||
+    useApiData(apiConsumer, fetches)) {
     return notify()
   }
 

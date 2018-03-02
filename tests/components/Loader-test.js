@@ -41,7 +41,7 @@ describe('components', () => {
 
     it('does not show up with access token already set', () => {
       const api = apiFactory({
-        auth: {access_token: 'access token'},
+        auth: {accessToken: 'access token'},
         callbackUrl: 'callback url',
         clientId: 'client ID',
         scope: 'scope1 scope2'

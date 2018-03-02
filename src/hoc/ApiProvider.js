@@ -1,12 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
+import { isObject, mustBeObject } from '../helpers'
+
 const hocApiProvider = (Component, api, internalApi) => {
   class ApiProvider extends React.Component {
     constructor (props) {
       super(props)
 
-      if (process.browser && props.apiConfig) {
+      if (isObject(props.apiConfig)) {
         internalApi.updateConfig(props.apiConfig)
       }
     }
@@ -17,16 +19,14 @@ const hocApiProvider = (Component, api, internalApi) => {
 
     getChildContext () {
       let { apiData } = this.props
-      if (typeof apiData !== 'object') {
-        apiData = {}
-      }
+      apiData = mustBeObject(apiData)
 
       return {api, apiData, internalApi}
     }
 
     render () {
       const props = {...this.props}
-      if (typeof props.apiConfig === 'object') {
+      if (typeof props.apiConfig !== 'undefined') {
         delete props.apiConfig
       }
 

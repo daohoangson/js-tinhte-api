@@ -1,6 +1,8 @@
 import Cookies from 'js-cookie'
 import React from 'react'
 
+import { isObject } from '../helpers'
+
 const getCookie = (api) => {
   const name = api.getCookieName()
   if (!name) {
@@ -8,7 +10,7 @@ const getCookie = (api) => {
   }
 
   const value = Cookies.getJSON(name)
-  if (typeof value !== 'object') {
+  if (!isObject(value)) {
     return null
   }
 

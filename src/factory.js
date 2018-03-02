@@ -3,48 +3,61 @@ import reactTreeWalker from 'react-tree-walker'
 
 import components from './components'
 import fetchesInit from './fetches'
+import { isObject, mustBeObject } from './helpers'
 import helperCallbacksInit from './helpers/callbacks'
 import hoc from './hoc'
 
 const apiFactory = (config = {}) => {
-  if (typeof config !== 'object') {
-    config = {}
-  }
-  let apiRoot = (typeof config.apiRoot === 'string') ? config.apiRoot : 'https://tinhte.vn/appforo/index.php'
-  let callbackUrl = (typeof config.callbackUrl === 'string') ? config.callbackUrl : ''
-  let clientId = (typeof config.clientId === 'string') ? config.clientId : ''
-  let cookiePrefix = (typeof config.cookiePrefix === 'string') ? config.cookiePrefix : 'auth_'
-  let debug = (typeof config.debug === 'boolean') ? config.debug : false
-  let ott = (typeof config.ott === 'string') ? config.ott : ''
-  let scope = (typeof config.scope === 'string') ? config.scope : 'read'
-
+  let apiRoot = 'https://tinhte.vn/appforo/index.php'
   let auth = null
-  if (typeof config.auth === 'object') {
-    const ca = config.auth
-    auth = {
-      access_token: (typeof ca.access_token === 'string') ? ca.access_token : '',
-      user_id: (typeof ca.user_id === 'number') ? ca.user_id : 0
-    }
+  let callbackUrl = ''
+  let clientId = ''
+  let cookiePrefix = 'auth_'
+  let debug = false
+  let ott = ''
+  let scope = 'read'
 
-    if (auth.access_token.length > 0 && auth.user_id === 0) {
-      // detect XenForo environments
-      if (typeof XenForo === 'object' && XenForo !== null &&
-        typeof XenForo.visitor === 'object' &&
-        typeof XenForo.visitor.user_id === 'number' &&
-        typeof XenForo._csrfToken === 'string') {
-        // XenForo 1.x
-        auth.user_id = XenForo.visitor.user_id
-        auth._xf1 = XenForo
-      } else if (typeof XF === 'object' && XF !== null &&
-        typeof XF.config === 'object' &&
-        typeof XF.config.userId === 'number' &&
-        typeof XF.config.csrf === 'string') {
-        // XenForo 2.x
-        auth.user_id = XF.config.userId
-        auth._xf2 = XF
+  const updateConfig = (config) => {
+    config = mustBeObject(config)
+
+    if (typeof config.apiRoot === 'string') apiRoot = config.apiRoot
+    if (isObject(config.auth)) {
+      auth = {
+        accessToken: '',
+        userId: 0
+      }
+
+      const ca = config.auth
+      if (typeof ca.accessToken === 'string') auth.accessToken = ca.accessToken
+      if (typeof ca.userId === 'number') auth.userId = ca.userId
+
+      if (auth.accessToken.length > 0 && auth.userId === 0) {
+        // detect XenForo environments
+        if (isObject(XenForo) &&
+          isObject(XenForo.visitor) &&
+          typeof XenForo.visitor.user_id === 'number' &&
+          typeof XenForo._csrfToken === 'string') {
+          // XenForo 1.x
+          auth.userId = XenForo.visitor.user_id
+          auth._xf1 = XenForo
+        } else if (isObject(XF) &&
+          isObject(XF.config) &&
+          typeof XF.config.userId === 'number' &&
+          typeof XF.config.csrf === 'string') {
+          // XenForo 2.x
+          auth.userId = XF.config.userId
+          auth._xf2 = XF
+        }
       }
     }
+    if (typeof config.callbackUrl === 'string') callbackUrl = config.callbackUrl
+    if (typeof config.clientId === 'string') clientId = config.clientId
+    if (typeof config.cookiePrefix === 'string') cookiePrefix = config.cookiePrefix
+    if (typeof config.debug === 'boolean') debug = config.debug
+    if (typeof config.ott === 'string') ott = config.ott
+    if (typeof config.scope === 'string') scope = config.scope
   }
+  updateConfig(config)
 
   const uniqueId = ('' + Math.random()).substr(2, 6)
   const callbackListForAuth = { name: 'auth', items: [] }
@@ -71,11 +84,12 @@ const apiFactory = (config = {}) => {
     },
 
     standardizeReqOptions: (options) => {
-      let { uri, method, headers, body } = options
-      if (typeof uri !== 'string') options.uri = ''
-      if (typeof method !== 'string') options.method = 'GET'
-      if (typeof headers !== 'object') options.headers = {}
-      if (typeof body !== 'object') options.body = null
+      options = mustBeObject(options)
+
+      if (typeof options.uri !== 'string') options.uri = ''
+      if (typeof options.method !== 'string') options.method = 'GET'
+      options.headers = mustBeObject(options.headers)
+      if (!isObject(options.body)) options.body = null
       const uniqueId = md5(options.method + options.uri)
 
       return uniqueId
@@ -108,17 +122,19 @@ const apiFactory = (config = {}) => {
 
       const notify = () => callbacks.fetchList(callbackListForAuth)
 
-      if (typeof newAuth !== 'object' ||
-        typeof newAuth.access_token !== 'string' ||
-        typeof newAuth.state !== 'string') {
+      if (!isObject(newAuth) ||
+        typeof newAuth.state !== 'string' ||
+        newAuth.state !== uniqueId) {
         return notify()
       }
 
-      if (newAuth.state !== uniqueId) {
-        return notify()
+      if (typeof newAuth.access_token === 'string') {
+        auth.accessToken = newAuth.access_token
+      }
+      if (typeof newAuth.user_id === 'number') {
+        auth.userId = newAuth.user_id
       }
 
-      auth = newAuth
       return notify()
     },
 
@@ -132,27 +148,7 @@ const apiFactory = (config = {}) => {
       return callbacks.fetchList(callbackListForProviderMount)
     },
 
-    updateConfig: (config) => {
-      if (typeof config !== 'object') {
-        config = {}
-      }
-
-      if (typeof config.apiRoot === 'string') apiRoot = config.apiRoot
-      if (typeof config.auth === 'object') {
-        const ca = config.auth
-        if (auth === null) auth = {}
-        if (typeof ca.access_token === 'string') auth.access_token = ca.access_token
-        if (typeof ca.user_id === 'number') auth.user_id = ca.user_id
-      }
-      if (typeof config.callbackUrl === 'string') callbackUrl = config.callbackUrl
-      if (typeof config.clientId === 'string') clientId = config.clientId
-      if (typeof config.cookiePrefix === 'string') cookiePrefix = config.cookiePrefix
-      if (typeof config.debug === 'boolean') debug = config.debug
-      if (typeof config.ott === 'string') ott = config.ott
-      if (typeof config.scope === 'string') scope = config.scope
-
-      internalApi.log('Updated config')
-    }
+    updateConfig
   }
 
   const api = {
@@ -162,6 +158,25 @@ const apiFactory = (config = {}) => {
     ConsumerHoc: hoc.ApiConsumer,
 
     ProviderHoc: (Component) => hoc.ApiProvider(Component, api, internalApi),
+
+    clone: (config) => {
+      config = mustBeObject(config)
+
+      const clonedConfig = {
+        apiRoot,
+        auth,
+        callbackUrl,
+        clientId,
+        cookiePrefix,
+        debug,
+        ott,
+        scope,
+
+        ...config
+      }
+
+      return apiFactory(clonedConfig)
+    },
 
     fetchApiDataForProvider: (rootElement) => {
       return reactTreeWalker(rootElement, () => true)
@@ -186,7 +201,7 @@ const apiFactory = (config = {}) => {
       const userId = api.getUserId()
 
       let timestamp
-      if (typeof ttl === 'object' && typeof ttl.getTime === 'function') {
+      if (isObject(ttl) && typeof ttl.getTime === 'function') {
         // ttl is a Date, use its value directly
         timestamp = Math.floor(ttl.getTime() / 1000)
       } else {
@@ -194,12 +209,12 @@ const apiFactory = (config = {}) => {
       }
 
       const once = md5(`${userId}${timestamp}${clientSecret}`)
-      ott = `${userId},${timestamp},${once},${clientId}`
+      const ott = `${userId},${timestamp},${once},${clientId}`
 
       return ott
     },
 
-    getAccessToken: () => (auth && auth.access_token) ? auth.access_token : '',
+    getAccessToken: () => (auth && auth.accessToken) ? auth.accessToken : '',
 
     getApiRoot: () => apiRoot,
 
@@ -228,7 +243,7 @@ const apiFactory = (config = {}) => {
 
     getUniqueId: () => uniqueId,
 
-    getUserId: () => (auth && auth.user_id) ? auth.user_id : 0,
+    getUserId: () => (auth && auth.userId) ? auth.userId : 0,
 
     setAuth: (newAuth) => {
       if (!debug) {
