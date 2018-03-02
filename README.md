@@ -351,6 +351,24 @@ Returns the unique ID string of this api instance.
 
 Returns the authenticated access token or `0`.
 
+### api.onAuthenticated
+
+Params:
+
+ - `callback` required func
+
+Returns a `func` that can be used to cancel the callback.
+It's recommended to use `apiFetchesWithAuth` instead of using this method directly.
+
+### api.onProviderMounted
+
+Params:
+
+ - `callback` required function
+
+Returns a `function` that can be used to cancel the callback.
+It's recommended to use `apiFetches` instead of using this method directly.
+
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api
 

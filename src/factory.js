@@ -109,14 +109,6 @@ const apiFactory = (config = {}) => {
       return message
     },
 
-    onAuthenticated: (callback) => {
-      return callbacks.add(callbackListForAuth, callback, auth !== null)
-    },
-
-    onProviderMounted: (callback) => {
-      return callbacks.add(callbackListForProviderMount, callback, providerMounted)
-    },
-
     setAuth: (newAuth) => {
       auth = {}
 
@@ -249,6 +241,14 @@ const apiFactory = (config = {}) => {
     getUniqueId: () => uniqueId,
 
     getUserId: () => (auth && auth.userId) ? auth.userId : 0,
+
+    onAuthenticated: (callback) => {
+      return callbacks.add(callbackListForAuth, callback, auth !== null)
+    },
+
+    onProviderMounted: (callback) => {
+      return callbacks.add(callbackListForProviderMount, callback, providerMounted)
+    },
 
     setAuth: (newAuth) => {
       if (!debug) {

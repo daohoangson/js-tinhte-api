@@ -198,6 +198,16 @@ describe('hoc', () => {
         return Promise.all([test(), test()])
       })
 
+      it('handles bad context', () => {
+        const Child = () => 'foo'
+        Child.apiFetches = {index: {uri: 'index'}}
+        const C = apiHoc.ApiConsumer(Child)
+
+        return new Promise((resolve) => {
+          render(<C onFetched={resolve} />, node)
+        })
+      })
+
       it('merge batch with apiFetchesWithAuth', () => {
         const clientId = 'client ID'
         const cookiePrefix = `auth${Math.random()}_`

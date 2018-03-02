@@ -3,8 +3,7 @@ import PropTypes from 'prop-types'
 
 import { isObject } from '../helpers'
 
-const executeFetches = (apiConsumer, fetches) => {
-  const { api } = apiConsumer.context
+const executeFetches = (apiConsumer, api, fetches) => {
   const promises = []
   const fetchedData = {}
   Object.keys(fetches).forEach((key) => {
@@ -46,6 +45,11 @@ const executeFetches = (apiConsumer, fetches) => {
 
 const useApiData = (apiConsumer, fetches) => {
   const { api, apiData, internalApi } = apiConsumer.context
+  if (!isObject(api) ||
+    !isObject(apiData) ||
+    !isObject(internalApi)) {
+    return false
+  }
 
   const foundJobs = {}
   const fetchKeys = Object.keys(fetches)
@@ -96,9 +100,13 @@ const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
     return notify()
   }
 
-  const { internalApi } = apiConsumer.context
-  const onEvent = internalApi[eventName]
-  return onEvent(() => executeFetches(apiConsumer, fetches).then(notify))
+  const { api } = apiConsumer.context
+  if (!isObject(api)) {
+    return notify()
+  }
+
+  const onEvent = api[eventName]
+  return onEvent(() => executeFetches(apiConsumer, api, fetches).then(notify))
 }
 
 const hocApiConsumer = (Component) => {
