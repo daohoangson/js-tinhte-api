@@ -349,14 +349,6 @@ Returns a `Promise` that will resolve to the number of auth callbacks.
 **Note:** This method will not work unless debugging is turned on (`debug=true`). 
 It is strongly recommended against altering API states from outside.
 
-### api.setOneTimeToken
-
-Params:
-
- - `ott` required string
-
-Returns `true` if ott has been updated, `false` otherwise.
-
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api
 

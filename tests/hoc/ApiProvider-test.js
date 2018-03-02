@@ -33,67 +33,57 @@ describe('hoc', () => {
       it('accepts apiRoot', () => {
         const apiRoot = 'api root'
         const apiConfig = {apiRoot}
-        test(apiConfig, (api) => {
-          expect(api.getApiRoot()).toBe(apiRoot)
-        })
+        test(apiConfig, (api) => expect(api.getApiRoot()).toBe(apiRoot))
       })
 
       it('accepts auth.access_token', () => {
         const accessToken = 'access token'
         const apiConfig = {auth: {access_token: accessToken}}
-        test(apiConfig, (api) => {
-          expect(api.getAccessToken()).toBe(accessToken)
-        })
+        test(apiConfig, (api) => expect(api.getAccessToken()).toBe(accessToken))
       })
 
       it('accepts auth.user_id', () => {
         const userId = 1
         const apiConfig = {auth: {user_id: userId}}
-        test(apiConfig, (api) => {
-          expect(api.getUserId()).toBe(userId)
-        })
+        test(apiConfig, (api) => expect(api.getUserId()).toBe(userId))
       })
 
       it('accepts callbackUrl', () => {
         const callbackUrl = 'callback url'
         const apiConfig = {callbackUrl}
-        test(apiConfig, (api) => {
-          expect(api.getCallbackUrl()).toBe(callbackUrl)
-        })
+        test(apiConfig, (api) => expect(api.getCallbackUrl()).toBe(callbackUrl))
       })
 
       it('accepts clientId', () => {
         const clientId = 'client ID'
         const apiConfig = {clientId}
-        test(apiConfig, (api) => {
-          expect(api.getClientId()).toBe(clientId)
-        })
+        test(apiConfig, (api) => expect(api.getClientId()).toBe(clientId))
       })
 
       it('accepts cookiePrefix', () => {
         const cookiePrefix = 'cookie prefix'
         const clientId = 'client ID'
         const apiConfig = {clientId, cookiePrefix}
-        test(apiConfig, (api) => {
-          const regEx = new RegExp('^' + cookiePrefix)
-          expect(api.getCookieName()).toMatch(regEx)
-        })
+        const regEx = new RegExp('^' + cookiePrefix)
+        test(apiConfig, (api) => expect(api.getCookieName()).toMatch(regEx))
       })
 
       it('accepts debug', () => {
         const debug = true
         const apiConfig = {debug}
-        test(apiConfig, (api) => {
-          expect(api.getDebug()).toBe(debug)
-        })
+        test(apiConfig, (api) => expect(api.getDebug()).toBe(debug))
+      })
+
+      it('accepts ott', () => {
+        const ott = 'ott'
+        const apiConfig = {ott}
+        test(apiConfig, (api) => expect(api.getOtt()).toBe(ott))
       })
 
       it('accepts scope', () => {
         const scope = 'scope1 scope2'
         const apiConfig = {scope}
-        test(apiConfig, (api) => {
-          expect(api.getScope()).toBe(scope)
-        })
+        test(apiConfig, (api) => expect(api.getScope()).toBe(scope))
       })
     })
 

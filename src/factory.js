@@ -199,7 +199,7 @@ const apiFactory = (config = {}) => {
       }
 
       const once = md5(`${userId}${timestamp}${clientSecret}`)
-      const ott = `${userId},${timestamp},${once},${clientId}`
+      ott = `${userId},${timestamp},${once},${clientId}`
 
       return ott
     },
@@ -241,12 +241,6 @@ const apiFactory = (config = {}) => {
       }
 
       return internalApi.setAuth(newAuth)
-    },
-
-    setOneTimeToken: (newOtt) => {
-      internalApi.updateConfig({ott: newOtt})
-
-      return ott === newOtt
     }
   }
 

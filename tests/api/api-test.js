@@ -63,7 +63,9 @@ describe('api', () => {
       })
       const regEx = new RegExp(`^${userId},\\d+,\\w{32},${clientId}`)
 
-      expect(api.generateOneTimeToken(clientSecret)).toMatch(regEx)
+      const ott = api.generateOneTimeToken(clientSecret)
+      expect(ott).toMatch(regEx)
+      expect(api.getOtt()).toBe(ott)
     })
 
     it('accepts ttl', () => {
@@ -169,20 +171,6 @@ describe('api', () => {
       }
       return api.setAuth(auth)
         .then(() => expect(api.getAccessToken()).toBe(accessToken))
-    })
-  })
-
-  describe('setOneTimeToken', () => {
-    it('accepts non-string', () => {
-      const api = apiFactory()
-      expect(api.setOneTimeToken(0)).toBe(false)
-    })
-
-    it('accepts string', () => {
-      const api = apiFactory()
-      const ott = `${Math.random()}`
-      expect(api.setOneTimeToken(ott)).toBe(true)
-      expect(api.getOtt()).toBe(ott)
     })
   })
 })

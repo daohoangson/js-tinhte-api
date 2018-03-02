@@ -52,6 +52,12 @@ describe('apiFactory', () => {
     expect(api.getDebug()).toBe(debug)
   })
 
+  it('accepts ott', () => {
+    const ott = 'ott'
+    const api = apiFactory({ott})
+    expect(api.getOtt()).toBe(ott)
+  })
+
   it('accepts scope', () => {
     const scope = 'scope1 scope2'
     const api = apiFactory({scope})

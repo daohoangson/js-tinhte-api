@@ -9,7 +9,8 @@ import Visitor from '../demo/src/components/Visitor'
 
 const callbackUrl = process.browser ? window.location.origin + '/api-callback' : ''
 const debug = true
-const api = apiFactory({callbackUrl, debug})
+const apiConfig = {callbackUrl, debug}
+const api = apiFactory(apiConfig)
 
 const Index = () => (
   <div>
@@ -27,20 +28,20 @@ const ApiProvider = api.ProviderHoc(Index)
 
 ApiProvider.getInitialProps = async ({ query }) => {
   const clientId = query.client_id
-  const apiConfig = {clientId}
+  const scopedConfig = {clientId}
+  const scopedApi = apiFactory({...apiConfig, ...scopedConfig})
 
   const clientSecret = query.client_secret
   if (typeof clientSecret === 'string') {
-    const tempApi = apiFactory(apiConfig)
-    apiConfig.ott = tempApi.generateOneTimeToken(clientSecret)
-    api.setOneTimeToken(apiConfig.ott)
+    scopedConfig.ott = scopedApi.generateOneTimeToken(clientSecret)
   }
 
-  return api.fetchApiDataForProvider(<ApiProvider />)
+  const ScopedApiProvider = scopedApi.ProviderHoc(Index)
+
+  return scopedApi.fetchApiDataForProvider(<ScopedApiProvider />)
     .then((apiData) => {
       Head.rewind()
-
-      return {apiConfig, apiData}
+      return {apiConfig: scopedConfig, apiData}
     })
 }
 
