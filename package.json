@@ -15,6 +15,7 @@
     "clean": "nwb clean-module && nwb clean-demo",
     "deploy": "npm run build && npm publish && surge --domain https://tinhte-api.surge.sh demo/dist",
     "heroku-postbuild": "next build",
+    "heroku-web": "next start -p $PORT",
     "next": "next",
     "start": "nwb serve-react-demo",
     "test": "standard && nwb test-react",
