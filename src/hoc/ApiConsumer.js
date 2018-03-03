@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { isPlainObject } from '../helpers'
+import standardizeReqOptions from '../helpers/standardizeReqOptions'
 
 const executeFetches = (apiConsumer, api, fetches) => {
   const promises = []
@@ -63,7 +64,7 @@ const useApiData = (apiConsumer, fetches) => {
     }
 
     const reqOptions = { ...fetch }
-    const uniqueId = internalApi.standardizeReqOptions(reqOptions)
+    const uniqueId = standardizeReqOptions(reqOptions)
     const job = apiData[uniqueId]
 
     if (!isPlainObject(job) ||

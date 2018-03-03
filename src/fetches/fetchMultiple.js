@@ -1,122 +1,163 @@
 import { isPlainObject, mustBePlainObject } from '../helpers'
 
 const fetchMultipleInit = (fetchJson, batch, internalApi) => {
-  const fetchMultiple = (fetches, options = {}) => {
-    options = mustBePlainObject(options)
-    const triggerHandlers = typeof options.triggerHandlers === 'boolean' ? options.triggerHandlers : true
+  const newContext = (batchOptions) => {
+    batchOptions = mustBePlainObject(batchOptions)
+    batchOptions.triggerHandlers = typeof batchOptions.triggerHandlers === 'boolean'
+      ? batchOptions.triggerHandlers
+      : true
 
-    batch.init()
     const batchId = batch.id
-    fetches()
+    const batchHeaders = {
+      'Content-Type': 'application/json'
+    }
 
-    const headers = {}
+    const headers = {...batchHeaders}
     const handlers = {}
-    const batchBody = []
     const reqIds = {}
-    batch.forEach((req) => {
-      Object.keys(req.options.headers).forEach((headerKey) => {
-        headers[headerKey] = req.options.headers[headerKey]
-      })
+    const requests = []
 
-      const { id, uniqueId } = req
-      const uri = req.options.uri
-      const method = req.options.method.toUpperCase()
+    const context = {
+      batchId,
+      batchHeaders,
+      batchOptions,
 
-      handlers[id] = {
-        method,
-        resolve: req.resolve,
-        reject: req.reject,
-        uri
+      headers,
+      handlers,
+      reqIds,
+      requests
+    }
+
+    return context
+  }
+
+  const prepareRequest = (req, context) => {
+    const { batchHeaders, headers, handlers, reqIds, requests } = context
+
+    Object.keys(req.options.headers).forEach((headerKey) => {
+      if (typeof batchHeaders[headerKey] !== 'undefined') {
+        // DO NOT replace a batch header with one from the sub-request
+        return
       }
 
-      if (typeof reqIds[uniqueId] === 'undefined') {
-        reqIds[uniqueId] = [id]
-        batchBody.push({ id: uniqueId, uri, method })
-      } else {
-        reqIds[uniqueId].push(id)
-      }
+      headers[headerKey] = req.options.headers[headerKey]
     })
 
-    batch.reset()
+    const { id, uniqueId } = req
+    const { method, uri } = req.options
 
-    if (batchBody.length === 0) {
-      return Promise.reject(new Error('There is no fetches'))
+    handlers[id] = {
+      method,
+      resolve: req.resolve,
+      reject: req.reject,
+      uri
     }
 
-    const body = JSON.stringify(batchBody)
+    if (typeof reqIds[uniqueId] === 'undefined') {
+      reqIds[uniqueId] = [id]
+      requests.push({ id: uniqueId, uri, method })
+    } else {
+      reqIds[uniqueId].push(id)
+    }
+  }
 
-    const processJobs = (json) => {
-      let { jobs } = json
-      jobs = mustBePlainObject(jobs)
-      json._handled = 0
+  const normalizeJobs = (jobs, context) => {
+    const { handlers, reqIds } = context
 
-      const handle = (jobId, reqId) => {
-        if (!triggerHandlers) {
-          return
-        }
+    Object.keys(jobs).forEach((jobId) => {
+      const jobReqIds = reqIds[jobId]
+      if (!Array.isArray(jobReqIds)) {
+        return
+      }
+      const firstReqId = jobReqIds[0]
+      const handler = handlers[firstReqId]
 
-        const handler = handlers[reqId]
+      jobs[jobId]._req = {
+        method: handler.method,
+        uri: handler.uri
+      }
+    })
+  }
 
-        const resolve = (job) => {
-          json._handled++
-          internalApi.log('Resolving %s %s...', handler.method, handler.uri)
+  const processJob = (job, reqId, context) => {
+    const { batchOptions, handlers } = context
+    if (!batchOptions.triggerHandlers) {
+      return null
+    }
 
-          return handler.resolve(job)
-        }
+    const handler = handlers[reqId]
 
-        const reject = (reason) => {
-          json._handled++
-          internalApi.log('Rejecting %s %s (%s)...', handler.method, handler.uri, reason)
+    const resolve = (job) => {
+      internalApi.log('Resolving %s %s...', handler.method, handler.uri)
+      return {resolved: handler.resolve(job)}
+    }
 
-          return handler.reject(reason)
-        }
+    const reject = (reason) => {
+      internalApi.log('Rejecting %s %s (%s)...', handler.method, handler.uri, reason)
+      return {rejected: handler.reject(reason)}
+    }
 
-        const job = jobs[jobId]
-        if (isPlainObject(job)) {
-          if (!isPlainObject(job._req) ||
-            job._req.method !== handler.method ||
-            job._req.uri !== handler.uri) {
-            return reject(new Error('Detected mismatched job and request data'))
-          }
-
-          if (typeof job._job_result === 'string') {
-            if (job._job_result === 'ok') {
-              return resolve(job)
-            } else if (job._job_error) {
-              return reject(job._job_error)
-            }
-          }
-        }
-
-        return reject(new Error('Could not find job ' + jobId))
+    if (isPlainObject(job)) {
+      if (!isPlainObject(job._req) ||
+        job._req.method !== handler.method ||
+        job._req.uri !== handler.uri) {
+        return reject(new Error('Detected mismatched job and request data'))
       }
 
-      Object.keys(jobs).forEach((jobId) => {
-        const jobReqIds = reqIds[jobId]
-        if (!Array.isArray(jobReqIds) || jobReqIds.length === 0) {
-          return
+      if (typeof job._job_result === 'string') {
+        if (job._job_result === 'ok') {
+          return resolve(job)
+        } else if (job._job_error) {
+          return reject(job._job_error)
         }
-        const firstReqId = jobReqIds[0]
-        const handler = handlers[firstReqId]
-
-        jobs[jobId]._req = {
-          method: handler.method,
-          uri: handler.uri
-        }
-      })
-
-      Object.keys(reqIds).forEach((uniqueId) => {
-        reqIds[uniqueId].forEach((reqId) => handle(uniqueId, reqId))
-      })
-
-      return json
+      }
     }
 
-    internalApi.log('Batch #%d is being fetched...', batchId)
-    return fetchJson('/batch', {method: 'POST', headers, body})
-      .then(json => {
-        return processJobs(json)
+    return reject(new Error('Could not find job for request ' + reqId))
+  }
+
+  const processJobs = (json, context) => {
+    json.jobs = mustBePlainObject(json.jobs)
+    const { jobs } = json
+    json._handled = 0
+    normalizeJobs(jobs, context)
+
+    const { reqIds } = context
+    Object.keys(reqIds).forEach((uniqueId) => {
+      reqIds[uniqueId].forEach((reqId) => {
+        const job = jobs[uniqueId]
+        const handled = processJob(job, reqId, context)
+        if (handled !== null) {
+          json._handled++
+        }
       })
+    })
+
+    return json
+  }
+
+  const fetchMultiple = (fetches, options = {}) => {
+    const context = newContext(options)
+
+    batch.init()
+    fetches()
+    batch.forEach((req) => prepareRequest(req, context))
+    batch.reset()
+
+    if (context.requests.length === 0) {
+      return Promise.reject(new Error('There is no fetches'))
+    }
+    const body = JSON.stringify(context.requests)
+
+    const fetchOptions = {
+      method: 'POST',
+      headers: context.headers,
+      body
+    }
+
+    internalApi.log('Batch #%d is being fetched...', context.batchId)
+    return fetchJson('/batch', fetchOptions)
+      .then(json => processJobs(json, context))
   }
 
   return fetchMultiple

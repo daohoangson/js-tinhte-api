@@ -84,18 +84,6 @@ const apiFactory = (config = {}) => {
       return authorizeUrl
     },
 
-    standardizeReqOptions: (options) => {
-      options = mustBePlainObject(options)
-
-      if (typeof options.uri !== 'string') options.uri = ''
-      if (typeof options.method !== 'string') options.method = 'GET'
-      options.headers = mustBePlainObject(options.headers)
-      if (!isPlainObject(options.body)) options.body = null
-      const uniqueId = md5(options.method + options.uri)
-
-      return uniqueId
-    },
-
     getAuth: () => auth,
 
     log: function (message) {

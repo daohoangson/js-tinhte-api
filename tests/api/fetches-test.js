@@ -1,6 +1,9 @@
 import expect from 'expect'
 
 import { apiFactory } from 'src/'
+import fetchBatchFactory from 'src/fetches/batch'
+import fetchMultipleInit from 'src/fetches/fetchMultiple'
+import fetchOneInit from 'src/fetches/fetchOne'
 
 describe('api', () => {
   describe('fetchOne', function () {
@@ -155,7 +158,7 @@ describe('api', () => {
       const oneHeaders = {One: `${Math.random()}`}
       const twoHeaders = {Two: `${Math.random()}`}
       const fetches = () => {
-        api.fetchOne('one', 'GET', oneHeaders).catch(e => e)
+        api.fetchOne('one', 'GET', {...oneHeaders, 'Content-Type': 'foo'}).catch(e => e)
         api.fetchOne('two', 'GET', twoHeaders).catch(e => e)
       }
 
@@ -166,6 +169,7 @@ describe('api', () => {
           const { headers } = json
           expect(headers).toContain(oneHeaders)
           expect(headers).toContain(twoHeaders)
+          expect(headers['Content-Type']).toBe('application/json')
         })
     })
 
@@ -220,6 +224,57 @@ describe('api', () => {
           expect(json._handled).toBe(0)
           expect(api.getFetchCount()).toBe(1)
         })
+    })
+  })
+
+  describe('fetchMultiple internal', () => {
+    const mockedReqs = []
+    const mockedBatch = fetchBatchFactory(mockedReqs)
+    let mockedFetchOne
+    let mockedFetchMultiple
+    let mockedResponse
+
+    beforeEach(() => {
+      const mockedFetchJson = () => new Promise((resolve) => setTimeout(() => resolve(mockedResponse), 10))
+      const mockedInternalApi = {
+        log: console.log
+      }
+      mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedInternalApi)
+      mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedInternalApi)
+    })
+
+    it('handles unknown job in response', () => {
+      mockedResponse = {jobs: {foo: 'bar'}}
+      return mockedFetchMultiple(() => {
+        mockedFetchOne('index').catch(e => e)
+      }).then((json) => expect(json._handled).toBe(1))
+    })
+
+    it('handles uniqueId clash', () => {
+      const uniqueId = `uniqueId${Math.random()}`
+      mockedResponse = {jobs: {[uniqueId]: {foo: 'bar'}}}
+      return mockedFetchMultiple(() => {
+        mockedFetchOne('one').catch(e => e)
+        mockedFetchOne('two').catch(e => e)
+        mockedReqs[0].uniqueId = uniqueId
+        mockedReqs[1].uniqueId = uniqueId
+      }).then((json) => expect(json._handled).toBe(2))
+    })
+
+    it('handles non-string _job_result', () => {
+      const uniqueId = 'de160058e184557c638f82156445ceb2'
+      mockedResponse = {jobs: {[uniqueId]: {_job_result: false}}}
+      return mockedFetchMultiple(() => {
+        mockedFetchOne('index').catch(e => e)
+      }).then((json) => expect(json._handled).toBe(1))
+    })
+
+    it('handles unexpected _job_result string', () => {
+      const uniqueId = 'de160058e184557c638f82156445ceb2'
+      mockedResponse = {jobs: {[uniqueId]: {_job_result: 'foo'}}}
+      return mockedFetchMultiple(() => {
+        mockedFetchOne('index').catch(e => e)
+      }).then((json) => expect(json._handled).toBe(1))
     })
   })
 })

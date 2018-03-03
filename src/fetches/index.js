@@ -1,27 +1,13 @@
 import querystring from 'querystring'
 import unfetch from 'isomorphic-unfetch'
 
+import batchFactory from './batch'
 import fetchOneInit from './fetchOne'
 import fetchMultipleInit from './fetchMultiple'
+import { mustBePlainObject } from '../helpers'
 
 const fetchesInit = (api, internalApi) => {
-  let batchLatestId = 0
-
-  const batch = {
-    id: 0,
-    reqs: [],
-
-    forEach: (f) => batch.reqs.forEach(f),
-    getId: () => batch.id,
-    init: () => {
-      batchLatestId++
-      batch.id = batchLatestId
-      batch.reqs.length = 0
-    },
-    isOpen: () => batch.id > 0,
-    push: (req) => batch.reqs.push(req),
-    reset: () => (batch.id = 0)
-  }
+  const batch = batchFactory()
 
   const buildUrl = (url) => {
     if (url.match(/^https?:\/\//)) {
@@ -65,7 +51,12 @@ const fetchesInit = (api, internalApi) => {
 
     const finalUrl = buildUrl(url)
 
-    return unfetch(finalUrl, options)
+    options = mustBePlainObject(options)
+    const unfetchOptions = {credentials: 'include', ...options}
+    const headers = mustBePlainObject(options.headers)
+    unfetchOptions.headers = {...headers}
+
+    return unfetch(finalUrl, unfetchOptions)
       .then(response => response.json())
       .then((json) => {
         if (json.errors) {

@@ -1,9 +1,11 @@
+import standardizeReqOptions from '../helpers/standardizeReqOptions'
+
 const fetchOneInit = (fetchJson, batch, internalApi) => {
   let reqLatestId = 0
 
   const fetchOne = (uri, method = 'GET', headers = {}, body = null) => {
     const options = {uri, method, headers, body}
-    const uniqueId = internalApi.standardizeReqOptions(options)
+    const uniqueId = standardizeReqOptions(options)
 
     if (!options.uri) {
       return Promise.reject(new Error('uri is required'))
