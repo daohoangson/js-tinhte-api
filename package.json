@@ -18,6 +18,7 @@
     "heroku-web": "next start -p $PORT",
     "next": "next",
     "start": "nwb serve-react-demo",
+    "stats:analyzer": "webpack-bundle-analyzer umd/stats.json umd --host 0.0.0.0 --port 3000",
     "test": "standard && nwb test-react",
     "test:coverage": "nwb test-react --coverage",
     "test:watch": "nwb test-react --server"
@@ -25,6 +26,7 @@
   "dependencies": {
     "isomorphic-unfetch": "^2.0.0",
     "js-cookie": "^2.2.0",
+    "lodash": "^4.17.5",
     "md5": "^2.2.1",
     "prop-types": "^15.6.0",
     "querystring": "^0.2.0",
@@ -36,14 +38,15 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "lodash": "^4.17.5",
     "next": "5.0.1-canary.5",
     "nwb": "0.21.x",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-router-dom": "^4.2.2",
     "standard": "^11.0.0",
-    "surge": "^0.19.0"
+    "stats-webpack-plugin": "^0.6.2",
+    "surge": "^0.19.0",
+    "webpack-bundle-analyzer": "^2.11.1"
   },
   "author": "Dao Hoang Son",
   "homepage": "https://tinhte.vn",

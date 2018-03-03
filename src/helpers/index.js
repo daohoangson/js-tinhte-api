@@ -1,7 +1,9 @@
-export function isObject (v) {
-  return v !== null && typeof v === 'object'
+import { isPlainObject as _isPlainObject } from 'lodash'
+
+export function isPlainObject (v) {
+  return _isPlainObject(v)
 }
 
-export function mustBeObject (v) {
-  return isObject(v) ? v : {}
+export function mustBePlainObject (v) {
+  return isPlainObject(v) ? v : {}
 }

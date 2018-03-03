@@ -1,6 +1,11 @@
+const StatsWebpackPlugin = require('stats-webpack-plugin')
+
 const config = {
   type: 'react-component',
   babel: {
+    cherryPick: [
+      'lodash'
+    ],
     runtime: true
   },
   npm: {
@@ -15,6 +20,11 @@ const config = {
   webpack: {
     html: {
       filename: 'index.html'
+    },
+    extra: {
+      plugins: [
+        new StatsWebpackPlugin('stats.json', {chunkModules: true})
+      ]
     }
   }
 }

@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { isObject } from '../helpers'
+import { isPlainObject } from '../helpers'
 
 const executeFetches = (apiConsumer, api, fetches) => {
   const promises = []
@@ -11,7 +11,7 @@ const executeFetches = (apiConsumer, api, fetches) => {
     if (typeof fetch === 'function') {
       fetch = fetch(api)
     }
-    if (!isObject(fetch)) {
+    if (!isPlainObject(fetch)) {
       return
     }
 
@@ -45,9 +45,9 @@ const executeFetches = (apiConsumer, api, fetches) => {
 
 const useApiData = (apiConsumer, fetches) => {
   const { api, apiData, internalApi } = apiConsumer.context
-  if (!isObject(api) ||
-    !isObject(apiData) ||
-    !isObject(internalApi)) {
+  if (!isPlainObject(api) ||
+    !isPlainObject(apiData) ||
+    !isPlainObject(internalApi)) {
     return false
   }
 
@@ -58,7 +58,7 @@ const useApiData = (apiConsumer, fetches) => {
     if (typeof fetch === 'function') {
       fetch = fetch(api)
     }
-    if (!isObject(fetch)) {
+    if (!isPlainObject(fetch)) {
       return
     }
 
@@ -66,8 +66,8 @@ const useApiData = (apiConsumer, fetches) => {
     const uniqueId = internalApi.standardizeReqOptions(reqOptions)
     const job = apiData[uniqueId]
 
-    if (!isObject(job) ||
-      !isObject(job._req) ||
+    if (!isPlainObject(job) ||
+      !isPlainObject(job._req) ||
       job._req.method !== reqOptions.method ||
       job._req.uri !== reqOptions.uri ||
       typeof job._job_result !== 'string' ||
@@ -95,13 +95,13 @@ const useApiData = (apiConsumer, fetches) => {
 const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
   const notify = () => onFetched && onFetched()
 
-  if (!isObject(fetches) ||
+  if (!isPlainObject(fetches) ||
     useApiData(apiConsumer, fetches)) {
     return notify()
   }
 
   const { api } = apiConsumer.context
-  if (!isObject(api)) {
+  if (!isPlainObject(api)) {
     return notify()
   }
 

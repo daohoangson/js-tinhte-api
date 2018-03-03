@@ -1,9 +1,10 @@
+import { isDate } from 'lodash'
 import md5 from 'md5'
 import reactTreeWalker from 'react-tree-walker'
 
 import components from './components'
 import fetchesInit from './fetches'
-import { isObject, mustBeObject } from './helpers'
+import { isPlainObject, mustBePlainObject } from './helpers'
 import helperCallbacksInit from './helpers/callbacks'
 import hoc from './hoc'
 
@@ -18,10 +19,10 @@ const apiFactory = (config = {}) => {
   let scope = 'read'
 
   const updateConfig = (config) => {
-    config = mustBeObject(config)
+    config = mustBePlainObject(config)
 
     if (typeof config.apiRoot === 'string') apiRoot = config.apiRoot
-    if (isObject(config.auth)) {
+    if (isPlainObject(config.auth)) {
       auth = {
         accessToken: '',
         userId: 0
@@ -33,15 +34,15 @@ const apiFactory = (config = {}) => {
 
       if (auth.accessToken.length > 0 && auth.userId === 0) {
         // detect XenForo environments
-        if (isObject(XenForo) &&
-          isObject(XenForo.visitor) &&
+        if (isPlainObject(XenForo) &&
+          isPlainObject(XenForo.visitor) &&
           typeof XenForo.visitor.user_id === 'number' &&
           typeof XenForo._csrfToken === 'string') {
           // XenForo 1.x
           auth.userId = XenForo.visitor.user_id
           auth._xf1 = XenForo
-        } else if (isObject(XF) &&
-          isObject(XF.config) &&
+        } else if (isPlainObject(XF) &&
+          isPlainObject(XF.config) &&
           typeof XF.config.userId === 'number' &&
           typeof XF.config.csrf === 'string') {
           // XenForo 2.x
@@ -84,12 +85,12 @@ const apiFactory = (config = {}) => {
     },
 
     standardizeReqOptions: (options) => {
-      options = mustBeObject(options)
+      options = mustBePlainObject(options)
 
       if (typeof options.uri !== 'string') options.uri = ''
       if (typeof options.method !== 'string') options.method = 'GET'
-      options.headers = mustBeObject(options.headers)
-      if (!isObject(options.body)) options.body = null
+      options.headers = mustBePlainObject(options.headers)
+      if (!isPlainObject(options.body)) options.body = null
       const uniqueId = md5(options.method + options.uri)
 
       return uniqueId
@@ -114,7 +115,7 @@ const apiFactory = (config = {}) => {
 
       const notify = () => callbacks.fetchList(callbackListForAuth)
 
-      if (!isObject(newAuth) ||
+      if (!isPlainObject(newAuth) ||
         typeof newAuth.state !== 'string' ||
         newAuth.state !== uniqueId) {
         return notify()
@@ -157,7 +158,7 @@ const apiFactory = (config = {}) => {
     ProviderHoc: (Component) => hoc.ApiProvider(Component, api, internalApi),
 
     clone: (config) => {
-      config = mustBeObject(config)
+      config = mustBePlainObject(config)
 
       const clonedConfig = {
         apiRoot,
@@ -198,7 +199,7 @@ const apiFactory = (config = {}) => {
       const userId = api.getUserId()
 
       let timestamp
-      if (isObject(ttl) && typeof ttl.getTime === 'function') {
+      if (isDate(ttl)) {
         // ttl is a Date, use its value directly
         timestamp = Math.floor(ttl.getTime() / 1000)
       } else {

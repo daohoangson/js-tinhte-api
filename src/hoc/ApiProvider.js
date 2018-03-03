@@ -1,14 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { isObject, mustBeObject } from '../helpers'
+import { isPlainObject, mustBePlainObject } from '../helpers'
 
 const hocApiProvider = (Component, api, internalApi) => {
   class ApiProvider extends React.Component {
     constructor (props) {
       super(props)
 
-      if (isObject(props.apiConfig)) {
+      if (isPlainObject(props.apiConfig)) {
         internalApi.updateConfig(props.apiConfig)
       }
     }
@@ -19,7 +19,7 @@ const hocApiProvider = (Component, api, internalApi) => {
 
     getChildContext () {
       let { apiData } = this.props
-      apiData = mustBeObject(apiData)
+      apiData = mustBePlainObject(apiData)
 
       return {api, apiData, internalApi}
     }

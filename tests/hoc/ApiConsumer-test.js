@@ -3,7 +3,7 @@ import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
 import { apiFactory, apiHoc } from 'src/'
-import { isObject } from 'src/helpers'
+import { isPlainObject } from 'src/helpers'
 
 describe('hoc', () => {
   describe('ApiConsumer', () => {
@@ -158,7 +158,7 @@ describe('hoc', () => {
         const Child = ({ post1 }) => (
           <div className='post1'>
             {
-              isObject(post1) &&
+              isPlainObject(post1) &&
               Object.keys(post1).length === 0 &&
               'ok'
             }

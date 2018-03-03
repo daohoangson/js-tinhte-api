@@ -1,8 +1,8 @@
-import { isObject, mustBeObject } from '../helpers'
+import { isPlainObject, mustBePlainObject } from '../helpers'
 
 const fetchMultipleInit = (fetchJson, batch, internalApi) => {
   const fetchMultiple = (fetches, options = {}) => {
-    options = mustBeObject(options)
+    options = mustBePlainObject(options)
     const triggerHandlers = typeof options.triggerHandlers === 'boolean' ? options.triggerHandlers : true
 
     batch.init()
@@ -47,7 +47,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
 
     const processJobs = (json) => {
       let { jobs } = json
-      jobs = mustBeObject(jobs)
+      jobs = mustBePlainObject(jobs)
       json._handled = 0
 
       const handle = (jobId, reqId) => {
@@ -72,8 +72,8 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
         }
 
         const job = jobs[jobId]
-        if (isObject(job)) {
-          if (!isObject(job._req) ||
+        if (isPlainObject(job)) {
+          if (!isPlainObject(job._req) ||
             job._req.method !== handler.method ||
             job._req.uri !== handler.uri) {
             return reject(new Error('Detected mismatched job and request data'))
