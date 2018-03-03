@@ -14,15 +14,6 @@ describe('api', () => {
       global.XF = null
     })
 
-    it('rejects bad params', () => {
-      const api = apiFactory()
-      return api.fetchOne(false, false, false, false)
-        .then(
-          (json) => Promise.reject(new Error(JSON.stringify(json))),
-          (reason) => expect(reason).toBeAn(Error)
-        )
-    })
-
     it('keeps full url', () => {
       const api = apiFactory()
       const url = 'https://httpbin.org/get?foo=bar'
@@ -72,24 +63,41 @@ describe('api', () => {
         })
     })
 
-    it('includes XenForo 1 csrf token', () => {
-      const csrfToken = `csrf token ${Math.random()}`
-      global.XenForo = {
-        visitor: {
-          user_id: Math.random()
-        },
-        _csrfToken: csrfToken
+    describe('XenForo 1 csrf token', () => {
+      const testXenForo1CsrfToken = (csrfToken, uri) => {
+        global.XenForo = {
+          visitor: {
+            user_id: Math.random()
+          },
+          _csrfToken: csrfToken
+        }
+
+        const apiRoot = 'https://httpbin.org/anything'
+        const api = apiFactory({
+          apiRoot,
+          auth: {accessToken: 'access token'}
+        })
+        return api.fetchOne(uri)
       }
 
-      const apiRoot = 'https://httpbin.org/anything'
-      const api = apiFactory({
-        apiRoot,
-        auth: {accessToken: 'access token'}
+      it('includes it', () => {
+        const csrfToken = `csrf token ${Math.random()}`
+        const uri = 'xenforo1'
+        return testXenForo1CsrfToken(csrfToken, uri)
+          .then((json) => {
+            expect(json.args._xfToken).toBe(csrfToken)
+          })
       })
-      return api.fetchOne('xenforo1')
-        .then((json) => {
-          expect(json.args._xfToken).toBe(csrfToken)
-        })
+
+      it('keeps value from uri', () => {
+        const csrfToken = `csrf token ${Math.random()}`
+        const uriValue = `xf token ${Math.random()}`
+        const uri = `xenforo1?_xfToken=${uriValue}`
+        return testXenForo1CsrfToken(csrfToken, uri)
+          .then((json) => {
+            expect(json.args._xfToken).toBe(uriValue)
+          })
+      })
     })
 
     it('includes XenForo 2 csrf token', () => {

@@ -15,8 +15,8 @@ const fetchesInit = (api, internalApi) => {
     }
 
     let urlQuery = url.replace('?', '&')
-    const queryParams = querystring.parse(urlQuery)
-    let hasOauthToken = !!queryParams.oauth_token
+    const urlQueryParams = querystring.parse(urlQuery)
+    let hasOauthToken = !!urlQueryParams.oauth_token
     const auth = internalApi.getAuth()
 
     if (auth) {
@@ -24,10 +24,12 @@ const fetchesInit = (api, internalApi) => {
         urlQuery += `&oauth_token=${encodeURIComponent(auth.accessToken)}`
         hasOauthToken = true
       }
-      if (auth._xf1) {
-        urlQuery += `&_xfToken=${encodeURIComponent(auth._xf1._csrfToken)}`
-      } else if (auth._xf2) {
-        urlQuery += `&_xfToken=${encodeURIComponent(auth._xf2.config.csrf)}`
+      if (!urlQueryParams._xfToken) {
+        if (auth._xf1) {
+          urlQuery += `&_xfToken=${encodeURIComponent(auth._xf1._csrfToken)}`
+        } else if (auth._xf2) {
+          urlQuery += `&_xfToken=${encodeURIComponent(auth._xf2.config.csrf)}`
+        }
       }
     }
 

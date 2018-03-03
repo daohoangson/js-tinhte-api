@@ -7,10 +7,6 @@ const fetchOneInit = (fetchJson, batch, internalApi) => {
     const options = {uri, method, headers, body}
     const uniqueId = standardizeReqOptions(options)
 
-    if (!options.uri) {
-      return Promise.reject(new Error('uri is required'))
-    }
-
     reqLatestId++
     const reqId = reqLatestId
 

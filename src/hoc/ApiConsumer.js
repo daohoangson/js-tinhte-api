@@ -17,10 +17,6 @@ const executeFetches = (apiConsumer, api, fetches) => {
     }
 
     const { uri, method, headers, body, success, error } = fetch
-    if (!uri) {
-      return
-    }
-
     let promise = api.fetchOne(uri, method, headers, body)
 
     promise = promise.catch(error || (() => ({})))

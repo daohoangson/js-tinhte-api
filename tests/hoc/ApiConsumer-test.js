@@ -146,10 +146,6 @@ describe('hoc', () => {
         it('with non-object', () => {
           return testDoesNoFetch({index: 'foo'})
         })
-
-        it('without uri', () => {
-          return testDoesNoFetch({index: {}})
-        })
       })
 
       it('returns empty object on error', () => {
