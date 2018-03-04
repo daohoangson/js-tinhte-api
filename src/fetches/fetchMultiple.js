@@ -55,7 +55,12 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
 
     if (typeof reqIds[uniqueId] === 'undefined') {
       reqIds[uniqueId] = [id]
-      requests.push({ id: uniqueId, method, uri, params })
+      const req = { id: uniqueId }
+      if (method !== 'GET') req.method = method
+      req.uri = uri === '' ? 'index' : uri
+      if (Object.keys(params).length > 0) req.params = params
+
+      requests.push(req)
     } else {
       reqIds[uniqueId].push(id)
     }

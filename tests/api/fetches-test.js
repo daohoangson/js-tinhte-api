@@ -231,16 +231,43 @@ describe('api', () => {
         })
     })
 
-    it('sends sub-request params', () => {
-      const apiRoot = 'https://httpbin.org/anything'
-      const api = apiFactory({apiRoot})
-      const params = {foo: Math.random()}
-      const fetches = () => api.fetchOne({params}).catch(e => e)
-      return api.fetchMultiple(fetches)
-        .then((json) => {
-          const job = json.json[0]
-          expect(job.params.foo).toBe(params.foo)
+    describe('sub-request data', () => {
+      const testSubRequestData = (optionsOverwrite, callback) => {
+        const apiRoot = 'https://httpbin.org/anything'
+        const api = apiFactory({apiRoot})
+        const method = `METHOD${Math.random()}`
+        const uri = `uri${Math.random()}`
+        const params = {foo: `foo${Math.random()}`}
+        const options = {method, uri, params, ...optionsOverwrite}
+        const fetches = () => api.fetchOne(options).catch(e => e)
+        return api.fetchMultiple(fetches)
+          .then((json) => callback(json.json[0], {method, uri, params}))
+      }
+
+      it('sends method, params, uri', () => {
+        return testSubRequestData({}, (received, sent) => {
+          expect(received.id).toBeA('string')
+          expect(received.method).toBe(sent.method)
+          expect(received.uri).toBe(sent.uri)
+          expect(received.params).toEqual(sent.params)
+          expect(Object.keys(received).length).toBe(4)
         })
+      })
+
+      it('skips method GET', () => testSubRequestData({method: 'GET'}, (received) => {
+        expect(received.method).toBeAn('undefined')
+        expect(Object.keys(received).length).toBe(3)
+      }))
+
+      it('sends \'index\' as uri', () => testSubRequestData({uri: ''}, (received) => {
+        expect(received.uri).toBe('index')
+        expect(Object.keys(received).length).toBe(4)
+      }))
+
+      it('skips params empty', () => testSubRequestData({params: {}}, (received) => {
+        expect(received.params).toBeAn('undefined')
+        expect(Object.keys(received).length).toBe(3)
+      }))
     })
 
     it('skips duplicate requests', () => {
