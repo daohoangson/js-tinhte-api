@@ -224,12 +224,22 @@ describe('api', () => {
 
       return api.fetchMultiple(fetches)
         .then((json) => {
-          expect(json).toContainKey('headers')
-
           const { headers } = json
           expect(headers).toContain(oneHeaders)
           expect(headers).toContain(twoHeaders)
           expect(headers['Content-Type']).toBe('application/json')
+        })
+    })
+
+    it('sends sub-request params', () => {
+      const apiRoot = 'https://httpbin.org/anything'
+      const api = apiFactory({apiRoot})
+      const params = {foo: Math.random()}
+      const fetches = () => api.fetchOne({params}).catch(e => e)
+      return api.fetchMultiple(fetches)
+        .then((json) => {
+          const job = json.json[0]
+          expect(job.params.foo).toBe(params.foo)
         })
     })
 

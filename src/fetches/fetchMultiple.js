@@ -44,7 +44,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     })
 
     const { id, uniqueId } = req
-    const { method, uri } = req.options
+    const { method, params, uri } = req.options
 
     handlers[id] = {
       method,
@@ -55,7 +55,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
 
     if (typeof reqIds[uniqueId] === 'undefined') {
       reqIds[uniqueId] = [id]
-      requests.push({ id: uniqueId, uri, method })
+      requests.push({ id: uniqueId, method, uri, params })
     } else {
       reqIds[uniqueId].push(id)
     }
