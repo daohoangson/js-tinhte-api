@@ -13,7 +13,7 @@ const ButtonOne = apiHoc.ApiConsumer(({ api, uri }) => {
 })
 
 const ButtonMultiple = apiHoc.ApiConsumer(({ api, uris }) => {
-  const fetch = () => api.fetchMultiple(() => uris.forEach((uri) => get(api, uri)))
+  const fetch = () => api.batch(() => uris.forEach((uri) => get(api, uri)))
   return (
     <ul>
       {uris.map((uri, i) => <li key={i}>GET `{uri}`</li>)}

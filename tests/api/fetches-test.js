@@ -124,21 +124,21 @@ describe('api', () => {
     })
 
     describe('shortcut', () => {
-      const testShortcut = (method) => {
+      const testShortcut = (apiMethod, expectedJsonMethod) => {
         const apiRoot = 'https://httpbin.org/anything'
         const uri = `uri${Math.random()}`
         const api = apiFactory({apiRoot})
-        return api[method](uri)
+        return api[apiMethod](uri)
           .then((json) => {
-            expect(json.method).toBe(method.toUpperCase())
+            expect(json.method).toBe(expectedJsonMethod)
             expect(json.url).toBe(`${apiRoot}?${uri}`)
           })
       }
 
-      it('deletes', () => testShortcut('delete'))
-      it('gets', () => testShortcut('get'))
-      it('posts', () => testShortcut('post'))
-      it('puts', () => testShortcut('put'))
+      it('deletes', () => testShortcut('del', 'DELETE'))
+      it('gets', () => testShortcut('get', 'GET'))
+      it('posts', () => testShortcut('post', 'POST'))
+      it('puts', () => testShortcut('put', 'PUT'))
 
       it('posts params', () => {
         const apiRoot = 'https://httpbin.org/anything'

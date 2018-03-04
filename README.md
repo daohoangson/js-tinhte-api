@@ -88,13 +88,13 @@ You can also trigger the function `processCallback` directly on the callback pag
 
 ### Fetch from API
 
-In children components, use `apiHoc.ApiConsumer` or `api.ConsumerHoc` to prepare the API context and fetch data.
+In children components, use `apiHoc.ApiConsumer` to prepare the API context and fetch data.
 
 ```js
 import { apiHoc } from 'tinhte-api'
 
 const UsersMeBase = ({ api }) => {
-    const fetch = () => api.fetchOne('users/me')
+    const fetch = () => api.get('users/me')
         .then((json) => console.log(json))
         .error(reason) => console.error(reason))
 
@@ -158,7 +158,7 @@ Props:
  - `onFetchedWithAuth` function
 
 Returns a higher order React component, the underlying component will receive `api` and api data as props.
-It can use `api` directly (`api.fetchOne()`, `api.fetchMultiple()`, etc.)
+It can use `api` directly (`api.get()`, `api.post()`, `api.batch()`, etc.)
 or it can let the HOC make the requests and benefit from multiple requests
 from different components being batched together automatically.
 
@@ -254,7 +254,8 @@ ApiProvider.getInitialProps = async () => {
 ### api.fetchOne
 
 Alias:
- - `api.delete`
+
+ - `api.del`
  - `api.get`
  - `api.post`
  - `api.put`
@@ -293,6 +294,10 @@ api.post({
 
 ### api.fetchMultiple
 
+Alias:
+
+ - `api.batch`
+
 Params:
 
  - `fetches` required func
@@ -304,12 +309,12 @@ Returns a `Promise` that will resolve to the response `JSON` object.
 Example:
 
 ```js
-api.fetchMultiple(() => {
-    api.fetchOne('notifications')
+api.batch(() => {
+    api.get('notifications')
         .then((json) => console.log('notifications', json.notifications))
         .catch((reason) => console.warn('notifications error', reason))
 
-    api.fetchOne('conversations')
+    api.get('conversations')
         .then((json) => console.log('conversations', json.conversations))
         .catch((reason) => console.warn('conversations error', reason))
 })

@@ -265,10 +265,12 @@ const apiFactory = (config = {}) => {
     options.method = method
     return api.fetchOne(options)
   }
-  api.delete = (options) => fetchShortcut('DELETE', options)
+  api.del = (options) => fetchShortcut('DELETE', options)
   api.get = (options) => fetchShortcut('GET', options)
   api.post = (options) => fetchShortcut('POST', options)
   api.put = (options) => fetchShortcut('PUT', options)
+
+  api.batch = api.fetchMultiple
 
   const callbacks = helperCallbacksInit(api, internalApi)
 
