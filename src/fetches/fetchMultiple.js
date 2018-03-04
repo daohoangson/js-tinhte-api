@@ -1,4 +1,6 @@
 import { isPlainObject, mustBePlainObject } from '../helpers'
+import errors from '../helpers/errors'
+import standardizeReqOptions from '../helpers/standardizeReqOptions'
 
 const fetchMultipleInit = (fetchJson, batch, internalApi) => {
   const newContext = (batchOptions) => {
@@ -101,19 +103,23 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       if (!isPlainObject(job._req) ||
         job._req.method !== handler.method ||
         job._req.uri !== handler.uri) {
-        return reject(new Error('Detected mismatched job and request data'))
+        return reject(new Error(errors.FETCH_MULTIPLE.MISMATCHED))
       }
 
-      if (typeof job._job_result === 'string') {
-        if (job._job_result === 'ok') {
-          return resolve(job)
-        } else if (job._job_error) {
-          return reject(job._job_error)
-        }
+      if (typeof job._job_result !== 'string') {
+        return reject(job)
+      }
+
+      if (job._job_result === 'ok') {
+        return resolve(job)
+      } else if (job._job_error) {
+        return reject(new Error(job._job_error))
+      } else {
+        return reject(job)
       }
     }
 
-    return reject(new Error('Could not find job for request ' + reqId))
+    return reject(new Error(errors.FETCH_MULTIPLE.JOB_NOT_FOUND))
   }
 
   const processJobs = (json, context) => {
@@ -145,18 +151,19 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     batch.reset()
 
     if (context.requests.length === 0) {
-      return Promise.reject(new Error('There is no fetches'))
+      return Promise.reject(new Error(errors.FETCH_MULTIPLE.NO_FETCHES))
     }
     const body = JSON.stringify(context.requests)
 
     const fetchOptions = {
-      method: 'POST',
+      uri: 'batch',
       headers: context.headers,
       body
     }
+    standardizeReqOptions(fetchOptions)
 
     internalApi.log('Batch #%d is being fetched...', context.batchId)
-    return fetchJson('/batch', fetchOptions)
+    return fetchJson(fetchOptions)
       .then(json => processJobs(json, context))
   }
 

@@ -1,4 +1,5 @@
 import expect from 'expect'
+import md5 from 'md5'
 import React from 'react'
 
 import { apiFactory } from 'src/'
@@ -44,7 +45,8 @@ describe('api', () => {
 
       return api.fetchApiDataForProvider(<P />)
         .then((apiData) => {
-          expect(Object.keys(apiData)).toContain('de160058e184557c638f82156445ceb2')
+          const uniqueId = md5('GET index?')
+          expect(Object.keys(apiData)).toContain(uniqueId)
         })
     })
 
@@ -187,6 +189,18 @@ describe('api', () => {
       }
       return api.setAuth(auth)
         .then(() => expect(api.getAccessToken()).toBe(accessToken))
+    })
+
+    it('accepts invalid user id', () => {
+      const userId = -1
+      const debug = true
+      const api = apiFactory({debug})
+      const auth = {
+        user_id: userId,
+        state: api.getUniqueId()
+      }
+      return api.setAuth(auth)
+        .then(() => expect(api.getUserId()).toBe(0))
     })
 
     it('updates user id', () => {

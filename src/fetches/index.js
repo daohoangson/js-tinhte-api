@@ -1,4 +1,3 @@
-import querystring from 'querystring'
 import unfetch from 'isomorphic-unfetch'
 
 import batchFactory from './batch'
@@ -9,56 +8,70 @@ import { mustBePlainObject } from '../helpers'
 const fetchesInit = (api, internalApi) => {
   const batch = batchFactory()
 
-  const buildUrl = (url) => {
-    if (url.match(/^https?:\/\//)) {
-      return url
+  const buildUrlQueryParts = (options) => {
+    const { params, paramsAsString } = options
+
+    const urlQueryParts = []
+    if (typeof paramsAsString === 'string' && paramsAsString.length > 0) {
+      urlQueryParts.push(paramsAsString)
     }
 
-    let urlQuery = url.replace('?', '&')
-    const urlQueryParams = querystring.parse(urlQuery)
-    let hasOauthToken = !!urlQueryParams.oauth_token
     const auth = internalApi.getAuth()
-
     if (auth) {
-      if (!hasOauthToken && auth.accessToken) {
-        urlQuery += `&oauth_token=${encodeURIComponent(auth.accessToken)}`
-        hasOauthToken = true
+      if (!params.oauth_token && auth.accessToken) {
+        params.oauth_token = auth.accessToken
+        urlQueryParts.push(`oauth_token=${encodeURIComponent(params.oauth_token)}`)
       }
-      if (!urlQueryParams._xfToken) {
+      if (!params._xfToken) {
         if (auth._xf1) {
-          urlQuery += `&_xfToken=${encodeURIComponent(auth._xf1._csrfToken)}`
+          params._xfToken = auth._xf1._csrfToken
+          urlQueryParts.push(`_xfToken=${encodeURIComponent(params._xfToken)}`)
         } else if (auth._xf2) {
-          urlQuery += `&_xfToken=${encodeURIComponent(auth._xf2.config.csrf)}`
+          params._xfToken = auth._xf2.config.csrf
+          urlQueryParts.push(`_xfToken=${encodeURIComponent(params._xfToken)}`)
         }
       }
     }
 
-    if (!hasOauthToken) {
+    if (!params.oauth_token) {
       const ott = api.getOtt()
       if (ott) {
-        urlQuery += `&oauth_token=${encodeURIComponent(ott)}`
-        hasOauthToken = true
+        params.oauth_token = ott
+        urlQueryParts.push(`oauth_token=${encodeURIComponent(params.oauth_token)}`)
       }
     }
 
-    const finalUrl = `${api.getApiRoot()}?${urlQuery}`
+    return urlQueryParts
+  }
 
-    return finalUrl
+  const buildUrl = (options) => {
+    let url = options.uri
+    url = url.match(/^https?:\/\//) ? url : `${api.getApiRoot()}?${url}`
+
+    const urlQueryParts = buildUrlQueryParts(options)
+    if (urlQueryParts.length > 0) {
+      url += (url.indexOf('?') === -1 ? '?' : '&') + urlQueryParts.join('&')
+    }
+
+    return url
   }
 
   let fetchCount = 0
 
-  const fetchJson = (url, options) => {
+  const fetchJson = (options) => {
     fetchCount++
 
-    const finalUrl = buildUrl(url)
+    const url = buildUrl(options)
 
-    options = mustBePlainObject(options)
-    const unfetchOptions = {credentials: 'include', ...options}
-    const headers = mustBePlainObject(options.headers)
-    unfetchOptions.headers = {...headers}
+    const { body, headers, method, params } = options
+    const unfetchOptions = {
+      headers: {...mustBePlainObject(headers)},
+      method
+    }
+    if (body) unfetchOptions.body = options.body
+    if (params._xfToken) unfetchOptions.credentials = 'include'
 
-    return unfetch(finalUrl, unfetchOptions)
+    return unfetch(url, unfetchOptions)
       .then(response => response.json())
       .then((json) => {
         if (json.errors) {

@@ -253,21 +253,42 @@ ApiProvider.getInitialProps = async () => {
 
 ### api.fetchOne
 
-Params:
+Alias:
+ - `api.delete`
+ - `api.get`
+ - `api.post`
+ - `api.put`
 
- - `uri` required string
- - `method` default=`'GET'`
- - `headers` default=`{}`
- - `body` default=`null`
+Params:
+ 
+ - `options` object or string (will be used as `uri`)
+   - `method` default=`'GET'`
+   - `uri` default=`''`
+   - `params` default=`{}`
+   - `headers` default=`{}`
+   - `body` default=`null`
 
 Returns a `Promise` that will resolve to the response `JSON` object.
 
-Example:
+A GET request example:
 
 ```js
-api.fetchOne('users/me')
+api.get('users/me')
     .then((json) => console.log('success', json.user))
     .catch((reason) => console.warn('error', reason))
+```
+
+Example with a POST request:
+
+```js
+api.post({
+  uri: 'threads',
+  params: {
+    forum_id: 2,
+    thread_title: 'Hello',
+    post_body: 'World.'
+  }
+})
 ```
 
 ### api.fetchMultiple

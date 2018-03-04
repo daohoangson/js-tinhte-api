@@ -27,13 +27,32 @@ describe('helpers', () => {
       it('sorts query params', () => {
         const options = {uri: 'path?a=1&c=2&b=3'}
         _(options)
-        expect(options.uri).toBe('path?a=1&b=3&c=2')
+        expect(options.uri).toBe('path')
+        expect(options.paramsAsString).toBe('a=1&b=3&c=2')
       })
 
       it('remove bad ampersands', () => {
-        const options = {uri: 'path?foo&&&bar'}
+        const options = {uri: 'path?foo=1&&&bar=2'}
         _(options)
-        expect(options.uri).toBe('path?bar&foo')
+        expect(options.paramsAsString).toBe('bar=2&foo=1')
+      })
+
+      it('remove empty value', () => {
+        const options = {uri: 'path?empty=&foo=1'}
+        _(options)
+        expect(options.paramsAsString).toBe('foo=1')
+      })
+
+      it('remove empty value in array', () => {
+        const options = {uri: 'path?foo=1&foo=&bar=2'}
+        _(options)
+        expect(options.paramsAsString).toBe('bar=2&foo=1')
+      })
+
+      it('remove empty array', () => {
+        const options = {uri: 'path?empty=&empty=&foo=1'}
+        _(options)
+        expect(options.paramsAsString).toBe('foo=1')
       })
     })
 

@@ -92,12 +92,14 @@ class Loader extends React.Component {
       this.setState({src: authorizeUrl})
     }
 
+    /* istanbul ignore else */
     if (typeof window.addEventListener === 'function') {
       window.addEventListener('message', this.onWindowMessage)
     }
   }
 
   componentWillUnmount () {
+    /* istanbul ignore else */
     if (typeof window.removeEventListener === 'function') {
       window.removeEventListener('message', this.onWindowMessage)
     }

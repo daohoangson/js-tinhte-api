@@ -1,29 +1,73 @@
-import { filter } from 'lodash'
 import md5 from 'md5'
+import querystring from 'querystring'
 
-import { isPlainObject, mustBePlainObject } from '.'
+import { mustBePlainObject } from '.'
+
+const filterEmptyValueFromArray = (array) => {
+  const filtered = []
+
+  array.forEach((v) => {
+    if (typeof v === 'string' && v.length === 0) {
+      return
+    }
+
+    filtered.push(v)
+  })
+
+  return filtered
+}
+
+const filterEmptyKeyOrValueFromParams = (params) => {
+  const filtered = {}
+  Object.keys(params).forEach((k) => {
+    if (k.length === 0) {
+      return
+    }
+
+    let v = params[k]
+    if (typeof v === 'string') {
+      if (v.length === 0) {
+        return
+      }
+    } else {
+      /* istanbul ignore else */
+      if (Array.isArray(v)) {
+        v = filterEmptyValueFromArray(v)
+        if (v.length === 0) {
+          return
+        }
+      }
+    }
+
+    filtered[k] = v
+  })
+
+  return filtered
+}
 
 const standardizeReqOptions = (options) => {
   options = mustBePlainObject(options)
-
   if (typeof options.uri !== 'string') options.uri = ''
-  options.uri = options.uri.replace(/^\/+/, '')
-  const uriMatches = options.uri.match(/^([^?]+)\?(.+)$/)
-  if (uriMatches !== null) {
-    const uriPath = uriMatches[1]
-    const uriQuery = uriMatches[2]
-    const uriQueryParts = filter(uriQuery.split('&'), 'length').sort()
-    options.uri = `${uriPath}?${uriQueryParts.join('&')}`
-  }
-
-  if (typeof options.method !== 'string') options.method = 'GET'
+  options.params = mustBePlainObject(options.params)
+  options.headers = mustBePlainObject(options.headers)
+  if (typeof options.body === 'undefined') options.body = null
+  if (typeof options.method !== 'string') options.method = (options.body ? 'POST' : 'GET')
   options.method = options.method.toUpperCase()
 
-  options.headers = mustBePlainObject(options.headers)
+  const uriMatches = options.uri.match(/^\/*([^?]*)(\?(.+))?$/)
+  /* istanbul ignore else */
+  if (uriMatches !== null) {
+    options.uri = uriMatches[1]
+    options.params = {...options.params, ...querystring.parse(uriMatches[3])}
+  }
 
-  if (!isPlainObject(options.body)) options.body = null
+  options.params = filterEmptyKeyOrValueFromParams(options.params)
+  const paramsStringified = querystring.stringify(options.params)
+  const paramsParts = paramsStringified.split(/&/).sort()
+  options.paramsAsString = paramsParts.join('&')
+  options.explain = `${options.method} ${options.uri}?${options.paramsAsString}`
 
-  const uniqueId = md5(options.method + options.uri)
+  const uniqueId = md5(options.explain)
 
   return uniqueId
 }

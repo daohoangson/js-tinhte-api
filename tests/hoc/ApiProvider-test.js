@@ -62,12 +62,12 @@ describe('hoc', () => {
         }
 
         it('fetches with non-object job data', () => {
-          const apiData = {de160058e184557c638f82156445ceb2: 'bad'}
+          const apiData = {foo: 'bar'}
           return testBadData(apiData)
         })
 
         it('fetches with bad job data', () => {
-          const apiData = {de160058e184557c638f82156445ceb2: {_req: 'bad'}}
+          const apiData = {foo: {_req: 'bar'}}
           return testBadData(apiData)
         })
       })

@@ -6,6 +6,7 @@ import components from './components'
 import fetchesInit from './fetches'
 import { isPlainObject, mustBePlainObject } from './helpers'
 import helperCallbacksInit from './helpers/callbacks'
+import errors from './helpers/errors'
 import hoc from './hoc'
 
 const apiFactory = (config = {}) => {
@@ -112,13 +113,15 @@ const apiFactory = (config = {}) => {
       if (typeof newAuth.access_token === 'string') {
         auth.accessToken = newAuth.access_token
       }
+
+      let userId = 0
       if (typeof newAuth.user_id === 'number') {
-        auth.userId = newAuth.user_id
+        userId = newAuth.user_id
       } else if (typeof newAuth.user_id === 'string') {
-        const userId = parseInt(newAuth.user_id)
-        if (userId > 0) {
-          auth.userId = userId
-        }
+        userId = parseInt(newAuth.user_id)
+      }
+      if (userId > 0) {
+        auth.userId = userId
       }
 
       return notify()
@@ -175,6 +178,7 @@ const apiFactory = (config = {}) => {
     },
 
     generateOneTimeToken: (clientSecret, ttl) => {
+      /* istanbul ignore else  */
       if (process.browser) {
         const message = 'Running on browser is not allowed'
         if (debug) {
@@ -241,7 +245,7 @@ const apiFactory = (config = {}) => {
 
     setAuth: (newAuth) => {
       if (!debug) {
-        throw new Error('Access denied')
+        throw new Error(errors.SET_AUTH_ACCESS_DENIED)
       }
 
       return internalApi.setAuth(newAuth)
@@ -252,6 +256,19 @@ const apiFactory = (config = {}) => {
   api.fetchOne = fetches.fetchOne
   api.fetchMultiple = fetches.fetchMultiple
   api.getFetchCount = fetches.getFetchCount
+
+  const fetchShortcut = (method, options) => {
+    if (typeof options === 'string') {
+      options = {uri: options}
+    }
+    options = mustBePlainObject(options)
+    options.method = method
+    return api.fetchOne(options)
+  }
+  api.delete = (options) => fetchShortcut('DELETE', options)
+  api.get = (options) => fetchShortcut('GET', options)
+  api.post = (options) => fetchShortcut('POST', options)
+  api.put = (options) => fetchShortcut('PUT', options)
 
   const callbacks = helperCallbacksInit(api, internalApi)
 

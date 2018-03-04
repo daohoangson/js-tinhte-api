@@ -5,6 +5,7 @@ import { apiFactory } from '../src'
 import Buttons from '../demo/src/components/Buttons'
 import FeaturePages from '../demo/src/components/FeaturePages'
 import Navigation from '../demo/src/components/Navigation'
+import NewThread from '../demo/src/components/NewThread'
 import Visitor from '../demo/src/components/Visitor'
 
 const callbackUrl = process.browser ? window.location.origin + '/api-callback' : ''
@@ -20,6 +21,7 @@ const Index = () => (
     <Buttons />
     <FeaturePages />
     <Navigation />
+    <NewThread />
     <Visitor />
   </div>
 )

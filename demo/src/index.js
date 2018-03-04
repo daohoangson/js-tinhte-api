@@ -7,6 +7,7 @@ import { apiFactory } from '../../src'
 import Buttons from './components/Buttons'
 import FeaturePages from './components/FeaturePages'
 import Navigation from './components/Navigation'
+import NewThread from './components/NewThread'
 import Visitor from './components/Visitor'
 
 // in order to load api authentication, a callback route is required
@@ -32,6 +33,7 @@ const Home = () => {
       <Buttons />
       <FeaturePages />
       <Navigation />
+      <NewThread />
       <Visitor />
     </div>
   )

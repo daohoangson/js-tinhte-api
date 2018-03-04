@@ -1,9 +1,12 @@
+import FormData from 'form-data'
 import expect from 'expect'
+import md5 from 'md5'
 
 import { apiFactory } from 'src/'
 import fetchBatchFactory from 'src/fetches/batch'
 import fetchMultipleInit from 'src/fetches/fetchMultiple'
 import fetchOneInit from 'src/fetches/fetchOne'
+import errors from 'src/helpers/errors'
 
 describe('api', () => {
   describe('fetchOne', function () {
@@ -14,22 +17,25 @@ describe('api', () => {
       global.XF = null
     })
 
+    it('uses root url', () => {
+      const apiRoot = 'https://httpbin.org/anything'
+      const api = apiFactory({apiRoot})
+      return api.fetchOne()
+        .then((json) => expect(json.url).toBe(apiRoot))
+    })
+
     it('keeps full url', () => {
       const api = apiFactory()
       const url = 'https://httpbin.org/get?foo=bar'
       return api.fetchOne(url)
-        .then((json) => {
-          expect(json.url).toBe(url)
-        })
+        .then((json) => expect(json.url).toBe(url))
     })
 
     it('replaces ? from uri', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({apiRoot})
       return api.fetchOne('path?foo=bar')
-        .then((json) => {
-          expect(json.url).toBe(apiRoot + '?path&foo=bar')
-        })
+        .then((json) => expect(json.url).toBe(apiRoot + '?path&foo=bar'))
     })
 
     it('keeps oauth_token in url', () => {
@@ -38,9 +44,7 @@ describe('api', () => {
       const api = apiFactory({apiRoot, auth: {accessToken}})
       const oauthToken = `${Math.random()}`
       return api.fetchOne(`path?oauth_token=${oauthToken}`)
-        .then((json) => {
-          expect(json.args.oauth_token).toBe(oauthToken)
-        })
+        .then((json) => expect(json.args.oauth_token).toBe(oauthToken))
     })
 
     it('includes access token', () => {
@@ -48,9 +52,7 @@ describe('api', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({apiRoot, auth: {accessToken}})
       return api.fetchOne('path')
-        .then((json) => {
-          expect(json.args.oauth_token).toBe(accessToken)
-        })
+        .then((json) => expect(json.args.oauth_token).toBe(accessToken))
     })
 
     it('includes one time token', () => {
@@ -58,9 +60,7 @@ describe('api', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({apiRoot, ott})
       return api.fetchOne('path')
-        .then((json) => {
-          expect(json.args.oauth_token).toBe(ott)
-        })
+        .then((json) => expect(json.args.oauth_token).toBe(ott))
     })
 
     describe('XenForo 1 csrf token', () => {
@@ -84,9 +84,7 @@ describe('api', () => {
         const csrfToken = `csrf token ${Math.random()}`
         const uri = 'xenforo1'
         return testXenForo1CsrfToken(csrfToken, uri)
-          .then((json) => {
-            expect(json.args._xfToken).toBe(csrfToken)
-          })
+          .then((json) => expect(json.args._xfToken).toBe(csrfToken))
       })
 
       it('keeps value from uri', () => {
@@ -94,9 +92,7 @@ describe('api', () => {
         const uriValue = `xf token ${Math.random()}`
         const uri = `xenforo1?_xfToken=${uriValue}`
         return testXenForo1CsrfToken(csrfToken, uri)
-          .then((json) => {
-            expect(json.args._xfToken).toBe(uriValue)
-          })
+          .then((json) => expect(json.args._xfToken).toBe(uriValue))
       })
     })
 
@@ -115,9 +111,7 @@ describe('api', () => {
         auth: {accessToken: 'access token'}
       })
       return api.fetchOne('xenforo2')
-        .then((json) => {
-          expect(json.args._xfToken).toBe(csrf)
-        })
+        .then((json) => expect(json.args._xfToken).toBe(csrf))
     })
 
     it('rejects on error', () => {
@@ -127,6 +121,64 @@ describe('api', () => {
           (json) => Promise.reject(new Error(JSON.stringify(json))),
           (reason) => expect(reason).toBeAn(Error)
         )
+    })
+
+    describe('shortcut', () => {
+      const testShortcut = (method) => {
+        const apiRoot = 'https://httpbin.org/anything'
+        const uri = `uri${Math.random()}`
+        const api = apiFactory({apiRoot})
+        return api[method](uri)
+          .then((json) => {
+            expect(json.method).toBe(method.toUpperCase())
+            expect(json.url).toBe(`${apiRoot}?${uri}`)
+          })
+      }
+
+      it('deletes', () => testShortcut('delete'))
+      it('gets', () => testShortcut('get'))
+      it('posts', () => testShortcut('post'))
+      it('puts', () => testShortcut('put'))
+
+      it('posts params', () => {
+        const apiRoot = 'https://httpbin.org/anything'
+        const api = apiFactory({apiRoot})
+        const options = {params: {foo: `foo${Math.random()}`}}
+        return api.post(options)
+          .then((json) => expect(json.args.foo).toBe(options.params.foo))
+      })
+
+      it('posts form data', () => {
+        const apiRoot = 'https://httpbin.org/anything'
+        const api = apiFactory({apiRoot})
+        const body = new FormData()
+        const foo = `foo${Math.random()}`
+        body.append('foo', foo)
+        const options = {body}
+        return api.post(options)
+          .then((json) => expect(json.form.foo).toBe(foo))
+      })
+
+      it('posts json', () => {
+        const apiRoot = 'https://httpbin.org/anything'
+        const api = apiFactory({apiRoot})
+        const bodyJson = {foo: `foo${Math.random()}`}
+        const options = {
+          body: JSON.stringify(bodyJson),
+          headers: {'Content-Type': 'application/json'}
+        }
+        return api.post(options)
+          .then((json) => expect(json.json.foo).toBe(bodyJson.foo))
+      })
+
+      it('posts raw body', () => {
+        const apiRoot = 'https://httpbin.org/anything'
+        const api = apiFactory({apiRoot})
+        const body = 'foo'
+        const options = {body}
+        return api.post(options)
+          .then((json) => expect(json.data).toBe(body))
+      })
     })
   })
 
@@ -166,8 +218,8 @@ describe('api', () => {
       const oneHeaders = {One: `${Math.random()}`}
       const twoHeaders = {Two: `${Math.random()}`}
       const fetches = () => {
-        api.fetchOne('one', 'GET', {...oneHeaders, 'Content-Type': 'foo'}).catch(e => e)
-        api.fetchOne('two', 'GET', twoHeaders).catch(e => e)
+        api.fetchOne({uri: 'one', headers: {...oneHeaders, 'Content-Type': 'foo'}}).catch(e => e)
+        api.fetchOne({uri: 'two', headers: twoHeaders}).catch(e => e)
       }
 
       return api.fetchMultiple(fetches)
@@ -244,45 +296,84 @@ describe('api', () => {
 
     beforeEach(() => {
       const mockedFetchJson = () => new Promise((resolve) => setTimeout(() => resolve(mockedResponse), 10))
-      const mockedInternalApi = {
-        log: console.log
-      }
+      const mockedInternalApi = {log: console.log}
       mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedInternalApi)
       mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedInternalApi)
     })
 
     it('handles unknown job in response', () => {
       mockedResponse = {jobs: {foo: 'bar'}}
-      return mockedFetchMultiple(() => {
-        mockedFetchOne('index').catch(e => e)
-      }).then((json) => expect(json._handled).toBe(1))
+      let catched = []
+
+      return mockedFetchMultiple(() => mockedFetchOne('index').catch(reason => (catched.push(reason))))
+        .then((json) => {
+          expect(json._handled).toBe(1)
+          expect(catched.length).toBe(1)
+          expect(catched[0].message).toBe(errors.FETCH_MULTIPLE.JOB_NOT_FOUND)
+        })
     })
 
     it('handles uniqueId clash', () => {
       const uniqueId = `uniqueId${Math.random()}`
-      mockedResponse = {jobs: {[uniqueId]: {foo: 'bar'}}}
+      const job = {_job_result: 'ok', foo: Math.random()}
+      mockedResponse = {jobs: {[uniqueId]: job}}
+      const jsons = []
+      const catched = []
+
       return mockedFetchMultiple(() => {
-        mockedFetchOne('one').catch(e => e)
-        mockedFetchOne('two').catch(e => e)
+        mockedFetchOne('one').then((json) => jsons.push(json))
+        mockedFetchOne('two').catch((reason) => catched.push(reason))
         mockedReqs[0].uniqueId = uniqueId
         mockedReqs[1].uniqueId = uniqueId
-      }).then((json) => expect(json._handled).toBe(2))
+      }).then((json) => {
+        expect(json._handled).toBe(2)
+        expect(jsons.length).toBe(1)
+        expect(jsons[0].foo).toBe(job.foo)
+        expect(catched.length).toBe(1)
+        expect(catched[0].message).toBe(errors.FETCH_MULTIPLE.MISMATCHED)
+      })
     })
 
     it('handles non-string _job_result', () => {
-      const uniqueId = 'de160058e184557c638f82156445ceb2'
-      mockedResponse = {jobs: {[uniqueId]: {_job_result: false}}}
-      return mockedFetchMultiple(() => {
-        mockedFetchOne('index').catch(e => e)
-      }).then((json) => expect(json._handled).toBe(1))
+      const uri = `uri${Math.random()}`
+      const job = {_job_result: false, foo: Math.random()}
+      const uniqueId = md5(`GET ${uri}?`)
+      mockedResponse = {jobs: {[uniqueId]: job}}
+      const catched = []
+      return mockedFetchMultiple(() => mockedFetchOne(uri).catch(json => catched.push(json)))
+        .then((json) => {
+          expect(json._handled).toBe(1)
+          expect(catched.length).toBe(1)
+          expect(catched[0].foo).toBe(job.foo)
+        })
     })
 
-    it('handles unexpected _job_result string', () => {
-      const uniqueId = 'de160058e184557c638f82156445ceb2'
-      mockedResponse = {jobs: {[uniqueId]: {_job_result: 'foo'}}}
-      return mockedFetchMultiple(() => {
-        mockedFetchOne('index').catch(e => e)
-      }).then((json) => expect(json._handled).toBe(1))
+    it('handles _job_error', () => {
+      const uri = `uri${Math.random()}`
+      const job = {_job_result: 'error', _job_error: `job error ${Math.random()}`}
+      const uniqueId = md5(`GET ${uri}?`)
+      mockedResponse = {jobs: {[uniqueId]: job}}
+      const catched = []
+      return mockedFetchMultiple(() => mockedFetchOne(uri).catch(reason => catched.push(reason)))
+        .then((json) => {
+          expect(json._handled).toBe(1)
+          expect(catched.length).toBe(1)
+          expect(catched[0].message).toBe(job._job_error)
+        })
+    })
+
+    it('handles non-ok _job_result without _job_error', () => {
+      const uri = `uri${Math.random()}`
+      const job = {_job_result: 'foo', bar: Math.random()}
+      const uniqueId = md5(`GET ${uri}?`)
+      mockedResponse = {jobs: {[uniqueId]: job}}
+      const catched = []
+      return mockedFetchMultiple(() => mockedFetchOne(uri).catch(reason => catched.push(reason)))
+        .then((json) => {
+          expect(json._handled).toBe(1)
+          expect(catched.length).toBe(1)
+          expect(catched[0].bar).toBe(job.bar)
+        })
     })
   })
 })

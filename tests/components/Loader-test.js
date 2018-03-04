@@ -78,6 +78,15 @@ describe('components', () => {
         })
       })
 
+      it('without access token', (done) => {
+        const apiConfig = {}
+        const messageFactory = () => ({auth: {}})
+        testReceiveMessage(apiConfig, messageFactory, () => {
+          expect(node.innerHTML).toContain(`data-user-id="0"`)
+          done()
+        })
+      })
+
       it('with valid auth', (done) => {
         const clientId = 'client ID'
         const cookiePrefix = `auth${Math.random()}_`
