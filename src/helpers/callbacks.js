@@ -1,14 +1,17 @@
+const waitABitThen = (callback) => {
+  /* istanbul ignore else */
+  if (window && typeof window.requestAnimationFrame === 'function') {
+    window.requestAnimationFrame(callback)
+  } else {
+    setTimeout(callback, 0)
+  }
+}
+
 const helperCallbacksInit = (api, internalApi) => {
   const sharedItems = []
   const sharedResolves = []
 
   const add = (list, callback, triggerNow) => {
-    if (triggerNow) {
-      callback()
-      internalApi.log('Triggered %s callback without adding', list.name)
-      return () => false
-    }
-
     const { items } = list
     items.push(callback)
     internalApi.log('Added new %s callback, total=%d', list.name, items.length)
@@ -22,6 +25,10 @@ const helperCallbacksInit = (api, internalApi) => {
       items.splice(i, 1)
       internalApi.log('Removed %s callback #%d, remaining=%d', list.name, i, items.length)
       return true
+    }
+
+    if (triggerNow) {
+      fetchList(list)
     }
 
     return cancel
@@ -43,7 +50,7 @@ const helperCallbacksInit = (api, internalApi) => {
     const { items } = list
     const callbackCount = items.length
 
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve) => {
       if (callbackCount === 0) {
         return resolve(callbackCount)
       }
@@ -52,7 +59,7 @@ const helperCallbacksInit = (api, internalApi) => {
       sharedResolves.push(() => resolve(callbackCount))
 
       const sharedItemsLength = sharedItems.length
-      setTimeout(() => {
+      waitABitThen(() => {
         if (sharedItems.length !== sharedItemsLength) {
           // another invocation has altered the shared queue,
           // stop running now and let that handle the fetch
@@ -64,7 +71,7 @@ const helperCallbacksInit = (api, internalApi) => {
             sharedResolves.forEach((sqr) => sqr(result))
             sharedResolves.length = 0
           })
-      }, 0)
+      })
 
       items.length = 0
     })
