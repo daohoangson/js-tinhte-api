@@ -9,7 +9,6 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       ? batchOptions.triggerHandlers
       : true
 
-    const batchId = batch.id
     const batchHeaders = {
       'Content-Type': 'application/json'
     }
@@ -20,7 +19,6 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     const requests = []
 
     const context = {
-      batchId,
       batchHeaders,
       batchOptions,
 
@@ -162,7 +160,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     }
     standardizeReqOptions(fetchOptions)
 
-    internalApi.log('Batch #%d is being fetched...', context.batchId)
+    internalApi.log('Batch #%d is being fetched...', batch.getId())
     return fetchJson(fetchOptions)
       .then(json => processJobs(json, context))
   }
