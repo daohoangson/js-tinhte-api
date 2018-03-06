@@ -35,14 +35,16 @@ const apiFactory = (config = {}) => {
 
       if (auth.accessToken.length > 0 && auth.userId === 0) {
         // detect XenForo environments
-        if (isPlainObject(XenForo) &&
+        if (typeof XenForo !== 'undefined' &&
+          isPlainObject(XenForo) &&
           isPlainObject(XenForo.visitor) &&
           typeof XenForo.visitor.user_id === 'number' &&
           typeof XenForo._csrfToken === 'string') {
           // XenForo 1.x
           auth.userId = XenForo.visitor.user_id
           auth._xf1 = XenForo
-        } else if (isPlainObject(XF) &&
+        } else if (typeof XF !== 'undefined' &&
+          isPlainObject(XF) &&
           isPlainObject(XF.config) &&
           typeof XF.config.userId === 'number' &&
           typeof XF.config.csrf === 'string') {
