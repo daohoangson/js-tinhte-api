@@ -27,4 +27,4 @@ docker run --rm -it \
   -v "$_dataPath/npm:/root/.npm" \
   -v "$_npmrcPath:/root/.npmrc" \
   -w "/src" \
-  node:9.5.0 bash
+  node:9.7.1 bash

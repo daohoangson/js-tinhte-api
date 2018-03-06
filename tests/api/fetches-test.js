@@ -295,6 +295,35 @@ describe('api', () => {
         })
     })
 
+    it('works if being called within another', () => {
+      const api = apiFactory()
+
+      const fetches1 = () => {
+        api.fetchOne('posts/1').catch(e => e)
+        api.fetchOne('posts/2').catch(e => e)
+      }
+      const fetches2 = () => {
+        api.fetchOne('posts/3').catch(e => e)
+        api.fetchOne('posts/4').catch(e => e)
+        api.fetchOne('posts/5').catch(e => e)
+      }
+
+      return api.fetchMultiple(() => {
+        fetches1()
+        return api.fetchMultiple(fetches2)
+          .then((json) => {
+            expect(Object.keys(json.jobs)).toContain(md5('GET posts/3?'))
+            expect(Object.keys(json.jobs)).toContain(md5('GET posts/4?'))
+            expect(Object.keys(json.jobs)).toContain(md5('GET posts/5?'))
+            expect(api.getFetchCount()).toBe(1)
+          })
+      }).then((json) => {
+        expect(Object.keys(json.jobs)).toContain(md5('GET posts/1?'))
+        expect(Object.keys(json.jobs)).toContain(md5('GET posts/2?'))
+        expect(api.getFetchCount()).toBe(1)
+      })
+    })
+
     it('accepts non-object options', () => {
       const api = apiFactory()
       const fetches = () => {}

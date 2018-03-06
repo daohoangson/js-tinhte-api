@@ -141,20 +141,24 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
         }
       })
     })
-
-    return json
   }
 
-  const fetchMultiple = (fetches, options = {}) => {
+  const fetchMultiple = (fetches, options = {}) => new Promise((resolve, reject) => {
     const context = newContext(options)
 
-    batch.init()
+    if (batch.init(resolve, reject) === false) {
+      // couldn't init the batch
+      // we are probably being called within another fetchMultiple
+      // let's just run the callback and leave the other invocation do the fetch
+      return fetches()
+    }
+
     fetches()
     batch.forEach((req) => prepareRequest(req, context))
     batch.reset()
 
     if (context.requests.length === 0) {
-      return Promise.reject(new Error(errors.FETCH_MULTIPLE.NO_FETCHES))
+      return batch.reject(new Error(errors.FETCH_MULTIPLE.NO_FETCHES))
     }
     const body = JSON.stringify(context.requests)
 
@@ -166,9 +170,12 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     standardizeReqOptions(fetchOptions)
 
     internalApi.log('Batch #%d is being fetched...', batch.getId())
-    return fetchJson(fetchOptions)
-      .then(json => processJobs(json, context))
-  }
+    fetchJson(fetchOptions)
+      .then(json => {
+        processJobs(json, context)
+        batch.resolve(json)
+      })
+  })
 
   return fetchMultiple
 }
