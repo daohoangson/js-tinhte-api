@@ -117,13 +117,16 @@ describe('hoc', () => {
     describe('apiFetches', () => {
       it('accepts function as fetch', () => {
         const api = apiFactory()
+        const foo = `foo${Math.random()}`
 
         const Child = ({ index }) => <div className='index'>{index && index.links ? 'ok' : 'not'}</div>
-        const func = (api) => {
-          expect(api).toBeAn('object')
-          return {uri: 'index'}
+        Child.apiFetches = {
+          index: (api, props) => {
+            expect(api).toBeAn('object')
+            expect(props.foo).toBe(foo)
+            return {uri: 'index'}
+          }
         }
-        Child.apiFetches = {index: func}
         const C = apiHoc.ApiConsumer(Child)
 
         return new Promise((resolve) => {
@@ -131,7 +134,7 @@ describe('hoc', () => {
             expect(node.innerHTML).toContain('<div class="index">ok</div>')
             resolve()
           }
-          const P = api.ProviderHoc(() => <C onFetched={check} />)
+          const P = api.ProviderHoc(() => <C onFetched={check} foo={foo} />)
           render(<P />, node)
         })
       })
@@ -159,6 +162,10 @@ describe('hoc', () => {
 
         it('with non-object', () => {
           return testDoesNoFetch({index: 'foo'})
+        })
+
+        it('with function returning null', () => {
+          return testDoesNoFetch({index: () => null})
         })
       })
 

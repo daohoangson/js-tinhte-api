@@ -9,6 +9,7 @@ import FeaturePages from './components/FeaturePages'
 import Navigation from './components/Navigation'
 import NewThread from './components/NewThread'
 import Visitor from './components/Visitor'
+import VisitorThreads from './components/VisitorThreads'
 
 // in order to load api authentication, a callback route is required
 // all pages should render api.ProviderHoc to trigger the auth process
@@ -35,6 +36,7 @@ const Home = () => {
       <Navigation />
       <NewThread />
       <Visitor />
+      <VisitorThreads />
     </div>
   )
 }

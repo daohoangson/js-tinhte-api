@@ -176,10 +176,37 @@ ComponentBase.apiFetches = {
     body: {},
     success: (json) => json.jsonKey,
     error: (reason) => someDefaultValue
+  },
+
+  postById: (api, { postId }) => {
+    if (!postId) {
+      return null
+    }
+
+    return {
+      uri: 'posts',
+      params: {
+        post_id: postId
+      }
+    }
   }
 }
 
-// ComponentBase.apiFetchesWithAuth = { ... }
+ComponentBase.apiFetchesWithAuth = {
+  visitorThreads: (api) => {
+    const userId = api.getUserId()
+    if (!userId) {
+      return null
+    }
+
+    return {
+      uri: 'threads',
+      params: {
+        creator_user_id: userId
+      }
+    }
+  }
+}
 
 const Component = api.ConsumerHoc(ComponentBase)
 ```
@@ -187,7 +214,7 @@ const Component = api.ConsumerHoc(ComponentBase)
 The ones declared in `apiFetches` will be fetched as soon as the parent `ApiProvider` is mounted.
 While the ones in `apiFetchesWithAuth` wait until authentication complete before being fetched.
 Please note that it's not guaranteed that fetches in `apiFetchesWithAuth` will have a valid token (a non-logged in user visit your app for example).
-Each fetch can also be configured with a `function`, it will receive an `api` as param and must return a valid object with `uri`, `method`, etc. for the fetch to work.
+Each fetch can also be configured with a `function`, it will receive `api` and `props` as params and must return a valid object with `uri`, `method`, etc. for the fetch to work.
 
 The HOC will do the fetches and pass data as props for the component to use (in the example above, `props.someKey` will become available).
 By default, the HOC will use the response `JSON` object as the value, you can do some normalization via `success` to make it easier to render.

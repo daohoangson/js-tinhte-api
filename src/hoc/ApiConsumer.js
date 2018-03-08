@@ -9,17 +9,14 @@ const executeFetches = (apiConsumer, api, fetches) => {
   const promises = []
   const fetchedData = {}
   Object.keys(fetches).forEach((key) => {
-    let fetch = fetches[key]
-    if (typeof fetch === 'function') {
-      fetch = fetch(api)
-    }
-    if (!isPlainObject(fetch)) {
+    const fetch = getFetchObject(apiConsumer, api, fetches, key)
+    if (fetch === null) {
       return
     }
 
-    const { uri, method, headers, body, success, error } = fetch
-    let promise = api.fetchOne(uri, method, headers, body)
+    let promise = api.fetchOne({...fetch})
 
+    const { error, success } = fetch
     promise = promise.catch(error || (() => ({})))
     if (success) {
       promise = promise.then(success)
@@ -41,6 +38,18 @@ const executeFetches = (apiConsumer, api, fetches) => {
     )))
 }
 
+const getFetchObject = (apiConsumer, api, fetches, key) => {
+  let fetch = fetches[key]
+  if (typeof fetch === 'function') {
+    fetch = fetch(api, apiConsumer.props)
+  }
+  if (!isPlainObject(fetch)) {
+    return null
+  }
+
+  return fetch
+}
+
 const useApiData = (apiConsumer, fetches) => {
   const { api, apiData, internalApi } = apiConsumer.context
   if (!isPlainObject(api) ||
@@ -52,11 +61,8 @@ const useApiData = (apiConsumer, fetches) => {
   const foundJobs = {}
   const fetchKeys = Object.keys(fetches)
   fetchKeys.forEach((key) => {
-    let fetch = fetches[key]
-    if (typeof fetch === 'function') {
-      fetch = fetch(api)
-    }
-    if (!isPlainObject(fetch)) {
+    const fetch = getFetchObject(apiConsumer, api, fetches, key)
+    if (fetch === null) {
       return
     }
 

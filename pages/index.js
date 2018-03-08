@@ -7,6 +7,7 @@ import FeaturePages from '../demo/src/components/FeaturePages'
 import Navigation from '../demo/src/components/Navigation'
 import NewThread from '../demo/src/components/NewThread'
 import Visitor from '../demo/src/components/Visitor'
+import VisitorThreads from '../demo/src/components/VisitorThreads'
 
 const callbackUrl = process.browser ? window.location.origin + '/api-callback' : ''
 const debug = true
@@ -23,6 +24,7 @@ const Index = () => (
     <Navigation />
     <NewThread />
     <Visitor />
+    <VisitorThreads />
   </div>
 )
 

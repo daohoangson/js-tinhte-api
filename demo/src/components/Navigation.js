@@ -76,7 +76,7 @@ const Navigation = ({ elements }) => elements ? <List elements={elements} parent
 
 Navigation.apiFetches = {
   elements: {
-    uri: 'navigation?fields_exclude=forum_prefixes,permissions,links&fields_include=*,links.permalink,links.target',
+    uri: 'navigation',
     success: (json) => json.elements
   }
 }
