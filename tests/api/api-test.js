@@ -48,7 +48,7 @@ describe('api', () => {
           const uniqueId = md5('GET index?')
           expect(Object.keys(apiData)).toContain(uniqueId)
         })
-    }).timeout(10000)
+    })
 
     it('handles no children', () => {
       const api = apiFactory()

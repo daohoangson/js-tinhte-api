@@ -10,8 +10,6 @@ import errors from 'src/helpers/errors'
 
 describe('api', () => {
   describe('fetchOne', function () {
-    this.timeout(10000)
-
     afterEach(() => {
       global.XenForo = null
       global.XF = null
@@ -183,8 +181,6 @@ describe('api', () => {
   })
 
   describe('fetchMultiple', function () {
-    this.timeout(10000)
-
     it('does nothing if no fetches', () => {
       const api = apiFactory()
       const fetches = () => {}

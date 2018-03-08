@@ -109,65 +109,65 @@ describe('hoc', () => {
           return testBadData(apiData)
         })
       })
+    })
 
-      it('renders', (done) => {
-        const api = apiFactory()
+    it('renders', (done) => {
+      const api = apiFactory()
 
-        const Child = ({ test1a, test1b }) => (
-          <div className='Child'>
-            <div className='test1a'>{test1a ? 'ok' : 'not'}</div>
-            <div className='test1b'>{test1b === 'test1b' ? 'ok' : 'not'}</div>
-          </div>
-        )
-        Child.apiFetches = {
-          test1a: {uri: 'index'},
-          test1b: {uri: 'index', success: () => 'test1b'}
-        }
-        const C = api.ConsumerHoc(Child)
-        const P = api.ProviderHoc(() => <C />)
+      const Child = ({ test1a, test1b }) => (
+        <div className='Child'>
+          <div className='test1a'>{test1a ? 'ok' : 'not'}</div>
+          <div className='test1b'>{test1b === 'test1b' ? 'ok' : 'not'}</div>
+        </div>
+      )
+      Child.apiFetches = {
+        test1a: {uri: 'index'},
+        test1b: {uri: 'index', success: () => 'test1b'}
+      }
+      const C = api.ConsumerHoc(Child)
+      const P = api.ProviderHoc(() => <C />)
 
-        const api2 = apiFactory()
-        const Child2 = ({ test2a, test2b }) => (
-          <div className='Child2'>
-            <div className='test2a'>{test2a ? 'ok' : 'not'}</div>
-            <div className='test2b'>{test2b ? 'ok' : 'not'}</div>
-          </div>
-        )
-        Child2.apiFetches = {
-          test2a: {uri: 'index'},
-          test2b: {uri: 'navigation'}
-        }
-        const C2 = api2.ConsumerHoc(Child2)
-        let onC2Fetched = null
-        const P2 = api2.ProviderHoc(() => <C2 onFetched={onC2Fetched} />)
+      const api2 = apiFactory()
+      const Child2 = ({ test2a, test2b }) => (
+        <div className='Child2'>
+          <div className='test2a'>{test2a ? 'ok' : 'not'}</div>
+          <div className='test2b'>{test2b ? 'ok' : 'not'}</div>
+        </div>
+      )
+      Child2.apiFetches = {
+        test2a: {uri: 'index'},
+        test2b: {uri: 'navigation'}
+      }
+      const C2 = api2.ConsumerHoc(Child2)
+      let onC2Fetched = null
+      const P2 = api2.ProviderHoc(() => <C2 onFetched={onC2Fetched} />)
 
-        api.fetchApiDataForProvider(<P />)
-          .then((apiData) => {
+      api.fetchApiDataForProvider(<P />)
+        .then((apiData) => {
+          expect(api.getFetchCount()).toBe(1)
+
+          // test 1: renders from apiData
+          render(<P apiData={apiData} />, node, () => {
+            expect(node.innerHTML).toContain('<div class="test1a">ok</div>')
+            expect(node.innerHTML).toContain('<div class="test1b">ok</div>')
             expect(api.getFetchCount()).toBe(1)
 
-            // test 1: renders from apiData
-            render(<P apiData={apiData} />, node, () => {
-              expect(node.innerHTML).toContain('<div class="test1a">ok</div>')
-              expect(node.innerHTML).toContain('<div class="test1b">ok</div>')
-              expect(api.getFetchCount()).toBe(1)
+            // test 2: fetches for missing data
+            const node2 = document.createElement('div')
+            render(<P2 apiData={apiData} />, node2)
+            onC2Fetched = () => {
+              setTimeout(() => {
+                expect(node2.innerHTML).toContain('<div class="test2a">ok</div>')
+                expect(node2.innerHTML).toContain('<div class="test2b">ok</div>')
+                expect(api.getFetchCount()).toBe(1)
+                expect(api2.getFetchCount()).toBe(1)
 
-              // test 2: fetches for missing data
-              const node2 = document.createElement('div')
-              render(<P2 apiData={apiData} />, node2)
-              onC2Fetched = () => {
-                setTimeout(() => {
-                  expect(node2.innerHTML).toContain('<div class="test2a">ok</div>')
-                  expect(node2.innerHTML).toContain('<div class="test2b">ok</div>')
-                  expect(api.getFetchCount()).toBe(1)
-                  expect(api2.getFetchCount()).toBe(1)
-
-                  unmountComponentAtNode(node2)
-                  done()
-                }, 10)
-              }
-            })
+                unmountComponentAtNode(node2)
+                done()
+              }, 10)
+            }
           })
-      })
+        })
     })
   })
 })
