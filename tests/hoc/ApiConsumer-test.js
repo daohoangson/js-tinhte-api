@@ -4,6 +4,7 @@ import {render, unmountComponentAtNode} from 'react-dom'
 
 import { apiFactory, apiHoc } from 'src/'
 import { isPlainObject } from 'src/helpers'
+import errors from 'src/helpers/errors'
 
 describe('hoc', () => {
   describe('ApiConsumer', () => {
@@ -15,6 +16,19 @@ describe('hoc', () => {
 
     afterEach(() => {
       unmountComponentAtNode(node)
+    })
+
+    it('check for required param', () => {
+      let catched = []
+
+      try {
+        apiHoc.ApiConsumer()
+      } catch (e) {
+        catched.push(e)
+      }
+
+      expect(catched.length).toBe(1)
+      expect(catched[0].message).toBe(errors.API_CONSUMER.REQUIRED_PARAM_MISSING)
     })
 
     it('populates api', () => {

@@ -2,8 +2,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { isPlainObject, mustBePlainObject } from '../helpers'
+import errors from '../helpers/errors'
 
 const hocApiProvider = (Component, api, internalApi) => {
+  if (!Component || !api || !internalApi) {
+    throw new Error(errors.API_PROVIDER.REQUIRED_PARAMS_MISSING)
+  }
+
   class ApiProvider extends React.Component {
     constructor (props) {
       super(props)
@@ -26,9 +31,8 @@ const hocApiProvider = (Component, api, internalApi) => {
 
     render () {
       const props = {...this.props}
-      if (typeof props.apiConfig !== 'undefined') {
-        delete props.apiConfig
-      }
+      delete props.apiConfig
+      delete props.apiData
 
       return (
         <div className='ApiProvider'>

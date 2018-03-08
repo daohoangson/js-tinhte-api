@@ -2,7 +2,8 @@ import expect from 'expect'
 import React from 'react'
 import {render, unmountComponentAtNode} from 'react-dom'
 
-import { apiFactory } from 'src/'
+import { apiFactory, apiHoc } from 'src/'
+import errors from 'src/helpers/errors'
 
 describe('hoc', () => {
   describe('ApiProvider', () => {
@@ -16,12 +17,49 @@ describe('hoc', () => {
       unmountComponentAtNode(node)
     })
 
-    it('swallows apiConfig prop', () => {
+    describe('required params', () => {
+      const testRequiredParam = (Component, api, internalApi) => {
+        let catched = []
+
+        try {
+          apiHoc.ApiProvider(Component, api, internalApi)
+        } catch (e) {
+          catched.push(e)
+        }
+
+        expect(catched.length).toBe(1)
+        expect(catched[0].message).toBe(errors.API_PROVIDER.REQUIRED_PARAMS_MISSING)
+      }
+
+      it('checks for Component', () => {
+        const Component = null
+        const api = {}
+        const internalApi = {}
+        testRequiredParam(Component, api, internalApi)
+      })
+
+      it('checks for api', () => {
+        const Component = () => 'foo'
+        const api = null
+        const internalApi = {}
+        testRequiredParam(Component, api, internalApi)
+      })
+
+      it('checks for internalApi', () => {
+        const Component = () => 'foo'
+        const api = {}
+        const internalApi = null
+        testRequiredParam(Component, api, internalApi)
+      })
+    })
+
+    it('swallows our props', () => {
       const api = apiFactory()
       const apiConfig = {}
+      const apiData = {}
       const prop = 'foo'
       const P = api.ProviderHoc((props) => <div className='P'>{JSON.stringify(props)}</div>)
-      render(<P prop={prop} apiConfig={apiConfig} />, node, () => {
+      render(<P prop={prop} apiConfig={apiConfig} apiData={apiData} />, node, () => {
         expect(node.innerHTML).toContain('<div class="P">' + JSON.stringify({prop}) + '</div>')
       })
     })

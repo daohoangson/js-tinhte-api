@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import { isPlainObject } from '../helpers'
+import errors from '../helpers/errors'
 import standardizeReqOptions from '../helpers/standardizeReqOptions'
 
 const executeFetches = (apiConsumer, api, fetches) => {
@@ -107,6 +108,10 @@ const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
 }
 
 const hocApiConsumer = (Component) => {
+  if (!Component) {
+    throw new Error(errors.API_CONSUMER.REQUIRED_PARAM_MISSING)
+  }
+
   class ApiConsumer extends React.Component {
     constructor (props, context) {
       super(props, context)
