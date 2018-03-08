@@ -53,7 +53,9 @@ describe('hoc', () => {
       })
     })
 
-    describe('apiFetchesWithAuth', () => {
+    describe('apiFetchesWithAuth', function () {
+      this.timeout(10000)
+
       it('accepts non-object', () => {
         const api = apiFactory()
         const Child = () => <div className='Child'>ok</div>
@@ -114,7 +116,9 @@ describe('hoc', () => {
       })
     })
 
-    describe('apiFetches', () => {
+    describe('apiFetches', function () {
+      this.timeout(10000)
+
       it('accepts function as fetch', () => {
         const api = apiFactory()
         const foo = `foo${Math.random()}`
