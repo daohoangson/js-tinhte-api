@@ -22,11 +22,29 @@ describe('api', () => {
         .then((json) => expect(json.url).toBe(apiRoot))
     })
 
-    it('keeps full url', () => {
-      const api = apiFactory()
-      const url = 'https://httpbin.org/get?foo=bar'
-      return api.fetchOne(url)
-        .then((json) => expect(json.url).toBe(url))
+    describe('full uri', () => {
+      it('keeps original value', () => {
+        const api = apiFactory()
+        const url = 'https://httpbin.org/get?action&foo=1&bar=2'
+        return api.fetchOne(url)
+          .then((json) => expect(json.url).toBe(url))
+      })
+
+      it('keeps oauth_token', () => {
+        const accessToken = `at${Math.random()}`
+        const api = apiFactory({auth: {accessToken}})
+        const url = `https://httpbin.org/get?action&oauth_token=${Math.random()}`
+        return api.fetchOne(url)
+          .then((json) => expect(json.url).toBe(url))
+      })
+
+      it('includes access token', () => {
+        const accessToken = `at${Math.random()}`
+        const api = apiFactory({auth: {accessToken}})
+        const url = `https://httpbin.org/get`
+        return api.fetchOne(url)
+          .then((json) => expect(json.args.oauth_token).toBe(accessToken))
+      })
     })
 
     it('replaces ? from uri', () => {
