@@ -88,7 +88,9 @@ You can also trigger the function `processCallback` directly on the callback pag
 
 ### Fetch from API
 
-In children components, use `apiHoc.ApiConsumer` to prepare the API context and fetch data.
+In children components, use `apiHoc.ApiConsumer` to prepare the `api` prop and fetch data.
+It's recommended to only use `api` if you fetch during some user action (e.g. `onClick`), in other cases,
+implement `apiFetches` or `apiFetchesWithAuth` and let `ApiConsumer` manages those for better performance.
 
 ```js
 import { apiHoc } from 'tinhte-api'
