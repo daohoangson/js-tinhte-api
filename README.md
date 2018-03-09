@@ -249,7 +249,10 @@ The general use case for these props are server side rendering, you can safely i
 
 ### api.clone
 
-Returns a new api instance with the same configuration.
+Returns a new api instance with merged configuration.
+
+Params:
+ - `config` object
 
 ### api.fetchApiDataForProvider
 
