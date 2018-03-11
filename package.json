@@ -30,7 +30,7 @@
     "md5": "^2.2.1",
     "prop-types": "^15.6.1",
     "querystring": "^0.2.0",
-    "react-tree-walker": "dvkndn/react-tree-walker#fix-instance-as-result"
+    "react-tree-walker": "dvkndn/react-tree-walker#03783a5"
   },
   "peerDependencies": {
     "babel-runtime": "6.x",
