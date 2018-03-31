@@ -8,6 +8,15 @@ const config = {
     ],
     runtime: true
   },
+  karma: {
+    extra: {
+      client: {
+        mocha: {
+          timeout: 10000
+        }
+      }
+    }
+  },
   npm: {
     esModules: true,
     umd: {
