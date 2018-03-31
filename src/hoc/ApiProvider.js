@@ -1,8 +1,8 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
 import { isPlainObject, mustBePlainObject } from '../helpers'
 import errors from '../helpers/errors'
+import ApiContext from './ApiContext'
 
 const hocApiProvider = (Component, api, internalApi) => {
   if (!Component || !api || !internalApi) {
@@ -16,17 +16,16 @@ const hocApiProvider = (Component, api, internalApi) => {
       if (isPlainObject(props.apiConfig)) {
         internalApi.updateConfig(props.apiConfig)
       }
+
+      let { apiData } = this.props
+      apiData = mustBePlainObject(apiData)
+      const apiContext = {api, apiData, internalApi}
+      this.state = {apiContext, isMounted: false}
     }
 
     componentDidMount () {
       internalApi.setProviderMounted()
-    }
-
-    getChildContext () {
-      let { apiData } = this.props
-      apiData = mustBePlainObject(apiData)
-
-      return {api, apiData, internalApi}
+      this.setState((state) => ({...state, isMounted: true}))
     }
 
     render () {
@@ -34,19 +33,17 @@ const hocApiProvider = (Component, api, internalApi) => {
       delete props.apiConfig
       delete props.apiData
 
+      if (!this.state.isMounted) {
+        return <Component {...props} />
+      }
+
       return (
-        <div className='ApiProvider'>
+        <ApiContext.Provider className='ApiProvider' value={this.state.apiContext}>
           <Component {...props} />
           { api.getAccessToken() === '' && <internalApi.LoaderComponent /> }
-        </div>
+        </ApiContext.Provider>
       )
     }
-  }
-
-  ApiProvider.childContextTypes = {
-    api: PropTypes.object,
-    apiData: PropTypes.object,
-    internalApi: PropTypes.object
   }
 
   return ApiProvider

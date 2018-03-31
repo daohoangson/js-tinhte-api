@@ -31,16 +31,19 @@ describe('hoc', () => {
       expect(catched[0].message).toBe(errors.API_CONSUMER.REQUIRED_PARAM_MISSING)
     })
 
-    it('populates api', () => {
+    it('populates api', (done) => {
       const userId = Math.random()
       const api = apiFactory({auth: {userId: userId}})
 
-      const Child = ({api}) => <span className='userId'>{api.getUserId()}</span>
+      const Child = ({ api }) => <span className='userId'>{api ? api.getUserId() : 'not'}</span>
       const C = apiHoc.ApiConsumer(Child)
       const P = api.ProviderHoc(() => <C />)
 
       render(<P />, node, () => {
-        expect(node.innerHTML).toContain(`<span class="userId">${userId}</span>`)
+        setTimeout(() => {
+          expect(node.innerHTML).toContain(`<span class="userId">${userId}</span>`)
+          done()
+        }, 10)
       })
     })
 
@@ -108,8 +111,10 @@ describe('hoc', () => {
 
         const testNode = document.createElement('div')
         render(<P />, testNode, () => {
-          const unmounted = unmountComponentAtNode(testNode)
-          expect(unmounted).toBe(true)
+          setTimeout(() => {
+            const unmounted = unmountComponentAtNode(testNode)
+            expect(unmounted).toBe(true)
+          }, 10)
         })
       })
     })

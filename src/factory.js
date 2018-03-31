@@ -1,12 +1,12 @@
 import { isDate } from 'lodash'
 import md5 from 'md5'
-import reactTreeWalker from 'react-tree-walker'
 
 import components from './components'
 import fetchesInit from './fetches'
 import { isPlainObject, mustBePlainObject } from './helpers'
 import helperCallbacksInit from './helpers/callbacks'
 import errors from './helpers/errors'
+import fetchApiDataForProvider from './helpers/fetchApiDataForProvider'
 import hoc from './hoc'
 
 const apiFactory = (config = {}) => {
@@ -169,15 +169,7 @@ const apiFactory = (config = {}) => {
       return apiFactory(clonedConfig)
     },
 
-    fetchApiDataForProvider: (rootElement) => {
-      return reactTreeWalker(rootElement, () => true)
-        .then(() => {
-          const { items } = callbackListForProviderMount
-          const options = {triggerHandlers: false}
-          return callbacks.fetchItems(items, options)
-        })
-        .then((json) => json && json.jobs ? json.jobs : {})
-    },
+    fetchApiDataForProvider: (rootElement) => fetchApiDataForProvider(api, internalApi, rootElement),
 
     generateOneTimeToken: (clientSecret, ttl) => {
       /* istanbul ignore else  */

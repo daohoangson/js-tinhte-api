@@ -122,7 +122,8 @@ describe('hoc', () => {
       )
       Child.apiFetches = {
         test1a: {uri: 'index'},
-        test1b: {uri: 'index', success: () => 'test1b'}
+        test1b: {uri: 'index', success: () => 'test1b'},
+        noop: () => null
       }
       const C = api.ConsumerHoc(Child)
       const P = api.ProviderHoc(() => <C />)
@@ -136,7 +137,8 @@ describe('hoc', () => {
       )
       Child2.apiFetches = {
         test2a: {uri: 'index'},
-        test2b: {uri: 'navigation'}
+        test2b: {uri: 'navigation'},
+        noop2: () => null
       }
       const C2 = api2.ConsumerHoc(Child2)
       let onC2Fetched = null
@@ -148,24 +150,27 @@ describe('hoc', () => {
 
           // test 1: renders from apiData
           render(<P apiData={apiData} />, node, () => {
-            expect(node.innerHTML).toContain('<div class="test1a">ok</div>')
-            expect(node.innerHTML).toContain('<div class="test1b">ok</div>')
-            expect(api.getFetchCount()).toBe(1)
+            setTimeout(() => {
+              expect(node.innerHTML).toContain('<div class="test1a">ok</div>')
+              expect(node.innerHTML).toContain('<div class="test1b">ok</div>')
+              expect(api.getFetchCount()).toBe(1)
 
-            // test 2: fetches for missing data
-            const node2 = document.createElement('div')
-            render(<P2 apiData={apiData} />, node2)
-            onC2Fetched = () => {
-              setTimeout(() => {
-                expect(node2.innerHTML).toContain('<div class="test2a">ok</div>')
-                expect(node2.innerHTML).toContain('<div class="test2b">ok</div>')
-                expect(api.getFetchCount()).toBe(1)
-                expect(api2.getFetchCount()).toBe(1)
+              // test 2: fetches for missing data
+              onC2Fetched = () => {
+                setTimeout(() => {
+                  expect(node2.innerHTML).toContain('<div class="test2a">ok</div>')
+                  expect(node2.innerHTML).toContain('<div class="test2b">ok</div>')
+                  expect(api.getFetchCount()).toBe(1)
+                  expect(api2.getFetchCount()).toBe(1)
 
-                unmountComponentAtNode(node2)
-                done()
-              }, 10)
-            }
+                  unmountComponentAtNode(node2)
+                  done()
+                }, 10)
+              }
+
+              const node2 = document.createElement('div')
+              render(<P2 apiData={apiData} />, node2)
+            }, 10)
           })
         })
     })

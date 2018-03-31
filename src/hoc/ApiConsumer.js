@@ -1,20 +1,21 @@
 import React from 'react'
-import PropTypes from 'prop-types'
 
 import { isPlainObject } from '../helpers'
 import errors from '../helpers/errors'
+import { createFetchObject } from '../helpers/fetchApiDataForProvider'
 import standardizeReqOptions from '../helpers/standardizeReqOptions'
+import ApiContext from './ApiContext'
 
 const executeFetches = (apiConsumer, api, fetches) => {
   const promises = []
   const fetchedData = {}
   Object.keys(fetches).forEach((key) => {
-    const fetch = getFetchObject(apiConsumer, api, fetches, key)
-    if (fetch === null) {
+    const fetch = createFetchObject(api, apiConsumer, fetches, key)
+    if (!isPlainObject(fetch)) {
       return
     }
 
-    let promise = api.fetchOne({...fetch})
+    let promise = api.fetchOne(fetch)
 
     const { error, success } = fetch
     promise = promise.catch(error || (() => ({})))
@@ -38,20 +39,9 @@ const executeFetches = (apiConsumer, api, fetches) => {
     )))
 }
 
-const getFetchObject = (apiConsumer, api, fetches, key) => {
-  let fetch = fetches[key]
-  if (typeof fetch === 'function') {
-    fetch = fetch(api, apiConsumer.props)
-  }
-  if (!isPlainObject(fetch)) {
-    return null
-  }
-
-  return fetch
-}
-
 const useApiData = (apiConsumer, fetches) => {
-  const { api, apiData, internalApi } = apiConsumer.context
+  const { apiContext } = apiConsumer.props
+  const { api, apiData, internalApi } = apiContext
   if (!isPlainObject(api) ||
     !isPlainObject(apiData) ||
     !isPlainObject(internalApi)) {
@@ -61,19 +51,19 @@ const useApiData = (apiConsumer, fetches) => {
   const foundJobs = {}
   const fetchKeys = Object.keys(fetches)
   fetchKeys.forEach((key) => {
-    const fetch = getFetchObject(apiConsumer, api, fetches, key)
-    if (fetch === null) {
+    const fetch = createFetchObject(api, apiConsumer, fetches, key)
+    if (!isPlainObject(fetch)) {
+      foundJobs[key] = {}
       return
     }
 
-    const reqOptions = { ...fetch }
-    const uniqueId = standardizeReqOptions(reqOptions)
+    const uniqueId = standardizeReqOptions(fetch)
     const job = apiData[uniqueId]
 
     if (!isPlainObject(job) ||
       !isPlainObject(job._req) ||
-      job._req.method !== reqOptions.method ||
-      job._req.uri !== reqOptions.uri ||
+      job._req.method !== fetch.method ||
+      job._req.uri !== fetch.uri ||
       typeof job._job_result !== 'string' ||
       job._job_result !== 'ok') {
       return
@@ -104,7 +94,8 @@ const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
     return notify()
   }
 
-  const { api } = apiConsumer.context
+  const { apiContext } = apiConsumer.props
+  const { api } = apiContext
   if (!isPlainObject(api)) {
     return notify()
   }
@@ -119,8 +110,8 @@ const hocApiConsumer = (Component) => {
   }
 
   class ApiConsumer extends React.Component {
-    constructor (props, context) {
-      super(props, context)
+    constructor (props) {
+      super(props)
       this.cancelFetches = null
       this.cancelFetchesWithAuth = null
 
@@ -128,18 +119,11 @@ const hocApiConsumer = (Component) => {
       this.state = {fetchedData}
     }
 
-    componentWillMount () {
-      const eventName = 'onProviderMounted'
-      const { apiFetches } = Component
-      const { onFetched } = this.props
-      this.cancelFetches = executeFetchesIfNeeded(this, eventName, apiFetches, onFetched)
-    }
-
     componentDidMount () {
-      const eventName = 'onAuthenticated'
-      const { apiFetchesWithAuth } = Component
-      const { onFetchedWithAuth } = this.props
-      this.cancelFetchesWithAuth = executeFetchesIfNeeded(this, eventName, apiFetchesWithAuth, onFetchedWithAuth)
+      const { apiFetches, apiFetchesWithAuth } = Component
+      const { onFetched, onFetchedWithAuth } = this.props
+      this.cancelFetches = executeFetchesIfNeeded(this, 'onProviderMounted', apiFetches, onFetched)
+      this.cancelFetchesWithAuth = executeFetchesIfNeeded(this, 'onAuthenticated', apiFetchesWithAuth, onFetchedWithAuth)
     }
 
     componentWillUnmount () {
@@ -155,17 +139,41 @@ const hocApiConsumer = (Component) => {
     }
 
     render () {
-      return <Component api={this.context.api} {...this.state.fetchedData} {...this.props} />
+      const { apiContext } = this.props
+      const { api } = apiContext
+
+      const props = {...this.props}
+      delete props.apiContext
+
+      return <Component {...this.state.fetchedData} {...props} api={api} />
     }
   }
 
-  ApiConsumer.contextTypes = {
-    api: PropTypes.object,
-    apiData: PropTypes.object,
-    internalApi: PropTypes.object
+  class ApiContextConsumer extends React.Component {
+    constructor (props) {
+      super(props)
+
+      this.state = {isMounted: false}
+    }
+
+    componentDidMount () {
+      this.setState(() => ({isMounted: true}))
+    }
+
+    render () {
+      if (!this.state.isMounted) {
+        return <Component {...this.props} />
+      }
+
+      return (
+        <ApiContext.Consumer>
+          {apiContext => <ApiConsumer {...this.props} apiContext={apiContext} />}
+        </ApiContext.Consumer>
+      )
+    }
   }
 
-  return ApiConsumer
+  return ApiContextConsumer
 }
 
 export default hocApiConsumer
