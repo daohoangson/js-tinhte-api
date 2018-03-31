@@ -324,6 +324,17 @@ api.post({
 })
 ```
 
+Example with a GET request with headers:
+```js
+api.get({
+  uri: 'threads',
+  headers: { 
+    'foo': 'bar',
+    'foo1': 'bar1',
+  }
+})
+```
+
 ### api.fetchMultiple
 
 Alias:
