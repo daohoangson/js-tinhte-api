@@ -126,7 +126,9 @@ describe('hoc', () => {
         noop: () => null
       }
       const C = api.ConsumerHoc(Child)
-      const P = api.ProviderHoc(() => <C />)
+      const ChildWithoutFetch = () => 'foo'
+      const ConsumerWithoutFetch = api.ConsumerHoc(ChildWithoutFetch)
+      const P = api.ProviderHoc(() => <div><C /><ConsumerWithoutFetch /></div>)
 
       const api2 = apiFactory()
       const Child2 = ({ test2a, test2b }) => (

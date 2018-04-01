@@ -20,22 +20,17 @@ const hocApiProvider = (Component, api, internalApi) => {
       let { apiData } = this.props
       apiData = mustBePlainObject(apiData)
       const apiContext = {api, apiData, internalApi}
-      this.state = {apiContext, isMounted: false}
+      this.state = {apiContext}
     }
 
     componentDidMount () {
       internalApi.setProviderMounted()
-      this.setState((state) => ({...state, isMounted: true}))
     }
 
     render () {
       const props = {...this.props}
       delete props.apiConfig
       delete props.apiData
-
-      if (!this.state.isMounted) {
-        return <Component {...props} />
-      }
 
       return (
         <ApiContext.Provider className='ApiProvider' value={this.state.apiContext}>

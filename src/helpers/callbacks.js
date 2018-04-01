@@ -76,10 +76,6 @@ const helperCallbacksInit = (api, internalApi) => {
       items.length = 0
     })
 
-    if (callbackCount > 0) {
-      internalApi.log('Queued %d %s callbacks', callbackCount, list.name)
-    }
-
     return promise
   }
 

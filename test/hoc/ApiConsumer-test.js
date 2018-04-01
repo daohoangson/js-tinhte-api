@@ -145,25 +145,29 @@ describe('hoc', () => {
       })
 
       describe('does no fetch', () => {
-        const testDoesNoFetch = (fetches) => {
+        const testDoesNoFetch = (fetches, props = {}, expectedOutput = 'not') => {
           const api = apiFactory()
           const Parent = ({ children }) => <div>{children}</div>
           const P = api.ProviderHoc(Parent)
 
-          const Child = ({ index }) => <div className='index'>{index ? 'ok' : 'not'}</div>
+          const Child = ({ index }) => <div className='index'>{index || 'not'}</div>
           Child.apiFetches = fetches
           const C = apiHoc.ApiConsumer(Child)
 
           return new Promise((resolve) => {
             const check = () => {
-              expect(node.innerHTML).toContain('<div class="index">not</div>')
+              expect(node.innerHTML).toContain(`<div class="index">${expectedOutput}</div>`)
               expect(api.getFetchCount()).toBe(0)
               resolve()
             }
 
-            render(<P><C onFetched={check} /></P>, node)
+            render(<P><C {...props} onFetched={check} /></P>, node)
           })
         }
+
+        it('with empty object', () => {
+          return testDoesNoFetch({})
+        })
 
         it('with non-object', () => {
           return testDoesNoFetch({index: 'foo'})
@@ -171,6 +175,11 @@ describe('hoc', () => {
 
         it('with function returning null', () => {
           return testDoesNoFetch({index: () => null})
+        })
+
+        it('with existing prop', () => {
+          const random = Math.random()
+          return testDoesNoFetch({index: {uri: 'foo'}}, {index: random}, random)
         })
       })
 

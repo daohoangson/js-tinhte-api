@@ -1,36 +1,16 @@
 import reactTreeWalker from 'react-tree-walker'
 
-import { isPlainObject } from '.'
-
-export const createFetchObject = (api, element, fetches, key) => {
-  let fetch = fetches[key]
-  if (typeof fetch === 'function') {
-    fetch = fetch(api, element.props)
-  }
-  if (!isPlainObject(fetch)) {
-    return null
-  }
-
-  return {...fetch}
-}
-
 const fetchApiDataForProvider = (api, internalApi, rootElement) => {
   const queue = []
 
-  const enqueueFetches = (element, fetches) => {
-    Object.keys(fetches).forEach((key) => {
-      const fetch = createFetchObject(api, element, fetches, key)
-      if (!isPlainObject(fetch)) {
-        return
-      }
-
-      queue.push(fetch)
-    })
-  }
-
   return reactTreeWalker(rootElement, (element) => {
-    if (element && element.type && element.type.apiFetches) {
-      enqueueFetches(element, element.type.apiFetches)
+    if (element && element.type && typeof element.type.apiPreFetch === 'function') {
+      element.type.apiPreFetch(api, element, queue)
+
+      // react-tree-walker@4.0.2 haven't added support for React 16.3 Context API
+      // (that means it cannot reach ReactContext.Consumer's function-as-a-child)
+      // we are returning `false ` here to make that dependable
+      return false
     }
 
     return true

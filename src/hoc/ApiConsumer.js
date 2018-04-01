@@ -2,9 +2,112 @@ import React from 'react'
 
 import { isPlainObject } from '../helpers'
 import errors from '../helpers/errors'
-import { createFetchObject } from '../helpers/fetchApiDataForProvider'
 import standardizeReqOptions from '../helpers/standardizeReqOptions'
 import ApiContext from './ApiContext'
+
+const createFetchObject = (api, element, fetches, key) => {
+  let fetch = fetches[key]
+  if (typeof fetch === 'function') {
+    fetch = fetch(api, element.props)
+  }
+  if (!isPlainObject(fetch)) {
+    return null
+  }
+
+  return {...fetch}
+}
+
+const useApiData = (apiConsumer, fetches) => {
+  if (!isPlainObject(fetches)) {
+    return
+  }
+  const fetchKeys = Object.keys(fetches)
+  if (fetchKeys.length === 0) {
+    return
+  }
+
+  const { props, state } = apiConsumer
+  const { apiContext } = props
+  const { fetchedData } = state
+  const { api, apiData, internalApi } = apiContext
+  if (!isPlainObject(api) ||
+    !isPlainObject(apiData) ||
+    !isPlainObject(internalApi)) {
+    return
+  }
+
+  const foundJobs = {}
+  fetchKeys.forEach((key) => {
+    if (typeof props[key] !== 'undefined') {
+      return
+    }
+
+    const fetch = createFetchObject(api, apiConsumer, fetches, key)
+    if (!isPlainObject(fetch)) {
+      return
+    }
+
+    const uniqueId = standardizeReqOptions(fetch)
+    const job = apiData[uniqueId]
+
+    if (!isPlainObject(job) ||
+      !isPlainObject(job._req) ||
+      job._req.method !== fetch.method ||
+      job._req.uri !== fetch.uri ||
+      typeof job._job_result !== 'string' ||
+      job._job_result !== 'ok') {
+      return
+    }
+
+    foundJobs[key] = job
+  })
+
+  const foundKeys = Object.keys(foundJobs)
+  if (foundKeys.length === 0) {
+    return
+  }
+  foundKeys.forEach((key) => {
+    const { success } = fetches[key]
+    fetchedData[key] = success ? success(foundJobs[key]) : foundJobs[key]
+  })
+
+  internalApi.log('useApiData -> fetchedData (keys): ', Object.keys(fetchedData))
+}
+
+const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
+  const notify = () => onFetched && onFetched()
+
+  if (!isPlainObject(fetches)) {
+    return notify()
+  }
+
+  const { props, state } = apiConsumer
+  const { apiContext } = props
+  const { fetchedData } = state
+  const neededFetches = {}
+  Object.keys(fetches).forEach((key) => {
+    if (typeof props[key] !== 'undefined') {
+      return
+    }
+    if (typeof fetchedData[key] !== 'undefined') {
+      return
+    }
+
+    neededFetches[key] = fetches[key]
+  })
+  const neededKeys = Object.keys(neededFetches)
+  if (neededKeys.length === 0) {
+    return notify()
+  }
+
+  const { api, internalApi } = apiContext
+  if (!isPlainObject(api) || !isPlainObject(internalApi)) {
+    return notify()
+  }
+  const onEvent = api[eventName]
+  internalApi.log('executeFetchesIfNeeded -> neededKeys', neededKeys)
+  return onEvent(() => executeFetches(apiConsumer, api, neededFetches).then(notify))
+}
 
 const executeFetches = (apiConsumer, api, fetches) => {
   const promises = []
@@ -39,71 +142,6 @@ const executeFetches = (apiConsumer, api, fetches) => {
     )))
 }
 
-const useApiData = (apiConsumer, fetches) => {
-  const { apiContext } = apiConsumer.props
-  const { api, apiData, internalApi } = apiContext
-  if (!isPlainObject(api) ||
-    !isPlainObject(apiData) ||
-    !isPlainObject(internalApi)) {
-    return false
-  }
-
-  const foundJobs = {}
-  const fetchKeys = Object.keys(fetches)
-  fetchKeys.forEach((key) => {
-    const fetch = createFetchObject(api, apiConsumer, fetches, key)
-    if (!isPlainObject(fetch)) {
-      foundJobs[key] = {}
-      return
-    }
-
-    const uniqueId = standardizeReqOptions(fetch)
-    const job = apiData[uniqueId]
-
-    if (!isPlainObject(job) ||
-      !isPlainObject(job._req) ||
-      job._req.method !== fetch.method ||
-      job._req.uri !== fetch.uri ||
-      typeof job._job_result !== 'string' ||
-      job._job_result !== 'ok') {
-      return
-    }
-
-    foundJobs[key] = job
-  })
-
-  if (Object.keys(foundJobs).length !== fetchKeys.length) {
-    return false
-  }
-
-  const fetchedData = {}
-  fetchKeys.forEach((key) => {
-    const { success } = fetches[key]
-    fetchedData[key] = success ? success(foundJobs[key]) : foundJobs[key]
-  })
-
-  apiConsumer.setState(() => ({fetchedData}))
-  return true
-}
-
-const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
-  const notify = () => onFetched && onFetched()
-
-  if (!isPlainObject(fetches) ||
-    useApiData(apiConsumer, fetches)) {
-    return notify()
-  }
-
-  const { apiContext } = apiConsumer.props
-  const { api } = apiContext
-  if (!isPlainObject(api)) {
-    return notify()
-  }
-
-  const onEvent = api[eventName]
-  return onEvent(() => executeFetches(apiConsumer, api, fetches).then(notify))
-}
-
 const hocApiConsumer = (Component) => {
   if (!Component) {
     throw new Error(errors.API_CONSUMER.REQUIRED_PARAM_MISSING)
@@ -117,6 +155,9 @@ const hocApiConsumer = (Component) => {
 
       const fetchedData = {}
       this.state = {fetchedData}
+
+      const { apiFetches } = Component
+      useApiData(this, apiFetches)
     }
 
     componentDidMount () {
@@ -145,32 +186,30 @@ const hocApiConsumer = (Component) => {
       const props = {...this.props}
       delete props.apiContext
 
-      return <Component {...this.state.fetchedData} {...props} api={api} />
+      return <Component {...props} {...this.state.fetchedData} api={api} />
     }
   }
 
-  class ApiContextConsumer extends React.Component {
-    constructor (props) {
-      super(props)
+  const ApiContextConsumer = (props) => (
+    <ApiContext.Consumer>
+      {apiContext => <ApiConsumer {...props} apiContext={apiContext} />}
+    </ApiContext.Consumer>
+  )
 
-      this.state = {isMounted: false}
+  ApiContextConsumer.apiPreFetch = (api, element, queue) => {
+    const fetches = Component.apiFetches
+    if (!isPlainObject(fetches)) {
+      return
     }
 
-    componentDidMount () {
-      this.setState(() => ({isMounted: true}))
-    }
-
-    render () {
-      if (!this.state.isMounted) {
-        return <Component {...this.props} />
+    Object.keys(fetches).forEach((key) => {
+      const fetch = createFetchObject(api, element, fetches, key)
+      if (!isPlainObject(fetch)) {
+        return
       }
 
-      return (
-        <ApiContext.Consumer>
-          {apiContext => <ApiConsumer {...this.props} apiContext={apiContext} />}
-        </ApiContext.Consumer>
-      )
-    }
+      queue.push(fetch)
+    })
   }
 
   return ApiContextConsumer
