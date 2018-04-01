@@ -28,7 +28,7 @@ describe('components', () => {
     })
 
     it('renders success', () => {
-      window.location.hash = '#access_token=yes'
+      window.location.hash = '#state=yes'
 
       const debug = true
       const api = apiFactory({debug})

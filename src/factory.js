@@ -72,21 +72,6 @@ const apiFactory = (config = {}) => {
   const internalApi = {
     LoaderComponent: () => components.Loader(api, internalApi),
 
-    buildAuthorizeUrl: () => {
-      if (!clientId) {
-        return null
-      }
-
-      const authorizeUrl = `${apiRoot}?oauth/authorize&` +
-        `client_id=${encodeURIComponent(clientId)}&` +
-        `redirect_uri=${encodeURIComponent(callbackUrl)}&` +
-        'response_type=token&' +
-        `scope=${encodeURIComponent(scope)}&` +
-        `state=${encodeURIComponent(uniqueId)}`
-
-      return authorizeUrl
-    },
-
     getAuth: () => auth,
 
     log: function (message) {
