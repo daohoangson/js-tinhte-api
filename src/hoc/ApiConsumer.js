@@ -59,6 +59,7 @@ const useApiData = (apiConsumer, fetches) => {
   }
 
   const foundJobs = {}
+  const successRefs = {}
   const fetchKeys = Object.keys(fetches)
   fetchKeys.forEach((key) => {
     const fetch = getFetchObject(apiConsumer, api, fetches, key)
@@ -80,6 +81,7 @@ const useApiData = (apiConsumer, fetches) => {
     }
 
     foundJobs[key] = job
+    successRefs[key] = fetch.success
   })
 
   if (Object.keys(foundJobs).length !== fetchKeys.length) {
@@ -88,7 +90,7 @@ const useApiData = (apiConsumer, fetches) => {
 
   const fetchedData = {}
   fetchKeys.forEach((key) => {
-    const { success } = fetches[key]
+    const success = successRefs[key]
     fetchedData[key] = success ? success(foundJobs[key]) : foundJobs[key]
   })
 

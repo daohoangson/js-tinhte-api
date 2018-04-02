@@ -114,15 +114,17 @@ describe('hoc', () => {
     it('renders', (done) => {
       const api = apiFactory()
 
-      const Child = ({ test1a, test1b }) => (
+      const Child = ({ test1a, test1b, test1c }) => (
         <div className='Child'>
           <div className='test1a'>{test1a ? 'ok' : 'not'}</div>
           <div className='test1b'>{test1b === 'test1b' ? 'ok' : 'not'}</div>
+          <div className='test1c'>{test1c === 'test1c' ? 'ok' : 'not'}</div>
         </div>
       )
       Child.apiFetches = {
         test1a: {uri: 'index'},
-        test1b: {uri: 'index', success: () => 'test1b'}
+        test1b: {uri: 'index', success: () => 'test1b'},
+        test1c: () => ({uri: 'index', success: () => 'test1c'})
       }
       const C = api.ConsumerHoc(Child)
       const P = api.ProviderHoc(() => <C />)
@@ -142,15 +144,20 @@ describe('hoc', () => {
       let onC2Fetched = null
       const P2 = api2.ProviderHoc(() => <C2 onFetched={onC2Fetched} />)
 
+      expect(api.getFetchCount()).toBe(0)
+      expect(api2.getFetchCount()).toBe(0)
       api.fetchApiDataForProvider(<P />)
         .then((apiData) => {
           expect(api.getFetchCount()).toBe(1)
+          expect(api2.getFetchCount()).toBe(0)
 
           // test 1: renders from apiData
           render(<P apiData={apiData} />, node, () => {
             expect(node.innerHTML).toContain('<div class="test1a">ok</div>')
             expect(node.innerHTML).toContain('<div class="test1b">ok</div>')
+            expect(node.innerHTML).toContain('<div class="test1c">ok</div>')
             expect(api.getFetchCount()).toBe(1)
+            expect(api2.getFetchCount()).toBe(0)
 
             // test 2: fetches for missing data
             const node2 = document.createElement('div')
