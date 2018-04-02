@@ -37,6 +37,7 @@ const useApiData = (apiConsumer, fetches) => {
   }
 
   const foundJobs = {}
+  const successRefs = {}
   fetchKeys.forEach((key) => {
     if (typeof props[key] !== 'undefined') {
       return
@@ -60,6 +61,7 @@ const useApiData = (apiConsumer, fetches) => {
     }
 
     foundJobs[key] = job
+    successRefs[key] = fetch.success
   })
 
   const foundKeys = Object.keys(foundJobs)
@@ -67,7 +69,7 @@ const useApiData = (apiConsumer, fetches) => {
     return
   }
   foundKeys.forEach((key) => {
-    const { success } = fetches[key]
+    const success = successRefs[key]
     fetchedData[key] = success ? success(foundJobs[key]) : foundJobs[key]
   })
 
