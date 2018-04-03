@@ -36,6 +36,10 @@ const helperCallbacksInit = (api, internalApi) => {
 
   const fetchItems = (items, options = {}) => {
     const fetches = () => {
+      if (items.length === 0) {
+        return
+      }
+
       items.forEach((callback) => callback())
       internalApi.log('Triggered %d callbacks', items.length)
 
@@ -51,10 +55,6 @@ const helperCallbacksInit = (api, internalApi) => {
     const callbackCount = items.length
 
     const promise = new Promise((resolve) => {
-      if (callbackCount === 0) {
-        return resolve(callbackCount)
-      }
-
       items.forEach((callback) => sharedItems.push(callback))
       sharedResolves.push(() => resolve(callbackCount))
 
@@ -75,8 +75,6 @@ const helperCallbacksInit = (api, internalApi) => {
 
       items.length = 0
     })
-
-    internalApi.log('Queued %d %s callbacks', callbackCount, list.name)
 
     return promise
   }

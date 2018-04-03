@@ -3,6 +3,28 @@ import React from 'react'
 
 import { isPlainObject } from '../helpers'
 
+const buildAuthorizeUrl = (api) => {
+  const clientId = api.getClientId()
+  const callbackUrl = api.getCallbackUrl()
+  if (!clientId || !callbackUrl) {
+    return null
+  }
+
+  const encodedUniqueId = encodeURIComponent(api.getUniqueId())
+  const guestRedirectUri = `${callbackUrl}#user_id=0&state=${encodedUniqueId}`
+  const redirectUri = callbackUrl
+
+  const authorizeUrl = `${api.getApiRoot()}?oauth/authorize&` +
+    `client_id=${encodeURIComponent(clientId)}&` +
+    `guest_redirect_uri=${encodeURIComponent(guestRedirectUri)}&` +
+    `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+    'response_type=token&' +
+    `scope=${encodeURIComponent(api.getScope())}&` +
+    `state=${encodedUniqueId}`
+
+  return authorizeUrl
+}
+
 const getCookie = (api) => {
   const name = api.getCookieName()
   if (!name) {
@@ -87,7 +109,7 @@ class Loader extends React.Component {
       return
     }
 
-    const authorizeUrl = this.props.internalApi.buildAuthorizeUrl()
+    const authorizeUrl = buildAuthorizeUrl(api)
     if (authorizeUrl) {
       this.setState({src: authorizeUrl})
     }

@@ -8,6 +8,9 @@ const config = {
     ],
     runtime: true
   },
+  devServer: {
+    disableHostCheck: true
+  },
   karma: {
     extra: {
       client: {

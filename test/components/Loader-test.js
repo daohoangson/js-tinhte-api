@@ -26,10 +26,10 @@ describe('components', () => {
       const P = api.ProviderHoc(() => 'foo')
 
       render(<P />, node, () => {
-        expect(node.innerHTML).toContain('<iframe')
-        expect(node.innerHTML).toContain('src=""')
-
         setTimeout(() => {
+          expect(node.innerHTML).toContain('<iframe')
+          expect(node.innerHTML).toContain('src="')
+
           expect(node.innerHTML).toContain(api.getApiRoot())
           expect(node.innerHTML).toContain(encodeURIComponent(api.getCallbackUrl()))
           expect(node.innerHTML).toContain(encodeURIComponent(api.getClientId()))
