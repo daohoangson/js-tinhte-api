@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "tinhte-api React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -22,10 +22,6 @@
     "test": "standard && nwb test-react",
     "test:coverage": "standard && nwb test-react --coverage",
     "test:watch": "nwb test-react --server"
-  },
-  "engines": {
-    "node": "9.11.1",
-    "npm": "5.6.0"
   },
   "dependencies": {
     "isomorphic-unfetch": "^2.0.0",
