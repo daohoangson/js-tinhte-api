@@ -149,7 +149,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     if (batch.init(resolve, reject) === false) {
       // couldn't init the batch
       // we are probably being called within another fetchMultiple
-      // let's just run the callback and leave the other invocation do the fetch
+      // let's just run the callback and let the other invocation(s) do the fetch
       return fetches()
     }
 
