@@ -35,11 +35,11 @@ const helperCallbacksInit = (api, internalApi) => {
   }
 
   const fetchItems = (items, options = {}) => {
-    const fetches = () => {
-      if (items.length === 0) {
-        return
-      }
+    if (items.length === 0) {
+      return Promise.resolve([])
+    }
 
+    const fetches = () => {
       items.forEach((callback) => callback())
       internalApi.log('Triggered %d callbacks', items.length)
 
@@ -47,7 +47,7 @@ const helperCallbacksInit = (api, internalApi) => {
     }
 
     return api.fetchMultiple(fetches, options)
-      .catch((reason) => internalApi.log(reason))
+      .catch(() => [])
   }
 
   const fetchList = (list) => {
