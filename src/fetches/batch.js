@@ -1,32 +1,34 @@
-const batchFactory = (reqs) => {
-  let isOpen = false
+const batchFactory = () => {
+  let current = null
   let latestId = 0
-  if (!Array.isArray(reqs)) reqs = []
-  const resolves = []
-  const rejects = []
 
   const batch = {
-    forEach: (f) => reqs.forEach(f),
-    getId: () => latestId,
-    init: (resolve, reject) => {
-      resolves.push(resolve)
-      rejects.push(reject)
-
-      if (isOpen) {
-        return false
+    init: () => {
+      if (current !== null) {
+        return { other: current }
       }
 
-      isOpen = true
       latestId++
-      reqs.length = 0
+      const currentId = latestId
+      const reqs = []
+      const queue = []
+      const execute = (key, arg0) => queue.forEach((q) => q[key](arg0))
 
-      return latestId
+      current = {
+        enqueue: (resolve, reject) => queue.push({ resolve, reject }),
+        forEachReq: (f) => reqs.forEach(f),
+        getId: () => currentId,
+        getReqs: () => reqs,
+        pushReq: (req) => reqs.push(req),
+        reject: (reason) => execute('reject', reason),
+        resolve: (json) => execute('resolve', json)
+      }
+
+      return { current }
     },
-    isOpen: () => isOpen,
-    push: (req) => reqs.push(req),
-    reject: (reason) => rejects.forEach((reject) => reject(reason)),
-    resolve: (json) => resolves.forEach((resolve) => resolve(json)),
-    reset: () => (isOpen = false)
+    getCurrent: () => current,
+    getCurrentReqs: () => current.getReqs(),
+    reset: () => (current = null)
   }
 
   return batch

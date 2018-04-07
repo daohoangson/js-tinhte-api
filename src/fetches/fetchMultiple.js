@@ -143,39 +143,42 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     })
   }
 
-  const fetchMultiple = (fetches, options = {}) => new Promise((resolve, reject) => {
+  const fetchMultiple = (fetches, options = {}) => {
     const context = newContext(options)
-
-    if (batch.init(resolve, reject) === false) {
-      // couldn't init the batch
-      // we are probably being called within another fetchMultiple
-      // let's just run the callback and let the other invocation(s) do the fetch
-      return fetches()
-    }
-
+    const init = batch.init()
     fetches()
-    batch.forEach((req) => prepareRequest(req, context))
     batch.reset()
 
-    if (context.requests.length === 0) {
-      return batch.reject(new Error(errors.FETCH_MULTIPLE.NO_FETCHES))
-    }
-    const body = JSON.stringify(context.requests)
+    return new Promise((resolve, reject) => {
+      const { other, current } = init
+      if (other) {
+        return other.enqueue(resolve, reject)
+      } else {
+        current.enqueue(resolve, reject)
+      }
 
-    const fetchOptions = {
-      uri: 'batch',
-      headers: context.headers,
-      body
-    }
-    standardizeReqOptions(fetchOptions)
+      current.forEachReq((req) => prepareRequest(req, context))
 
-    internalApi.log('Batch #%d is being fetched...', batch.getId())
-    fetchJson(fetchOptions)
-      .then(json => {
-        processJobs(json, context)
-        batch.resolve(json)
-      })
-  })
+      if (context.requests.length === 0) {
+        return current.reject(new Error(errors.FETCH_MULTIPLE.NO_FETCHES))
+      }
+      const body = JSON.stringify(context.requests)
+
+      const fetchOptions = {
+        uri: 'batch',
+        headers: context.headers,
+        body
+      }
+      standardizeReqOptions(fetchOptions)
+
+      internalApi.log('Batch #%d is being fetched...', current.getId())
+      fetchJson(fetchOptions)
+        .then(json => {
+          processJobs(json, context)
+          current.resolve(json)
+        })
+    })
+  }
 
   return fetchMultiple
 }

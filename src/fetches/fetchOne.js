@@ -13,20 +13,16 @@ const fetchOneInit = (fetchJson, batch, internalApi) => {
 
     reqLatestId++
     const reqId = reqLatestId
+    const current = batch.getCurrent()
 
-    if (!batch.isOpen() || options.body !== null) {
+    if (current === null || options.body !== null) {
       internalApi.log('Request #%d is being fetched...', reqId)
       return fetchJson(options)
     } else {
-      internalApi.log('Request #%d is joining batch #%d...', reqId, batch.getId())
+      internalApi.log('Request #%d is joining batch #%d...', reqId, current.getId())
       return new Promise((resolve, reject) => {
-        batch.push({
-          options,
-          id: '_req' + reqId,
-          resolve,
-          reject,
-          uniqueId
-        })
+        const id = '_req' + reqId
+        current.pushReq({ id, options, resolve, reject, uniqueId })
       })
     }
   }

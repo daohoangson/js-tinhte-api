@@ -321,21 +321,24 @@ describe('api', () => {
         api.fetchOne('posts/4').catch(e => e)
         api.fetchOne('posts/5').catch(e => e)
       }
+      let checks = 0
 
       return api.fetchMultiple(() => {
         fetches1()
-        return api.fetchMultiple(fetches2)
+        api.fetchMultiple(fetches2)
           .then((json) => {
             expect(Object.keys(json.jobs)).toContain(md5('GET posts/3?'))
             expect(Object.keys(json.jobs)).toContain(md5('GET posts/4?'))
             expect(Object.keys(json.jobs)).toContain(md5('GET posts/5?'))
+            checks += 3
             expect(api.getFetchCount()).toBe(1)
           })
       }).then((json) => {
         expect(Object.keys(json.jobs)).toContain(md5('GET posts/1?'))
         expect(Object.keys(json.jobs)).toContain(md5('GET posts/2?'))
+        checks += 2
         expect(api.getFetchCount()).toBe(1)
-      })
+      }).then(() => expect(checks).toBe(5))
     })
 
     it('accepts non-object options', () => {
@@ -368,8 +371,7 @@ describe('api', () => {
   })
 
   describe('fetchMultiple internal', () => {
-    const mockedReqs = []
-    const mockedBatch = fetchBatchFactory(mockedReqs)
+    let mockedBatch
     let mockedFetchOne
     let mockedFetchMultiple
     let mockedResponse
@@ -377,6 +379,7 @@ describe('api', () => {
     beforeEach(() => {
       const mockedFetchJson = () => new Promise((resolve) => setTimeout(() => resolve(mockedResponse), 10))
       const mockedInternalApi = {log: console.log}
+      mockedBatch = fetchBatchFactory()
       mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedInternalApi)
       mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedInternalApi)
     })
@@ -403,6 +406,8 @@ describe('api', () => {
       return mockedFetchMultiple(() => {
         mockedFetchOne('one').then((json) => jsons.push(json))
         mockedFetchOne('two').catch((reason) => catched.push(reason))
+
+        const mockedReqs = mockedBatch.getCurrentReqs()
         mockedReqs[0].uniqueId = uniqueId
         mockedReqs[1].uniqueId = uniqueId
       }).then((json) => {
