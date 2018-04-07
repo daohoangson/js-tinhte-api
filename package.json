@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "tinhte-api React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -23,6 +23,10 @@
     "test:coverage": "standard && nwb test-react --coverage",
     "test:watch": "nwb test-react --server"
   },
+  "engines": {
+    "node": "9.11.1",
+    "npm": "5.6.0"
+  },
   "dependencies": {
     "isomorphic-unfetch": "^2.0.0",
     "js-cookie": "^2.2.0",
@@ -38,7 +42,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "form-data": "^2.3.2",
-    "next": "5.0.1-canary.5",
+    "next": "^5.1.0",
     "nwb": "0.21.x",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
@@ -46,7 +50,7 @@
     "sanitize-html": "^1.18.2",
     "standard": "^11.0.0",
     "stats-webpack-plugin": "^0.6.2",
-    "surge": "^0.19.0",
+    "surge": "^0.20.0",
     "webpack-bundle-analyzer": "^2.11.1"
   },
   "author": "Dao Hoang Son",
