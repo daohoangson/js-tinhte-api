@@ -72,7 +72,13 @@ const fetchesInit = (api, internalApi) => {
     if (params._xfToken) unfetchOptions.credentials = 'include'
 
     return unfetch(url, unfetchOptions)
-      .then(response => response.json())
+      .then(response => {
+        return response.json()
+          .catch((reason) => response.text()
+            .then((text) => internalApi.log('Error parsing JSON', url, text, reason))
+            .then(() => { throw reason })
+          )
+      })
       .then((json) => {
         if (json.errors) {
           throw new Error(json.errors)

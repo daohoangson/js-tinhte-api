@@ -110,7 +110,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       }
 
       if (typeof job._job_result !== 'string') {
-        return reject(job)
+        return reject(new Error(errors.FETCH_MULTIPLE.JOB_RESULT_NOT_FOUND))
       }
 
       if (job._job_result === 'ok') {
@@ -118,7 +118,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       } else if (job._job_error) {
         return reject(new Error(job._job_error))
       } else {
-        return reject(job)
+        return reject(new Error(job._job_result))
       }
     }
 
@@ -173,10 +173,16 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
 
       internalApi.log('Batch #%d is being fetched...', current.getId())
       fetchJson(fetchOptions)
-        .then(json => {
-          processJobs(json, context)
-          current.resolve(json)
-        })
+        .then(
+          (json) => {
+            processJobs(json, context)
+            current.resolve(json)
+          },
+          (reason) => {
+            processJobs({}, context)
+            current.reject(reason)
+          }
+        )
     })
   }
 

@@ -134,7 +134,17 @@ describe('api', () => {
       const api = apiFactory()
       return api.fetchOne('posts/1')
         .then(
-          (json) => Promise.reject(new Error(JSON.stringify(json))),
+          () => Promise.reject(new Error('Unexpected success?!')),
+          (reason) => expect(reason).toBeAn(Error)
+        )
+    })
+
+    it('rejects on non-json', () => {
+      const apiRoot = 'https://httpbin.org/html'
+      const api = apiFactory({apiRoot})
+      return api.fetchOne()
+        .then(
+          () => Promise.reject(new Error('Unexpected success?!')),
           (reason) => expect(reason).toBeAn(Error)
         )
     })
@@ -205,7 +215,7 @@ describe('api', () => {
 
       return api.fetchMultiple(fetches)
         .then(
-          (json) => Promise.reject(new Error(JSON.stringify(json))),
+          () => Promise.reject(new Error('Unexpected success?!')),
           (reason) => expect(reason).toBeAn(Error)
         )
     })
@@ -347,7 +357,7 @@ describe('api', () => {
 
       return api.fetchMultiple(fetches, 'foo')
         .then(
-          (json) => Promise.reject(new Error(JSON.stringify(json))),
+          () => Promise.reject(new Error('Unexpected success?!')),
           (reason) => expect(reason).toBeAn(Error)
         )
     })
@@ -367,6 +377,38 @@ describe('api', () => {
           expect(json._handled).toBe(0)
           expect(api.getFetchCount()).toBe(1)
         })
+    })
+
+    it('rejects sub-requests on non-json', () => {
+      const apiRoot = 'https://httpbin.org/html'
+      const api = apiFactory({apiRoot, debug: true})
+
+      const promises = []
+      let rejected = 0
+      const fetches = () => {
+        promises.push(api.fetchOne('foo')
+          .then(
+            () => Promise.reject(new Error('Unexpected success?!')),
+            () => (rejected++)
+          )
+        )
+        promises.push(api.fetchOne('bar')
+          .then(
+            () => Promise.reject(new Error('Unexpected success?!')),
+            () => (rejected++)
+          )
+        )
+      }
+
+      promises.push(api.fetchMultiple(fetches)
+        .then(
+          () => Promise.reject(new Error('Unexpected success?!')),
+          (reason) => expect(reason).toBeAn(Error)
+        )
+      )
+
+      return Promise.all(promises)
+        .then(() => expect(rejected).toBe(2))
     })
   })
 
@@ -425,11 +467,11 @@ describe('api', () => {
       const uniqueId = md5(`GET ${uri}?`)
       mockedResponse = {jobs: {[uniqueId]: job}}
       const catched = []
-      return mockedFetchMultiple(() => mockedFetchOne(uri).catch(json => catched.push(json)))
+      return mockedFetchMultiple(() => mockedFetchOne(uri).catch(reason => catched.push(reason)))
         .then((json) => {
           expect(json._handled).toBe(1)
           expect(catched.length).toBe(1)
-          expect(catched[0].foo).toBe(job.foo)
+          expect(catched[0].message).toBe(errors.FETCH_MULTIPLE.JOB_RESULT_NOT_FOUND)
         })
     })
 
@@ -457,7 +499,7 @@ describe('api', () => {
         .then((json) => {
           expect(json._handled).toBe(1)
           expect(catched.length).toBe(1)
-          expect(catched[0].bar).toBe(job.bar)
+          expect(catched[0].message).toBe(job._job_result)
         })
     })
   })
