@@ -22,7 +22,10 @@ const fetchApiDataForProvider = (api, internalApi, rootElement) => {
         return {}
       }
 
-      const fetches = () => queue.forEach((o) => api.fetchOne(o))
+      const fetches = () => queue.forEach(
+        (o, i) => api.fetchOne(o)
+          .catch((reason) => internalApi.log('fetchApiDataForProvider queue[%d] has been rejected (%s)', i, reason))
+      )
       return api.fetchMultiple(fetches)
     })
     .then((json) => json && json.jobs ? json.jobs : {})
