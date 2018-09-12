@@ -331,6 +331,9 @@ describe('api', () => {
         api.fetchOne('posts/4').catch(e => e)
         api.fetchOne('posts/5').catch(e => e)
       }
+      const fetches3 = () => {
+        api.fetchOne('posts/6').catch(e => e)
+      }
       let checks = 0
 
       return api.fetchMultiple(() => {
@@ -343,12 +346,14 @@ describe('api', () => {
             checks += 3
             expect(api.getFetchCount()).toBe(1)
           })
+        fetches3()
       }).then((json) => {
         expect(Object.keys(json.jobs)).toContain(md5('GET posts/1?'))
         expect(Object.keys(json.jobs)).toContain(md5('GET posts/2?'))
-        checks += 2
+        expect(Object.keys(json.jobs)).toContain(md5('GET posts/6?'))
+        checks += 3
         expect(api.getFetchCount()).toBe(1)
-      }).then(() => expect(checks).toBe(5))
+      }).then(() => expect(checks).toBe(6))
     })
 
     it('accepts non-object options', () => {

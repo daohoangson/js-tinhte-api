@@ -24,11 +24,12 @@ const batchFactory = () => {
         resolve: (json) => execute('resolve', json)
       }
 
-      return { current }
+      const reset = () => (current = null)
+
+      return { current, reset }
     },
     getCurrent: () => current,
-    getCurrentReqs: () => current.getReqs(),
-    reset: () => (current = null)
+    getCurrentReqs: () => current.getReqs()
   }
 
   return batch

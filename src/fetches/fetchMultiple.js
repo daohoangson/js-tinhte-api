@@ -145,12 +145,15 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
 
   const fetchMultiple = (fetches, options = {}) => {
     const context = newContext(options)
-    const init = batch.init()
+    const { current, other, reset } = batch.init()
+
     fetches()
-    batch.reset()
+
+    if (typeof reset === 'function') {
+      reset()
+    }
 
     return new Promise((resolve, reject) => {
-      const { other, current } = init
       if (other) {
         return other.enqueue(resolve, reject)
       } else {
