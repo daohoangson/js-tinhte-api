@@ -19,8 +19,8 @@ const hocApiProvider = (Component, api, internalApi) => {
 
       let { apiData } = this.props
       apiData = mustBePlainObject(apiData)
-      const apiContext = {api, apiData, internalApi}
-      this.state = {apiContext}
+      const apiContext = { api, apiData, internalApi }
+      this.state = { apiContext }
     }
 
     componentDidMount () {
@@ -28,7 +28,7 @@ const hocApiProvider = (Component, api, internalApi) => {
     }
 
     render () {
-      const props = {...this.props}
+      const props = { ...this.props }
       delete props.apiConfig
       delete props.apiData
 

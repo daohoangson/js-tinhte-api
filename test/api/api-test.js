@@ -39,7 +39,7 @@ describe('api', () => {
     it('returns jobs', () => {
       const api = apiFactory()
       const Child = () => 'child'
-      Child.apiFetches = {index: {uri: 'index'}}
+      Child.apiFetches = { index: { uri: 'index' } }
       const C = api.ConsumerHoc(Child)
       const P = api.ProviderHoc(() => <C />)
 
@@ -79,7 +79,7 @@ describe('api', () => {
       const clientSecret = 'cs'
       const debug = true
       const userId = 123
-      const api = apiFactory({auth: {userId}, clientId, debug})
+      const api = apiFactory({ auth: { userId }, clientId, debug })
       const regEx = new RegExp(`^${userId},\\d+,\\w{32},${clientId}`)
 
       const ott = api.generateOneTimeToken(clientSecret)
@@ -88,7 +88,7 @@ describe('api', () => {
 
     it('accepts ttl', () => {
       const debug = true
-      const api = apiFactory({debug})
+      const api = apiFactory({ debug })
       const ott = api.generateOneTimeToken('cs', 0)
 
       const m = ott.match(/^0,(\d+),/)
@@ -99,7 +99,7 @@ describe('api', () => {
     it('accepts exact date', () => {
       const clientId = 'ci'
       const debug = true
-      const api = apiFactory({clientId, debug})
+      const api = apiFactory({ clientId, debug })
       const timestamp = 123456
       const date = new Date(timestamp * 1000)
 
@@ -117,27 +117,27 @@ describe('api', () => {
   describe('getCookieName', () => {
     it('returns default cookie prefix', () => {
       const clientId = 'client ID'
-      const api = apiFactory({clientId})
+      const api = apiFactory({ clientId })
       expect(api.getCookieName()).toMatch(/^auth_/)
     })
 
     it('returns empty string without client ID', () => {
       const cookiePrefix = 'cookie prefix'
-      const api = apiFactory({cookiePrefix})
+      const api = apiFactory({ cookiePrefix })
       expect(api.getCookieName()).toBe('')
     })
 
     it('returns empty string without cookie prefix', () => {
       const clientId = 'client ID'
       const cookiePrefix = ''
-      const api = apiFactory({clientId, cookiePrefix})
+      const api = apiFactory({ clientId, cookiePrefix })
       expect(api.getCookieName()).toBe('')
     })
 
     it('returns empty string with unsafe client ID', () => {
       const clientId = '#'
       const cookiePrefix = 'cookie prefix'
-      const api = apiFactory({clientId, cookiePrefix})
+      const api = apiFactory({ clientId, cookiePrefix })
       expect(api.getCookieName()).toBe('')
     })
   })
@@ -170,7 +170,7 @@ describe('api', () => {
     it('accepts invalid state', () => {
       const accessToken = 'access token'
       const debug = true
-      const api = apiFactory({debug})
+      const api = apiFactory({ debug })
       const auth = {
         access_token: accessToken,
         state: ''
@@ -182,7 +182,7 @@ describe('api', () => {
     it('updates access token', () => {
       const accessToken = 'access token'
       const debug = true
-      const api = apiFactory({debug})
+      const api = apiFactory({ debug })
       const auth = {
         access_token: accessToken,
         state: api.getUniqueId()
@@ -194,7 +194,7 @@ describe('api', () => {
     it('accepts invalid user id', () => {
       const userId = -1
       const debug = true
-      const api = apiFactory({debug})
+      const api = apiFactory({ debug })
       const auth = {
         user_id: userId,
         state: api.getUniqueId()
@@ -206,7 +206,7 @@ describe('api', () => {
     it('updates user id', () => {
       const userId = Math.random()
       const debug = true
-      const api = apiFactory({debug})
+      const api = apiFactory({ debug })
       const auth = {
         user_id: userId,
         state: api.getUniqueId()
@@ -219,7 +219,7 @@ describe('api', () => {
       const userIdNumber = Math.floor(Math.random() * 1000)
       const userId = `${userIdNumber}`
       const debug = true
-      const api = apiFactory({debug})
+      const api = apiFactory({ debug })
       const auth = {
         user_id: userId,
         state: api.getUniqueId()

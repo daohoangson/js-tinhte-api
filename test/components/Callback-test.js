@@ -1,6 +1,6 @@
 import expect from 'expect'
 import React from 'react'
-import {render, unmountComponentAtNode} from 'react-dom'
+import { render, unmountComponentAtNode } from 'react-dom'
 
 import { apiFactory } from 'src/'
 
@@ -19,7 +19,7 @@ describe('components', () => {
 
     it('renders error', () => {
       const debug = true
-      const api = apiFactory({debug})
+      const api = apiFactory({ debug })
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
@@ -31,7 +31,7 @@ describe('components', () => {
       window.location.hash = '#state=yes'
 
       const debug = true
-      const api = apiFactory({debug})
+      const api = apiFactory({ debug })
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {

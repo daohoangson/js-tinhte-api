@@ -1,6 +1,6 @@
-import React, {Component} from 'react'
-import {render} from 'react-dom'
-import {BrowserRouter as Router, Route} from 'react-router-dom'
+import React, { Component } from 'react'
+import { render } from 'react-dom'
+import { BrowserRouter as Router, Route } from 'react-router-dom'
 import querystring from 'querystring'
 
 import { apiFactory } from '../../src'

@@ -13,13 +13,13 @@ const processCallback = (log) => {
     return false
   }
 
-  window.top.postMessage({auth}, window.location.origin)
+  window.top.postMessage({ auth }, window.location.origin)
   log && log('Forwarded auth to window.top')
 
   return true
 }
 
-const Callback = ({api, internalApi}) => {
+const Callback = ({ api, internalApi }) => {
   let success = false
 
   /* istanbul ignore else */

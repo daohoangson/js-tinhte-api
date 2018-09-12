@@ -36,7 +36,7 @@ class Item extends React.Component {
   render () {
     const { element, elements } = this.props
     const toggle = () => {
-      this.setState((prevState) => ({expand: !prevState.expand}))
+      this.setState((prevState) => ({ expand: !prevState.expand }))
     }
 
     let childrenCount = 0
@@ -52,7 +52,7 @@ class Item extends React.Component {
       <li>
         {`${element.navigation_type}: ${getTitle(element)} `}
         <a href={getLink(element)} target='_blank'>link</a>
-        {childrenCount > 0 && <span onClick={toggle} style={{cursor: 'pointer'}}>{` -> ${childrenCount}`}</span>}
+        {childrenCount > 0 && <span onClick={toggle} style={{ cursor: 'pointer' }}>{` -> ${childrenCount}`}</span>}
         {this.state.expand && <List elements={elements} parentId={element.navigation_id} />}
       </li>
     )

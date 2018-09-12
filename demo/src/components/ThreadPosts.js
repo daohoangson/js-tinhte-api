@@ -4,7 +4,7 @@ import sanitizeHtml from 'sanitize-html'
 import { apiHoc } from '../../../src'
 
 const preparePostBody = (post) => {
-  return {__html: sanitizeHtml(post.post_body_html)}
+  return { __html: sanitizeHtml(post.post_body_html) }
 }
 
 const ThreadPosts = ({ posts }) => (posts ? (

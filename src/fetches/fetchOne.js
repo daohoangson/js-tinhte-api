@@ -6,7 +6,7 @@ const fetchOneInit = (fetchJson, batch, internalApi) => {
 
   const fetchOne = (options) => {
     if (typeof options === 'string') {
-      options = {uri: options}
+      options = { uri: options }
     }
     options = mustBePlainObject(options)
     const uniqueId = standardizeReqOptions(options)

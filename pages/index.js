@@ -11,7 +11,7 @@ import VisitorThreads from '../demo/src/components/VisitorThreads'
 
 const callbackUrl = process.browser ? window.location.origin + '/api-callback' : ''
 const debug = true
-const apiConfig = {callbackUrl, debug}
+const apiConfig = { callbackUrl, debug }
 const api = apiFactory(apiConfig)
 
 const Index = () => (
@@ -32,7 +32,7 @@ const ApiProvider = api.ProviderHoc(Index)
 
 ApiProvider.getInitialProps = async ({ query }) => {
   const clientId = query.client_id
-  const reqConfig = {clientId}
+  const reqConfig = { clientId }
   const reqApi = api.clone(reqConfig)
 
   if (!process.browser) {
@@ -47,7 +47,7 @@ ApiProvider.getInitialProps = async ({ query }) => {
   return reqApi.fetchApiDataForProvider(<ReqApiProvider apiConfig={reqConfig} />)
     .then((apiData) => {
       Head.rewind()
-      return {apiConfig: reqConfig, apiData}
+      return { apiConfig: reqConfig, apiData }
     })
 }
 

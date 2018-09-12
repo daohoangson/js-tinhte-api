@@ -238,7 +238,7 @@ const apiFactory = (config = {}) => {
 
   const fetchShortcut = (method, options) => {
     if (typeof options === 'string') {
-      options = {uri: options}
+      options = { uri: options }
     }
     options = mustBePlainObject(options)
     options.method = method

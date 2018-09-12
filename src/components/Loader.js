@@ -77,11 +77,11 @@ class Loader extends React.Component {
         return
       }
       const auth = e.data.auth
-      const {api, internalApi} = this.props
+      const { api, internalApi } = this.props
       internalApi.log('Received auth via window message', auth)
 
       internalApi.setAuth(auth)
-      this.setState({userId: api.getUserId()})
+      this.setState({ userId: api.getUserId() })
 
       const accessToken = api.getAccessToken()
       if (accessToken && accessToken === auth.access_token) {
@@ -103,7 +103,7 @@ class Loader extends React.Component {
         ...cookieAuth,
         state: api.getUniqueId()
       })
-      this.setState({userId: api.getUserId()})
+      this.setState({ userId: api.getUserId() })
 
       // skip initializing further once we have recovered auth from cookie
       return
@@ -111,7 +111,7 @@ class Loader extends React.Component {
 
     const authorizeUrl = buildAuthorizeUrl(api)
     if (authorizeUrl) {
-      this.setState({src: authorizeUrl})
+      this.setState({ src: authorizeUrl })
     }
 
     /* istanbul ignore else */
@@ -131,7 +131,7 @@ class Loader extends React.Component {
     return (
       <iframe className='ApiLoader' data-user-id={this.state.userId}
         sandbox='allow-same-origin allow-scripts' src={this.state.src}
-        style={{display: 'block', height: 0, width: 0}} />
+        style={{ display: 'block', height: 0, width: 0 }} />
     )
   }
 }

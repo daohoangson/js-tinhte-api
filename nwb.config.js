@@ -35,7 +35,7 @@ const config = {
     },
     extra: {
       plugins: [
-        new StatsWebpackPlugin('stats.json', {chunkModules: true})
+        new StatsWebpackPlugin('stats.json', { chunkModules: true })
       ]
     }
   }

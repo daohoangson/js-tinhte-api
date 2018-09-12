@@ -13,7 +13,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       'Content-Type': 'application/json'
     }
 
-    const headers = {...batchHeaders}
+    const headers = { ...batchHeaders }
     const handlers = {}
     const reqIds = {}
     const requests = []
@@ -94,12 +94,12 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
 
     const resolve = (job) => {
       internalApi.log('Resolving %s %s...', handler.method, handler.uri)
-      return {resolved: handler.resolve(job)}
+      return { resolved: handler.resolve(job) }
     }
 
     const reject = (reason) => {
       internalApi.log('Rejecting %s %s (%s)...', handler.method, handler.uri, reason)
-      return {rejected: handler.reject(reason)}
+      return { rejected: handler.reject(reason) }
     }
 
     if (isPlainObject(job)) {

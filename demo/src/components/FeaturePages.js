@@ -5,7 +5,7 @@ const FeaturePage = ({ page }) => (
   <li>
     {'Feature page: '}
     {(page.links && page.links.image)
-      ? <img src={page.links.image} style={{maxHeight: '18px', verticalAlign: 'bottom'}} title={page.fullName} />
+      ? <img src={page.links.image} style={{ maxHeight: '18px', verticalAlign: 'bottom' }} title={page.fullName} />
       : page.fullName}
     {' '}
     <a href={page.links && page.links.permalink} target='_blank'>link</a>

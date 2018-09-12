@@ -44,8 +44,8 @@
     "react-dom": "^16.4.0",
     "react-router-dom": "^4.3.1",
     "sanitize-html": "^1.18.2",
-    "standard": "^11.0.1",
     "stats-webpack-plugin": "^0.6.2",
+    "standard": "^12.0.1",
     "surge": "^0.20.0",
     "webpack-bundle-analyzer": "^2.13.1"
   },
