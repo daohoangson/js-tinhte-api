@@ -13,7 +13,7 @@ const FeaturePage = ({ page }) => (
 )
 
 const FeaturePages = ({ pages }) => (
-  pages
+  (pages && typeof pages.map === 'function')
     ? <ul>
       { pages.map((page) => <FeaturePage page={page} key={page.tagText} />) }
     </ul>
