@@ -121,17 +121,11 @@ const executeFetches = (apiConsumer, api, fetches) => {
       return
     }
 
-    let promise = api.fetchOne(fetch)
-
     const { error, success } = fetch
-    promise = promise.catch(error || (() => ({})))
-    if (success) {
-      promise = promise.then(success)
-    }
-
-    promise = promise.then((value) => (fetchedData[key] = value))
-
-    promises.push(promise)
+    promises.push(api.fetchOne(fetch)
+      .then(success || (json => json), error || (() => ({})))
+      .then((value) => (fetchedData[key] = value))
+    )
   })
 
   return Promise.all(promises)
