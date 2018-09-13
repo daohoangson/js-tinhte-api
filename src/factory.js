@@ -4,6 +4,8 @@ import md5 from 'md5'
 import components from './components'
 import fetchesInit from './fetches'
 import { isPlainObject, mustBePlainObject } from './helpers'
+import oauthTokenGrantTypePassword from './helpers/oauth/token/grantTypePassword'
+import oauthTokenGrantTypeRefreshToken from './helpers/oauth/token/grantTypeRefreshToken'
 import helperCallbacksInit from './helpers/callbacks'
 import errors from './helpers/errors'
 import fetchApiDataForProvider from './helpers/fetchApiDataForProvider'
@@ -18,6 +20,18 @@ const apiFactory = (config = {}) => {
   let debug = false
   let ott = ''
   let scope = 'read'
+
+  const assertNotBrowser = () => {
+    /* istanbul ignore else  */
+    if (process.browser) {
+      const message = 'Running on browser is not allowed'
+      if (debug) {
+        console.error(message)
+      } else {
+        throw new Error(message)
+      }
+    }
+  }
 
   const updateConfig = (config) => {
     config = mustBePlainObject(config)
@@ -157,15 +171,7 @@ const apiFactory = (config = {}) => {
     fetchApiDataForProvider: (rootElement) => fetchApiDataForProvider(api, internalApi, rootElement),
 
     generateOneTimeToken: (clientSecret, ttl) => {
-      /* istanbul ignore else  */
-      if (process.browser) {
-        const message = 'Running on browser is not allowed'
-        if (debug) {
-          console.error(message)
-        } else {
-          throw new Error(message)
-        }
-      }
+      assertNotBrowser()
 
       const userId = api.getUserId()
 
@@ -250,6 +256,16 @@ const apiFactory = (config = {}) => {
   api.put = (options) => fetchShortcut('PUT', options)
 
   api.batch = api.fetchMultiple
+
+  api.login = (clientSecret, username, password) => {
+    assertNotBrowser()
+    return oauthTokenGrantTypePassword(api, internalApi, clientSecret, username, password)
+  }
+
+  api.refreshToken = (clientSecret, refreshToken) => {
+    assertNotBrowser()
+    return oauthTokenGrantTypeRefreshToken(api, internalApi, clientSecret, refreshToken)
+  }
 
   const callbacks = helperCallbacksInit(api, internalApi)
 

@@ -13,9 +13,11 @@ const config = {
   },
   karma: {
     extra: {
+      browserDisconnectTolerance: 4,
+      browserNoActivityTimeout: 30000,
       client: {
         mocha: {
-          timeout: 10000
+          timeout: 20000
         }
       }
     }

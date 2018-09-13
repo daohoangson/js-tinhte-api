@@ -81,7 +81,21 @@ const fetchesInit = (api, internalApi) => {
       })
       .then((json) => {
         if (json.errors) {
-          throw new Error(json.errors)
+          const errors = new Error(', '.join(json.errors))
+          internalApi.log('Fetched %s and found errors: %s', url, errors)
+          throw errors
+        }
+
+        if (json.error_description) {
+          const errorDescription = new Error(json.error_description)
+          internalApi.log('Fetched %s and found error_description: %s', url, errorDescription)
+          throw errorDescription
+        }
+
+        if (json.error) {
+          const error = new Error(json.error)
+          internalApi.log('Fetched %s and found error: %s', url, error)
+          throw error
         }
 
         internalApi.log('Fetched and parsed %s successfully, total=%d', url, fetchCount)

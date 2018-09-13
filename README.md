@@ -335,6 +335,11 @@ api.get({
 })
 ```
 
+#### Helpers
+
+- `api.login(clientSecret: string, username: string, password: string): Promise` executes POST request to oauth/token with OAuth2 [grant_type=password](https://oauth.net/2/grant-types/password/)
+- `api.refreshToken(clientSecret: string, refreshToken: string): Promise` executes POST request to oauth/token with OAuth2 [grant_type=refresh_token](https://oauth.net/2/grant-types/refresh-token/)
+
 ### api.fetchMultiple
 
 Alias:
