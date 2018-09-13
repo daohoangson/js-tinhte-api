@@ -17,7 +17,7 @@ const config = {
       browserNoActivityTimeout: 30000,
       client: {
         mocha: {
-          timeout: 20000
+          timeout: 50000
         }
       }
     }
