@@ -14,7 +14,7 @@ const createFetchObject = (api, element, fetches, key) => {
     return null
   }
 
-  return {...fetch}
+  return { ...fetch }
 }
 
 const useApiData = (apiConsumer, fetches) => {
@@ -151,7 +151,7 @@ const hocApiConsumer = (Component) => {
       this.cancelFetchesWithAuth = null
 
       const fetchedData = {}
-      this.state = {fetchedData}
+      this.state = { fetchedData }
 
       const { apiFetches } = Component
       useApiData(this, apiFetches)
@@ -180,7 +180,7 @@ const hocApiConsumer = (Component) => {
       const { apiContext } = this.props
       const { api } = apiContext
 
-      const props = {...this.props}
+      const props = { ...this.props }
       delete props.apiContext
 
       return <Component {...props} {...this.state.fetchedData} api={api} />

@@ -65,7 +65,7 @@ const fetchesInit = (api, internalApi) => {
 
     const { body, headers, method, params } = options
     const unfetchOptions = {
-      headers: {...mustBePlainObject(headers)},
+      headers: { ...mustBePlainObject(headers) },
       method
     }
     if (body) unfetchOptions.body = options.body

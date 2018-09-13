@@ -1,6 +1,6 @@
 import expect from 'expect'
 import React from 'react'
-import {render, unmountComponentAtNode} from 'react-dom'
+import { render, unmountComponentAtNode } from 'react-dom'
 
 import { apiFactory, apiHoc } from 'src/'
 import errors from 'src/helpers/errors'
@@ -60,7 +60,7 @@ describe('hoc', () => {
       const prop = 'foo'
       const P = api.ProviderHoc((props) => <div className='P'>{JSON.stringify(props)}</div>)
       render(<P prop={prop} apiConfig={apiConfig} apiData={apiData} />, node, () => {
-        expect(node.innerHTML).toContain('<div class="P">' + JSON.stringify({prop}) + '</div>')
+        expect(node.innerHTML).toContain('<div class="P">' + JSON.stringify({ prop }) + '</div>')
       })
     })
 
@@ -90,7 +90,7 @@ describe('hoc', () => {
           const api = apiFactory()
 
           const Child = () => 'foo'
-          Child.apiFetches = {index: {uri: 'index'}}
+          Child.apiFetches = { index: { uri: 'index' } }
           const C = api.ConsumerHoc(Child)
 
           return new Promise((resolve) => {
@@ -100,12 +100,12 @@ describe('hoc', () => {
         }
 
         it('fetches with non-object job data', () => {
-          const apiData = {foo: 'bar'}
+          const apiData = { foo: 'bar' }
           return testBadData(apiData)
         })
 
         it('fetches with bad job data', () => {
-          const apiData = {foo: {_req: 'bar'}}
+          const apiData = { foo: { _req: 'bar' } }
           return testBadData(apiData)
         })
       })
@@ -122,9 +122,9 @@ describe('hoc', () => {
         </div>
       )
       Child.apiFetches = {
-        test1a: {uri: 'index'},
-        test1b: {uri: 'index', success: () => 'test1b'},
-        test1c: () => ({uri: 'index', success: () => 'test1c'}),
+        test1a: { uri: 'index' },
+        test1b: { uri: 'index', success: () => 'test1b' },
+        test1c: () => ({ uri: 'index', success: () => 'test1c' }),
         noop: () => null
       }
       const C = api.ConsumerHoc(Child)
@@ -140,8 +140,8 @@ describe('hoc', () => {
         </div>
       )
       Child2.apiFetches = {
-        test2a: {uri: 'index'},
-        test2b: {uri: 'navigation'},
+        test2a: { uri: 'index' },
+        test2b: { uri: 'navigation' },
         noop2: () => null
       }
       const C2 = api2.ConsumerHoc(Child2)

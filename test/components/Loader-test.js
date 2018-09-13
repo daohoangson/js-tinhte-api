@@ -1,6 +1,6 @@
 import expect from 'expect'
 import React from 'react'
-import {render, unmountComponentAtNode} from 'react-dom'
+import { render, unmountComponentAtNode } from 'react-dom'
 
 import { apiFactory } from 'src/'
 
@@ -41,7 +41,7 @@ describe('components', () => {
 
     it('does not show up with access token already set', () => {
       const api = apiFactory({
-        auth: {accessToken: 'access token'},
+        auth: { accessToken: 'access token' },
         callbackUrl: 'callback url',
         clientId: 'client ID',
         scope: 'scope1 scope2'
@@ -71,7 +71,7 @@ describe('components', () => {
 
       it('without auth', (done) => {
         const apiConfig = {}
-        const messageFactory = () => ({foo: 'bar'})
+        const messageFactory = () => ({ foo: 'bar' })
         testReceiveMessage(apiConfig, messageFactory, () => {
           expect(node.innerHTML).toContain(`data-user-id="0"`)
           done()
@@ -80,7 +80,7 @@ describe('components', () => {
 
       it('without access token', (done) => {
         const apiConfig = {}
-        const messageFactory = () => ({auth: {}})
+        const messageFactory = () => ({ auth: {} })
         testReceiveMessage(apiConfig, messageFactory, () => {
           expect(node.innerHTML).toContain(`data-user-id="0"`)
           done()
@@ -90,7 +90,7 @@ describe('components', () => {
       it('with valid auth', (done) => {
         const clientId = 'client ID'
         const cookiePrefix = `auth${Math.random()}_`
-        const apiConfig = {clientId, cookiePrefix}
+        const apiConfig = { clientId, cookiePrefix }
         const userId = Math.random()
         const messageFactory = (api) => {
           const auth = {
@@ -99,7 +99,7 @@ describe('components', () => {
             user_id: userId,
             state: api.getUniqueId()
           }
-          const message = {auth}
+          const message = { auth }
           return message
         }
 
@@ -114,7 +114,7 @@ describe('components', () => {
       it('without expires_in -> no cookie', (done) => {
         const clientId = 'client ID'
         const cookiePrefix = `auth${Math.random()}_`
-        const apiConfig = {clientId, cookiePrefix}
+        const apiConfig = { clientId, cookiePrefix }
         const userId = Math.random()
         const messageFactory = (api) => {
           const auth = {
@@ -122,7 +122,7 @@ describe('components', () => {
             user_id: userId,
             state: api.getUniqueId()
           }
-          const message = {auth}
+          const message = { auth }
           return message
         }
 
@@ -135,7 +135,7 @@ describe('components', () => {
 
       it('without client ID -> no cookie', (done) => {
         const cookiePrefix = `auth${Math.random()}_`
-        const apiConfig = {cookiePrefix}
+        const apiConfig = { cookiePrefix }
         const userId = Math.random()
         const messageFactory = (api) => {
           const auth = {
@@ -144,7 +144,7 @@ describe('components', () => {
             user_id: userId,
             state: api.getUniqueId()
           }
-          const message = {auth}
+          const message = { auth }
           return message
         }
 
@@ -159,7 +159,7 @@ describe('components', () => {
     it('restores auth from cookie', (done) => {
       const clientId = 'client ID'
       const cookiePrefix = `auth${Math.random()}_`
-      const api = apiFactory({clientId, cookiePrefix})
+      const api = apiFactory({ clientId, cookiePrefix })
       const P = api.ProviderHoc(() => 'foo')
       const auth = {
         access_token: 'access token',

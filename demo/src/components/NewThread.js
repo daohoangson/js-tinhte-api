@@ -16,7 +16,7 @@ class NewThread extends React.Component {
 
   handleInputChange (event) {
     const { name, value } = event.target
-    this.setState({[name]: value})
+    this.setState({ [name]: value })
   }
 
   render () {
@@ -27,14 +27,14 @@ class NewThread extends React.Component {
 
     const postParams = () => api.post({
       uri: 'threads',
-      params: {...this.state}
+      params: { ...this.state }
     })
 
     const postFormData = () => {
       // eslint-disable-next-line
       const body = new FormData()
       Object.keys(this.state).forEach((k) => body.append(k, this.state[k]))
-      api.post({uri: 'threads', body})
+      api.post({ uri: 'threads', body })
     }
 
     return (

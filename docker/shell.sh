@@ -19,6 +19,9 @@ if [ ! -f "$_npmrcPath" ]; then
   touch "$_npmrcPath"
 fi
 
+# https://github.com/nodejs/Release
+_nodejsVersionLTS='8.12.0'
+
 docker run --rm -it \
   -p "13000:3000" \
   -v "$_srcPath:/src" \
@@ -27,4 +30,4 @@ docker run --rm -it \
   -v "$_dataPath/npm:/root/.npm" \
   -v "$_npmrcPath:/root/.npmrc" \
   -w "/src" \
-  node:9.11.1 bash
+  "node:$_nodejsVersionLTS" bash

@@ -1,6 +1,6 @@
 import expect from 'expect'
 import React from 'react'
-import {render, unmountComponentAtNode} from 'react-dom'
+import { render, unmountComponentAtNode } from 'react-dom'
 
 import { apiFactory, apiHoc } from 'src/'
 import { isPlainObject } from 'src/helpers'
@@ -33,7 +33,7 @@ describe('hoc', () => {
 
     it('populates api', (done) => {
       const userId = Math.random()
-      const api = apiFactory({auth: {userId: userId}})
+      const api = apiFactory({ auth: { userId: userId } })
 
       const Child = ({ api }) => <span className='userId'>{api ? api.getUserId() : 'not'}</span>
       const C = apiHoc.ApiConsumer(Child)
@@ -70,9 +70,9 @@ describe('hoc', () => {
       })
 
       it('executes if already authenticated', () => {
-        const api = apiFactory({auth: {}})
+        const api = apiFactory({ auth: {} })
         const Child = () => 'foo'
-        Child.apiFetchesWithAuth = {index: {uri: 'index'}}
+        Child.apiFetchesWithAuth = { index: { uri: 'index' } }
         const C = apiHoc.ApiConsumer(Child)
 
         return new Promise((resolve) => {
@@ -83,7 +83,7 @@ describe('hoc', () => {
 
       it('executes after new auth is available', () => {
         const debug = true
-        const api = apiFactory({debug})
+        const api = apiFactory({ debug })
 
         let successCount = 0
         const success = () => {
@@ -92,7 +92,7 @@ describe('hoc', () => {
         }
 
         const Child = () => 'foo'
-        Child.apiFetchesWithAuth = {index: {uri: 'index', success}}
+        Child.apiFetchesWithAuth = { index: { uri: 'index', success } }
         const C = apiHoc.ApiConsumer(Child)
 
         return new Promise((resolve) => {
@@ -105,7 +105,7 @@ describe('hoc', () => {
         const api = apiFactory()
 
         const Child = () => 'foo'
-        Child.apiFetchesWithAuth = {index: {uri: 'index'}}
+        Child.apiFetchesWithAuth = { index: { uri: 'index' } }
         const C = apiHoc.ApiConsumer(Child)
         const P = api.ProviderHoc(() => <C />)
 
@@ -129,7 +129,7 @@ describe('hoc', () => {
           index: (api, props) => {
             expect(api).toBeAn('object')
             expect(props.foo).toBe(foo)
-            return {uri: 'index'}
+            return { uri: 'index' }
           }
         }
         const C = apiHoc.ApiConsumer(Child)
@@ -170,16 +170,16 @@ describe('hoc', () => {
         })
 
         it('with non-object', () => {
-          return testDoesNoFetch({index: 'foo'})
+          return testDoesNoFetch({ index: 'foo' })
         })
 
         it('with function returning null', () => {
-          return testDoesNoFetch({index: () => null})
+          return testDoesNoFetch({ index: () => null })
         })
 
         it('with existing prop', () => {
           const random = Math.random()
-          return testDoesNoFetch({index: {uri: 'foo'}}, {index: random}, random)
+          return testDoesNoFetch({ index: { uri: 'foo' } }, { index: random }, random)
         })
       })
 
@@ -195,7 +195,7 @@ describe('hoc', () => {
             }
           </div>
         )
-        Child.apiFetches = {post1: {uri: 'posts/1'}}
+        Child.apiFetches = { post1: { uri: 'posts/1' } }
         const C = apiHoc.ApiConsumer(Child)
 
         return new Promise((resolve) => {
@@ -212,7 +212,7 @@ describe('hoc', () => {
         const api = apiFactory()
 
         const Child = () => 'foo'
-        Child.apiFetches = {index: {uri: 'index'}}
+        Child.apiFetches = { index: { uri: 'index' } }
         const C = apiHoc.ApiConsumer(Child)
 
         const test = () => new Promise((resolve) => {
@@ -231,7 +231,7 @@ describe('hoc', () => {
 
       it('handles bad context', () => {
         const Child = () => 'foo'
-        Child.apiFetches = {index: {uri: 'index'}}
+        Child.apiFetches = { index: { uri: 'index' } }
         const C = apiHoc.ApiConsumer(Child)
 
         return new Promise((resolve) => {
@@ -242,7 +242,7 @@ describe('hoc', () => {
       it('merge batch with apiFetchesWithAuth', () => {
         const clientId = 'client ID'
         const cookiePrefix = `auth${Math.random()}_`
-        const api = apiFactory({clientId, cookiePrefix})
+        const api = apiFactory({ clientId, cookiePrefix })
 
         const auth = {
           access_token: 'access token',
@@ -251,8 +251,8 @@ describe('hoc', () => {
         document.cookie = `${api.getCookieName()}=${JSON.stringify(auth)}`
 
         const Child = () => 'foo'
-        Child.apiFetchesWithAuth = {post1: {uri: 'posts/1'}}
-        Child.apiFetches = {post2: {uri: 'posts/2'}}
+        Child.apiFetchesWithAuth = { post1: { uri: 'posts/1' } }
+        Child.apiFetches = { post2: { uri: 'posts/2' } }
         const C = apiHoc.ApiConsumer(Child)
 
         return new Promise((resolve) => {
