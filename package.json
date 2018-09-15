@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api",
-  "version": "3.3.5",
+  "version": "3.3.6",
   "description": "tinhte-api React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -26,6 +26,7 @@
   "dependencies": {
     "isomorphic-unfetch": "^2.1.1",
     "js-cookie": "^2.2.0",
+    "form-data": "^2.3.2",
     "lodash": "^4.17.11",
     "md5": "^2.2.1",
     "querystring": "^0.2.0",
@@ -37,7 +38,6 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "form-data": "^2.3.2",
     "next": "6.1.1-canary.5",
     "nwb": "0.23.0",
     "react": "^16.5.0",
