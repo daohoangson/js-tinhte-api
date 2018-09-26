@@ -1,12 +1,16 @@
 import FormData from 'form-data'
 
+import { algos, encrypt } from '../../crypt'
+
+const algo = algos[0]
+
 const grantTypePassword = (api, internalApi, clientSecret, username, password) => {
   let formData = new FormData()
   formData.append('grant_type', 'password')
   formData.append('client_id', api.getClientId())
-  formData.append('client_secret', clientSecret)
   formData.append('username', username)
-  formData.append('password', password)
+  formData.append('password', encrypt(algo, password, clientSecret))
+  formData.append('password_algo', algo)
 
   const options = {
     body: formData,
