@@ -443,6 +443,21 @@ Params:
 Returns a `function` that can be used to cancel the callback.
 It's recommended to use `apiFetches` instead of using this method directly.
 
+### crypt
+
+```js
+import { crypt } from 'tinhte-api'
+
+const { algos, encrypt, decrypt } = crypt
+const algo = algos[0] // aes128
+const data = 'data'
+const key = 'key'
+
+const encrypted = encrypt(algo, data, key)
+const decrypted = decrypt(algo, encrypted, key)
+assert(encrypted === decrypted)
+```
+
 [build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api
 
