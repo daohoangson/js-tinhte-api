@@ -77,27 +77,21 @@ const fetchesInit = (api, internalApi) => {
       p = p.then(response => {
         return response.json()
           .catch((reason) => {
-            internalApi.log('Could not parse JSON', url, reason)
+            internalApi.log('Fetch %s and could not parse json: %s', url, reason.message)
             throw reason
           })
       })
         .then((json) => {
-          if (json.errors) {
-            const errors = new Error(', '.join(json.errors))
-            internalApi.log('Fetched %s and found errors: %s', url, errors)
-            throw errors
+          const { errors, error_description: desc } = json
+          if (errors && Array.isArray(errors)) {
+            const e = new Error(errors.join(', '))
+            internalApi.log('Fetched %s and found errors: %s', url, e.message)
+            throw e
           }
 
-          if (json.error_description) {
-            const errorDescription = new Error(json.error_description)
-            internalApi.log('Fetched %s and found error_description: %s', url, errorDescription)
-            throw errorDescription
-          }
-
-          if (json.error) {
-            const error = new Error(json.error)
-            internalApi.log('Fetched %s and found error: %s', url, error)
-            throw error
+          if (desc) {
+            internalApi.log('Fetched %s and found error_description: %s', url, desc)
+            throw new Error(desc)
           }
 
           internalApi.log('Fetched and parsed %s successfully, total=%d', url, fetchCount)

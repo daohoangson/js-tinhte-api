@@ -130,12 +130,21 @@ describe('api', () => {
         .then((json) => expect(json.args._xfToken).toBe(csrf))
     })
 
-    it('rejects on error', () => {
+    it('rejects on errors', () => {
       const api = apiFactory()
       return api.fetchOne('posts/1')
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason).toBeAn(Error)
+          (reason) => expect(reason.message).toBe('The requested post could not be found.')
+        )
+    })
+
+    it('rejects on error_description', () => {
+      const api = apiFactory()
+      return api.fetchOne({ method: 'POST', 'uri': 'oauth/token' })
+        .then(
+          () => Promise.reject(new Error('Unexpected success?!')),
+          (reason) => expect(reason.message).toBe('The grant type was not specified in the request')
         )
     })
 
