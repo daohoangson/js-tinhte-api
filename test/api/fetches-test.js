@@ -149,6 +149,13 @@ describe('api', () => {
         )
     })
 
+    it('skips json parsing', () => {
+      const apiRoot = 'https://httpbin.org/html'
+      const api = apiFactory({ apiRoot })
+      return api.fetchOne({ parseJson: false })
+        .then(response => expect(response.text()).toNotBe(''))
+    })
+
     describe('shortcut', () => {
       const testShortcut = (apiMethod, expectedJsonMethod) => {
         const apiRoot = 'https://httpbin.org/anything'
@@ -206,9 +213,40 @@ describe('api', () => {
           .then((json) => expect(json.data).toBe(body))
       })
     })
+
+    describe('within fetchMultiple', () => {
+      it('skips batch if has body', () => {
+        const apiRoot = 'https://httpbin.org/anything'
+        const api = apiFactory({ apiRoot })
+        return api.fetchMultiple(() => {
+          const bodyJson = { foo: `foo${Math.random()}` }
+          const options = {
+            body: JSON.stringify(bodyJson),
+            headers: { 'Content-Type': 'application/json' }
+          }
+          api.fetchOne(options)
+            .then((json) => expect(json.json.foo).toBe(bodyJson.foo))
+        }).then(
+          () => Promise.reject(new Error('Unexpected success?!')),
+          (reason) => expect(reason).toBeAn(Error)
+        )
+      })
+
+      it('skips batch if no json parsing', () => {
+        const apiRoot = 'https://httpbin.org/html'
+        const api = apiFactory({ apiRoot })
+        return api.fetchMultiple(() => {
+          api.fetchOne({ parseJson: false })
+            .then(response => expect(response.text()).toNotBe(''))
+        }).then(
+          () => Promise.reject(new Error('Unexpected success?!')),
+          (reason) => expect(reason).toBeAn(Error)
+        )
+      })
+    })
   })
 
-  describe('fetchMultiple', function () {
+  describe('fetchMultiple', () => {
     it('does nothing if no fetches', () => {
       const api = apiFactory()
       const fetches = () => {}

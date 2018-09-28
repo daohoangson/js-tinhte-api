@@ -300,8 +300,9 @@ Params:
    - `params` default=`{}`
    - `headers` default=`{}`
    - `body` default=`null`
+   - `parseJson` default=`true`
 
-Returns a `Promise` that will resolve to the response `JSON` object.
+Returns a `Promise` that will resolve to the parsed json or raw response object.
 
 A GET request example:
 

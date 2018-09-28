@@ -63,45 +63,50 @@ const fetchesInit = (api, internalApi) => {
 
     const url = buildUrl(options)
 
-    const { body, headers, method, params } = options
+    const { body, headers, method, params, parseJson } = options
     const unfetchOptions = {
       headers: { ...mustBePlainObject(headers) },
       method
     }
-    if (body) unfetchOptions.body = options.body
+    if (body) unfetchOptions.body = body
     if (params._xfToken) unfetchOptions.credentials = 'include'
 
-    return unfetch(url, unfetchOptions)
-      .then(response => {
+    let p = unfetch(url, unfetchOptions)
+
+    if (parseJson !== false) {
+      p = p.then(response => {
         return response.json()
-          .catch((reason) => response.text()
-            .then((text) => internalApi.log('Error parsing JSON', url, text, reason))
-            .then(() => { throw reason })
-          )
+          .catch((reason) => {
+            internalApi.log('Could not parse JSON', url, reason)
+            throw reason
+          })
       })
-      .then((json) => {
-        if (json.errors) {
-          const errors = new Error(', '.join(json.errors))
-          internalApi.log('Fetched %s and found errors: %s', url, errors)
-          throw errors
-        }
+        .then((json) => {
+          if (json.errors) {
+            const errors = new Error(', '.join(json.errors))
+            internalApi.log('Fetched %s and found errors: %s', url, errors)
+            throw errors
+          }
 
-        if (json.error_description) {
-          const errorDescription = new Error(json.error_description)
-          internalApi.log('Fetched %s and found error_description: %s', url, errorDescription)
-          throw errorDescription
-        }
+          if (json.error_description) {
+            const errorDescription = new Error(json.error_description)
+            internalApi.log('Fetched %s and found error_description: %s', url, errorDescription)
+            throw errorDescription
+          }
 
-        if (json.error) {
-          const error = new Error(json.error)
-          internalApi.log('Fetched %s and found error: %s', url, error)
-          throw error
-        }
+          if (json.error) {
+            const error = new Error(json.error)
+            internalApi.log('Fetched %s and found error: %s', url, error)
+            throw error
+          }
 
-        internalApi.log('Fetched and parsed %s successfully, total=%d', url, fetchCount)
+          internalApi.log('Fetched and parsed %s successfully, total=%d', url, fetchCount)
 
-        return json
-      })
+          return json
+        })
+    }
+
+    return p
   }
 
   const fetchOne = fetchOneInit(fetchJson, batch, internalApi)
