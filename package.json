@@ -24,7 +24,9 @@
     "test:watch": "nwb test-react --server"
   },
   "dependencies": {
+    "crypto-js": "^3.1.9-1",
     "isomorphic-unfetch": "^2.1.1",
+    "form-data": "^2.3.2",
     "js-cookie": "^2.2.0",
     "lodash": "^4.17.11",
     "md5": "^2.2.1",
@@ -33,14 +35,10 @@
   },
   "peerDependencies": {
     "babel-runtime": "6.x",
-    "crypto-js": "3.x",
-    "form-data": "2.x",
     "react": "^16.x"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "crypto-js": "^3.1.9-1",
-    "form-data": "^2.3.2",
     "next": "6.1.1-canary.5",
     "nwb": "0.23.0",
     "react": "^16.5.0",
