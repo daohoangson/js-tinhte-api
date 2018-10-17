@@ -35,8 +35,11 @@ const decrypt = (algo, data, key) => {
   return utf8
 }
 
+const hashMd5 = (data) => md5(data).toString()
+
 export {
   algos,
   encrypt,
-  decrypt
+  decrypt,
+  hashMd5
 }

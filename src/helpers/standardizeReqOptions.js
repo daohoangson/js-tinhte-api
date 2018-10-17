@@ -1,7 +1,7 @@
-import md5 from 'md5'
 import querystring from 'querystring'
 
 import { mustBePlainObject } from '.'
+import { hashMd5 } from './crypt'
 
 const filterEmptyValueFromArray = (array) => {
   const filtered = []
@@ -83,7 +83,7 @@ const standardizeReqOptions = (options) => {
     options.explain = `${options.method} full=${options.uri} params=${options.paramsAsString}`
   }
 
-  const uniqueId = md5(options.explain)
+  const uniqueId = hashMd5(options.explain)
 
   return uniqueId
 }

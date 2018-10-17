@@ -1,9 +1,9 @@
 import { isDate } from 'lodash'
-import md5 from 'md5'
 
 import components from './components'
 import fetchesInit from './fetches'
 import { isPlainObject, mustBePlainObject } from './helpers'
+import { hashMd5 } from './helpers/crypt'
 import oauthTokenGrantTypePassword from './helpers/oauth/token/grantTypePassword'
 import oauthTokenGrantTypeRefreshToken from './helpers/oauth/token/grantTypeRefreshToken'
 import helperCallbacksInit from './helpers/callbacks'
@@ -183,7 +183,7 @@ const apiFactory = (config = {}) => {
         timestamp = Math.floor(new Date().getTime() / 1000) + (typeof ttl === 'number' ? ttl : 3600)
       }
 
-      const once = md5(`${userId}${timestamp}${clientSecret}`)
+      const once = hashMd5(`${userId}${timestamp}${clientSecret}`)
       const ott = `${userId},${timestamp},${once},${clientId}`
 
       return ott

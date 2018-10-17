@@ -1,8 +1,8 @@
 import expect from 'expect'
-import md5 from 'md5'
 import React from 'react'
 
 import { apiFactory } from 'src/'
+import { hashMd5 as md5 } from 'src/helpers/crypt'
 
 describe('api', () => {
   describe('clone', () => {

@@ -1,12 +1,12 @@
 import FormData from 'form-data'
 import expect from 'expect'
-import md5 from 'md5'
 
 import { apiFactory } from 'src/'
 import fetchBatchFactory from 'src/fetches/batch'
 import fetchMultipleInit from 'src/fetches/fetchMultiple'
 import fetchOneInit from 'src/fetches/fetchOne'
 import errors from 'src/helpers/errors'
+import { hashMd5 as md5 } from 'src/helpers/crypt'
 
 describe('api', () => {
   describe('fetchOne', function () {
