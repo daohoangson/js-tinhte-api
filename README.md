@@ -139,7 +139,7 @@ Example:
 ```js
 import { apiFactory } from 'tinhte-api'
 
-const api = apiFactory()
+const api = apiFactory({ apiRoot, clientId })
 ```
 
 ### api.CallbackComponent
