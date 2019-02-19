@@ -132,10 +132,10 @@ describe('api', () => {
 
     it('rejects on errors', () => {
       const api = apiFactory()
-      return api.fetchOne('posts/1')
+      return api.fetchOne('posts/1?oauth_token=invalid')
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason.message).toBe('The requested post could not be found.')
+          (reason) => expect(reason.message).toBe('The access token provided is invalid')
         )
     })
 
