@@ -1,6 +1,5 @@
 import { isDate } from 'lodash'
 
-import components from './components'
 import fetchesInit from './fetches'
 import { isPlainObject, mustBePlainObject } from './helpers'
 import { hashMd5 } from './helpers/crypt'
@@ -8,8 +7,6 @@ import oauthTokenGrantTypePassword from './helpers/oauth/token/grantTypePassword
 import oauthTokenGrantTypeRefreshToken from './helpers/oauth/token/grantTypeRefreshToken'
 import helperCallbacksInit from './helpers/callbacks'
 import errors from './helpers/errors'
-import fetchApiDataForProvider from './helpers/fetchApiDataForProvider'
-import hoc from './hoc'
 
 const apiFactory = (config = {}) => {
   let apiRoot = 'https://tinhte.vn/appforo/index.php'
@@ -84,8 +81,6 @@ const apiFactory = (config = {}) => {
   let providerMounted = false
 
   const internalApi = {
-    LoaderComponent: () => components.Loader(api, internalApi),
-
     getAuth: () => auth,
 
     log: function (message) {
@@ -143,12 +138,6 @@ const apiFactory = (config = {}) => {
 
   const api = {
 
-    CallbackComponent: () => components.Callback(api, internalApi),
-
-    ConsumerHoc: hoc.ApiConsumer,
-
-    ProviderHoc: (Component) => hoc.ApiProvider(Component, api, internalApi),
-
     clone: (config) => {
       config = mustBePlainObject(config)
 
@@ -167,8 +156,6 @@ const apiFactory = (config = {}) => {
 
       return apiFactory(clonedConfig)
     },
-
-    fetchApiDataForProvider: (rootElement) => fetchApiDataForProvider(api, internalApi, rootElement),
 
     generateOneTimeToken: (clientSecret, ttl) => {
       assertNotBrowser()

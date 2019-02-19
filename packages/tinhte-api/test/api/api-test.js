@@ -1,8 +1,6 @@
 import expect from 'expect'
-import React from 'react'
 
 import { apiFactory } from 'src/'
-import { hashMd5 as md5 } from 'src/helpers/crypt'
 
 describe('api', () => {
   describe('clone', () => {
@@ -32,31 +30,6 @@ describe('api', () => {
       expect(api2.getDebug()).toBe(apiConfig.debug)
       expect(api2.getOtt()).toBe(apiConfig.ott)
       expect(api2.getScope()).toBe(apiConfig.scope)
-    })
-  })
-
-  describe('fetchApiDataForProvider', () => {
-    it('returns jobs', () => {
-      const api = apiFactory()
-      const Child = () => 'child'
-      Child.apiFetches = { index: { uri: 'index' } }
-      const C = api.ConsumerHoc(Child)
-      const P = api.ProviderHoc(() => <C />)
-
-      return api.fetchApiDataForProvider(<P />)
-        .then((apiData) => {
-          const uniqueId = md5('GET index?')
-          expect(Object.keys(apiData)).toContain(uniqueId)
-        })
-    })
-
-    it('handles no children', () => {
-      const api = apiFactory()
-      const P = api.ProviderHoc(() => 'foo')
-      return api.fetchApiDataForProvider(<P />)
-        .then((apiData) => {
-          expect(Object.keys(apiData).length).toBe(0)
-        })
     })
   })
 

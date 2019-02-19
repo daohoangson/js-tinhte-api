@@ -1,12 +1,4 @@
 export default {
-  API_CONSUMER: {
-    REQUIRED_PARAM_MISSING: 'ApiConsumer HOC requires Component param'
-  },
-
-  API_PROVIDER: {
-    REQUIRED_PARAMS_MISSING: 'ApiProvider HOC requires 3 params: Component, api and internalApi'
-  },
-
   FETCH_MULTIPLE: {
     JOB_NOT_FOUND: 'Could not find job from response',
     JOB_RESULT_NOT_FOUND: 'Could not find job result from response',

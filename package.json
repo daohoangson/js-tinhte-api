@@ -8,5 +8,15 @@
     "bootstrap": "lerna bootstrap",
     "test": "lerna run test",
     "test:tinhte-api": "lerna run test --scope tinhte-api"
+  },
+  "standard": {
+    "globals": [
+      "XenForo",
+      "XF",
+      "afterEach",
+      "beforeEach",
+      "describe",
+      "it"
+    ]
   }
 }
