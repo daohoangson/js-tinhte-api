@@ -5,7 +5,7 @@ import fetchOneInit from './fetchOne'
 import fetchMultipleInit from './fetchMultiple'
 import { mustBePlainObject } from '../helpers'
 
-const fetchesInit = (api, internalApi) => {
+const fetchesInit = (api) => {
   const batch = batchFactory()
 
   const buildUrlQueryParts = (options) => {
@@ -16,7 +16,7 @@ const fetchesInit = (api, internalApi) => {
       urlQueryParts.push(paramsAsString)
     }
 
-    const auth = internalApi.getAuth()
+    const auth = api.getAuth()
     if (auth) {
       if (!params.oauth_token && auth.accessToken) {
         params.oauth_token = auth.accessToken
@@ -77,7 +77,7 @@ const fetchesInit = (api, internalApi) => {
       p = p.then(response => {
         return response.json()
           .catch((reason) => {
-            internalApi.log('Fetch %s and could not parse json: %s', url, reason.message)
+            api._log('Fetch %s and could not parse json: %s', url, reason.message)
             throw reason
           })
       })
@@ -85,16 +85,16 @@ const fetchesInit = (api, internalApi) => {
           const { errors, error_description: desc } = json
           if (errors && Array.isArray(errors)) {
             const e = new Error(errors.join(', '))
-            internalApi.log('Fetched %s and found errors: %s', url, e.message)
+            api._log('Fetched %s and found errors: %s', url, e.message)
             throw e
           }
 
           if (desc) {
-            internalApi.log('Fetched %s and found error_description: %s', url, desc)
+            api._log('Fetched %s and found error_description: %s', url, desc)
             throw new Error(desc)
           }
 
-          internalApi.log('Fetched and parsed %s successfully, total=%d', url, fetchCount)
+          api._log('Fetched and parsed %s successfully, total=%d', url, fetchCount)
 
           return json
         })
@@ -103,9 +103,9 @@ const fetchesInit = (api, internalApi) => {
     return p
   }
 
-  const fetchOne = fetchOneInit(fetchJson, batch, internalApi)
+  const fetchOne = fetchOneInit(fetchJson, batch, api)
 
-  const fetchMultiple = fetchMultipleInit(fetchJson, batch, internalApi)
+  const fetchMultiple = fetchMultipleInit(fetchJson, batch, api)
 
   return {
     fetchOne,

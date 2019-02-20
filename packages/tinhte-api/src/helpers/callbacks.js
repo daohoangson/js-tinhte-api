@@ -7,14 +7,14 @@ const waitABitThen = (callback) => {
   }
 }
 
-const helperCallbacksInit = (api, internalApi) => {
+const helperCallbacksInit = (api) => {
   const sharedItems = []
   const sharedResolves = []
 
   const add = (list, callback, triggerNow) => {
     const { items } = list
     items.push(callback)
-    internalApi.log('Added new %s callback, total=%d', list.name, items.length)
+    api._log('Added new %s callback, total=%d', list.name, items.length)
 
     const cancel = () => {
       const i = items.indexOf(callback)
@@ -23,7 +23,7 @@ const helperCallbacksInit = (api, internalApi) => {
       }
 
       items.splice(i, 1)
-      internalApi.log('Removed %s callback #%d, remaining=%d', list.name, i, items.length)
+      api._log('Removed %s callback #%d, remaining=%d', list.name, i, items.length)
       return true
     }
 
@@ -41,7 +41,7 @@ const helperCallbacksInit = (api, internalApi) => {
 
     const fetches = () => {
       items.forEach((callback) => callback())
-      internalApi.log('Triggered %d callbacks', items.length)
+      api._log('Triggered %d callbacks', items.length)
 
       items.length = 0
     }

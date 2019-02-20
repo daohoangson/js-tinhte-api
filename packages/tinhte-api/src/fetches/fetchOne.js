@@ -1,7 +1,7 @@
 import { mustBePlainObject } from '../helpers'
 import standardizeReqOptions from '../helpers/standardizeReqOptions'
 
-const fetchOneInit = (fetchJson, batch, internalApi) => {
+const fetchOneInit = (fetchJson, batch, api) => {
   let reqLatestId = 0
 
   const fetchOne = (options) => {
@@ -22,10 +22,10 @@ const fetchOneInit = (fetchJson, batch, internalApi) => {
     )
 
     if (fetchIndividually) {
-      internalApi.log('Request #%d is being fetched...', reqId)
+      api._log('Request #%d is being fetched...', reqId)
       return fetchJson(options)
     } else {
-      internalApi.log('Request #%d is joining batch #%d...', reqId, current.getId())
+      api._log('Request #%d is joining batch #%d...', reqId, current.getId())
       return new Promise((resolve, reject) => {
         const id = '_req' + reqId
         current.pushReq({ id, options, resolve, reject, uniqueId })

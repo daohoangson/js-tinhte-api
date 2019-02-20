@@ -433,7 +433,7 @@ describe('api', () => {
 
     it('rejects sub-requests on non-json', () => {
       const apiRoot = 'https://httpbin.org/html'
-      const api = apiFactory({ apiRoot, debug: true })
+      const api = apiFactory({ apiRoot })
 
       const promises = []
       let rejected = 0
@@ -472,10 +472,10 @@ describe('api', () => {
 
     beforeEach(() => {
       const mockedFetchJson = () => new Promise((resolve) => setTimeout(() => resolve(mockedResponse), 10))
-      const mockedInternalApi = { log: console.log }
+      const mockedApi = { _log: () => {} }
       mockedBatch = fetchBatchFactory()
-      mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedInternalApi)
-      mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedInternalApi)
+      mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedApi)
+      mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedApi)
     })
 
     it('handles unknown job in response', () => {

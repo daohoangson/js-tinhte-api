@@ -123,19 +123,6 @@ describe('api', () => {
   })
 
   describe('setAuth', () => {
-    it('throws error if not debugging', () => {
-      const api = apiFactory()
-
-      let e
-      try {
-        api.setAuth()
-      } catch (something) {
-        e = something
-      }
-
-      expect(e).toBeAn(Error)
-    })
-
     it('accepts non-object', () => {
       // see onAuthenticated tests
     })
@@ -162,18 +149,6 @@ describe('api', () => {
       }
       return api.setAuth(auth)
         .then(() => expect(api.getAccessToken()).toBe(accessToken))
-    })
-
-    it('accepts invalid user id', () => {
-      const userId = -1
-      const debug = true
-      const api = apiFactory({ debug })
-      const auth = {
-        user_id: userId,
-        state: api.getUniqueId()
-      }
-      return api.setAuth(auth)
-        .then(() => expect(api.getUserId()).toBe(0))
     })
 
     it('updates user id', () => {

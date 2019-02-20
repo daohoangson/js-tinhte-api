@@ -6,5 +6,5 @@ export default {
     NO_FETCHES: 'There is no fetches'
   },
 
-  SET_AUTH_ACCESS_DENIED: 'Access denied'
+  ASSERT_NOT_BROWSER: 'Running on browser is not allowed'
 }
