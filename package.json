@@ -17,6 +17,7 @@
       "beforeEach",
       "describe",
       "it"
-    ]
+    ],
+    "parser": "babel-eslint"
   }
 }

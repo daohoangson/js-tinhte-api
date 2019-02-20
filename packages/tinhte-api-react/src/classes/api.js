@@ -9,7 +9,7 @@ import ApiConsumer from '../hoc/ApiConsumer'
 import ApiProvider from '../hoc/ApiProvider'
 
 class ApiReactInternal {
-  constructor(api) {
+  constructor (api) {
     this.api = api
 
     this._callbackListForAuth = { name: 'auth', items: [] }
@@ -40,10 +40,10 @@ class ApiReactInternal {
 }
 
 export default class ApiReact extends ApiBase {
-  constructor(config) {
+  constructor (config) {
     super(config)
 
-    this._internalApi = new ApiReactInternal(this);
+    this._internalApi = new ApiReactInternal(this)
     this.CallbackComponent = () => <Callback api={this} />
   }
 

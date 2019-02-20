@@ -24,7 +24,9 @@ const Callback = ({ api }) => {
 
   /* istanbul ignore else */
   if (process.browser) {
-    success = processCallback(() => api._log.call(api, arguments))
+    success = processCallback(function () {
+      return api._log(arguments)
+    })
   }
 
   if (!api.getDebug()) {

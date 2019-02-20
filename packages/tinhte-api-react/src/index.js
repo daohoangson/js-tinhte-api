@@ -1,5 +1,3 @@
-import React from 'react'
-
 import ApiReact from './classes/api'
 import apiHoc from './hoc'
 import { processCallback } from './components/Callback'
