@@ -16,10 +16,8 @@ class ApiReactInternal {
     this._callbackListForProviderMount = { name: 'provider mount', items: [] }
     this._callbacks = helperCallbacksInit(api)
     this._providerMounted = false
-  }
 
-  LoaderComponent () {
-    return <Loader api={this.api} />
+    this.LoaderComponent = () => <Loader api={this.api} />
   }
 
   onAuthenticated (callback) {
