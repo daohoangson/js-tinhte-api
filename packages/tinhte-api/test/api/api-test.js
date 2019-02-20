@@ -123,11 +123,7 @@ describe('api', () => {
   })
 
   describe('setAuth', () => {
-    it('accepts non-object', () => {
-      // see onAuthenticated tests
-    })
-
-    it('accepts invalid state', () => {
+    it('handles invalid state', () => {
       const accessToken = 'access token'
       const debug = true
       const api = apiFactory({ debug })
@@ -135,8 +131,9 @@ describe('api', () => {
         access_token: accessToken,
         state: ''
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getAccessToken()).toBe(''))
+
+      api.setAuth(auth)
+      expect(api.getAccessToken()).toBe('')
     })
 
     it('updates access token', () => {
@@ -147,8 +144,22 @@ describe('api', () => {
         access_token: accessToken,
         state: api.getUniqueId()
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getAccessToken()).toBe(accessToken))
+
+      api.setAuth(auth)
+      expect(api.getAccessToken()).toBe(accessToken)
+    })
+
+    it('handles invalid user id', () => {
+      const userId = -1
+      const debug = true
+      const api = apiFactory({ debug })
+      const auth = {
+        user_id: userId,
+        state: api.getUniqueId()
+      }
+
+      api.setAuth(auth)
+      expect(api.getUserId()).toBe(0)
     })
 
     it('updates user id', () => {
@@ -159,8 +170,9 @@ describe('api', () => {
         user_id: userId,
         state: api.getUniqueId()
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getUserId()).toBe(userId))
+
+      api.setAuth(auth)
+      expect(api.getUserId()).toBe(userId)
     })
 
     it('updates user id from string', () => {
@@ -172,8 +184,9 @@ describe('api', () => {
         user_id: userId,
         state: api.getUniqueId()
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getUserId()).toBe(userIdNumber))
+
+      api.setAuth(auth)
+      expect(api.getUserId()).toBe(userIdNumber)
     })
   })
 })

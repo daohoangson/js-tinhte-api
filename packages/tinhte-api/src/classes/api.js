@@ -5,7 +5,6 @@ import { isPlainObject, mustBePlainObject } from 'src/helpers'
 import { hashMd5 } from 'src/helpers/crypt'
 import oauthTokenGrantTypePassword from 'src/helpers/oauth/token/grantTypePassword'
 import oauthTokenGrantTypeRefreshToken from 'src/helpers/oauth/token/grantTypeRefreshToken'
-import helperCallbacksInit from 'src/helpers/callbacks'
 import errors from 'src/helpers/errors'
 
 const assertNotBrowser = (api) => {
@@ -40,12 +39,9 @@ export default class Api {
     this.scope = 'read'
     this.updateConfig(config)
 
-    this.callbackListForAuth = { name: 'auth', items: [] }
-    this.callbackListForProviderMount = { name: 'provider mount', items: [] }
     this.providerMounted = false
     this.uniqueId = ('' + Math.random()).substr(2, 6)
 
-    this.callbacks = helperCallbacksInit(this)
     this.fetches = fetchesInit(this)
   }
 
@@ -105,7 +101,8 @@ export default class Api {
   }
 
   getAuth () {
-    return Object.assign({}, this.auth)
+    const auth = this.auth || {}
+    return { ...auth }
   }
 
   getCallbackUrl () {
@@ -154,49 +151,26 @@ export default class Api {
     return auth.userId ? auth.userId : 0
   }
 
-  onAuthenticated (callback) {
-    return this.callbacks.add(this.callbackListForAuth, callback, this.auth !== null)
-  }
-
-  onProviderMounted (callback) {
-    return this.callbacks.add(this.callbackListForProviderMount, callback, this.providerMounted)
-  }
-
   setAuth (newAuth) {
-    this.auth = {
-      accessToken: '',
-      userId: 0
-    }
+    this.auth = {}
 
-    const notify = () => this.callbacks.fetchList(this.callbackListForAuth)
-
-    if (!isPlainObject(newAuth) ||
-      typeof newAuth.state !== 'string' ||
-      newAuth.state !== this.uniqueId) {
-      return notify()
+    if (!isPlainObject(newAuth) || newAuth.state !== this.uniqueId) {
+      return
     }
 
     if (typeof newAuth.access_token === 'string') {
       this.auth.accessToken = newAuth.access_token
     }
 
+    let userId = 0
     if (typeof newAuth.user_id === 'number') {
-      this.auth.userId = newAuth.user_id
+      userId = newAuth.user_id
     } else if (typeof newAuth.user_id === 'string') {
-      this.auth.userId = parseInt(newAuth.user_id)
+      userId = parseInt(newAuth.user_id)
     }
-
-    return notify()
-  }
-
-  setProviderMounted () {
-    if (this.providerMounted) {
-      return 0
+    if (userId > 0) {
+      this.auth.userId = userId
     }
-
-    this.providerMounted = true
-
-    return this.callbacks.fetchList(this.callbackListForProviderMount)
   }
 
   updateConfig (values) {
