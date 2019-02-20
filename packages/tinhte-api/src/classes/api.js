@@ -5,18 +5,6 @@ import { isPlainObject, mustBePlainObject } from '../helpers'
 import { hashMd5 } from '../helpers/crypt'
 import oauthTokenGrantTypePassword from '../helpers/oauth/token/grantTypePassword'
 import oauthTokenGrantTypeRefreshToken from '../helpers/oauth/token/grantTypeRefreshToken'
-import errors from '../helpers/errors'
-
-const assertNotBrowser = (api) => {
-  /* istanbul ignore else  */
-  if (process.browser) {
-    if (api.getDebug()) {
-      console.error(errors.ASSERT_NOT_BROWSER)
-    } else {
-      throw new Error(errors.ASSERT_NOT_BROWSER)
-    }
-  }
-}
 
 const fetchShortcut = (api, method, options) => {
   if (typeof options === 'string') {
@@ -56,8 +44,6 @@ export default class Api {
   }
 
   generateOneTimeToken (clientSecret, ttl) {
-    assertNotBrowser(this)
-
     const userId = this.getUserId()
 
     let timestamp
@@ -224,12 +210,10 @@ export default class Api {
   // helpers
 
   login (clientSecret, username, password) {
-    assertNotBrowser(this)
     return oauthTokenGrantTypePassword(this, clientSecret, username, password)
   }
 
   refreshToken (clientSecret, refreshToken) {
-    assertNotBrowser(this)
     return oauthTokenGrantTypeRefreshToken(this, clientSecret, refreshToken)
   }
 

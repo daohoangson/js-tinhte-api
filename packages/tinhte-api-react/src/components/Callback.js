@@ -20,18 +20,13 @@ const processCallback = (log) => {
 }
 
 const Callback = ({ api }) => {
-  let success = false
-
-  /* istanbul ignore else */
-  if (process.browser) {
-    success = processCallback(function () {
-      return api._log(arguments)
-    })
-  }
-
   if (!api.getDebug()) {
     return <span className='ApiCallback' />
   }
+
+  const success = processCallback(function () {
+    return api._log(arguments)
+  })
 
   return <span className='ApiCallback' data-success={success} />
 }

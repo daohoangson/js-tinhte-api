@@ -34,25 +34,11 @@ describe('api', () => {
   })
 
   describe('generateOneTimeToken', () => {
-    it('throws error if not debugging', () => {
-      const api = apiFactory()
-
-      let e
-      try {
-        api.generateOneTimeToken()
-      } catch (something) {
-        e = something
-      }
-
-      expect(e).toBeAn(Error)
-    })
-
     it('returns token', () => {
       const clientId = 'ci'
       const clientSecret = 'cs'
-      const debug = true
       const userId = 123
-      const api = apiFactory({ auth: { userId }, clientId, debug })
+      const api = apiFactory({ auth: { userId }, clientId })
       const regEx = new RegExp(`^${userId},\\d+,\\w{32},${clientId}`)
 
       const ott = api.generateOneTimeToken(clientSecret)
@@ -60,8 +46,7 @@ describe('api', () => {
     })
 
     it('accepts ttl', () => {
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const ott = api.generateOneTimeToken('cs', 0)
 
       const m = ott.match(/^0,(\d+),/)
@@ -71,8 +56,7 @@ describe('api', () => {
 
     it('accepts exact date', () => {
       const clientId = 'ci'
-      const debug = true
-      const api = apiFactory({ clientId, debug })
+      const api = apiFactory({ clientId })
       const timestamp = 123456
       const date = new Date(timestamp * 1000)
 
@@ -125,8 +109,7 @@ describe('api', () => {
   describe('setAuth', () => {
     it('handles invalid state', () => {
       const accessToken = 'access token'
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         access_token: accessToken,
         state: ''
@@ -138,8 +121,7 @@ describe('api', () => {
 
     it('updates access token', () => {
       const accessToken = 'access token'
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         access_token: accessToken,
         state: api.getUniqueId()
@@ -151,8 +133,7 @@ describe('api', () => {
 
     it('handles invalid user id', () => {
       const userId = -1
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         user_id: userId,
         state: api.getUniqueId()
@@ -164,8 +145,7 @@ describe('api', () => {
 
     it('updates user id', () => {
       const userId = Math.random()
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         user_id: userId,
         state: api.getUniqueId()
@@ -178,8 +158,7 @@ describe('api', () => {
     it('updates user id from string', () => {
       const userIdNumber = Math.floor(Math.random() * 1000)
       const userId = `${userIdNumber}`
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         user_id: userId,
         state: api.getUniqueId()
