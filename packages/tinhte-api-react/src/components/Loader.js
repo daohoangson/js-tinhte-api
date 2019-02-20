@@ -1,8 +1,6 @@
 import Cookies from 'js-cookie'
 import React from 'react'
 
-import { isPlainObject } from '../helpers'
-
 const buildAuthorizeUrl = (api) => {
   const clientId = api.getClientId()
   const callbackUrl = api.getCallbackUrl()
@@ -32,7 +30,7 @@ const getCookie = (api) => {
   }
 
   const value = Cookies.getJSON(name)
-  if (!isPlainObject(value)) {
+  if (!value) {
     return null
   }
 

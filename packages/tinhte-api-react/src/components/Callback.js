@@ -1,14 +1,11 @@
 import React from 'react'
 import querystring from 'querystring'
 
-import { mustBePlainObject } from '../helpers'
-
 const processCallback = (log) => {
-  let auth = window.location.hash
+  const auth = window.location.hash
     ? querystring.parse(window.location.hash.replace(/^#/, ''))
-    : {}
-  auth = mustBePlainObject(auth)
-  if (!auth.state) {
+    : false
+  if (!auth || !auth.state) {
     log && log('Couldn\'t extract state from %s', window.location.href)
     return false
   }

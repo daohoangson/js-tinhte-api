@@ -1,6 +1,5 @@
 import querystring from 'querystring'
 
-import { mustBePlainObject } from '.'
 import { hashMd5 } from './crypt'
 
 const filterEmptyValueFromArray = (array) => {
@@ -45,11 +44,10 @@ const filterEmptyKeyOrValueFromParams = (params) => {
   return filtered
 }
 
-const standardizeReqOptions = (options) => {
-  options = mustBePlainObject(options)
+const standardizeReqOptions = (options = {}) => {
   if (typeof options.uri !== 'string') options.uri = ''
-  options.params = mustBePlainObject(options.params)
-  options.headers = mustBePlainObject(options.headers)
+  options.params = options.params || {}
+  options.headers = options.headers || {}
   if (typeof options.body === 'undefined') options.body = null
   if (typeof options.method !== 'string') options.method = (options.body ? 'POST' : 'GET')
   options.method = options.method.toUpperCase()

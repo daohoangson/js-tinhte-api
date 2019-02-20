@@ -1,10 +1,8 @@
-import { isPlainObject, mustBePlainObject } from '../helpers'
 import errors from '../helpers/errors'
 import standardizeReqOptions from '../helpers/standardizeReqOptions'
 
 const fetchMultipleInit = (fetchJson, batch, api) => {
-  const newContext = (batchOptions) => {
-    batchOptions = mustBePlainObject(batchOptions)
+  const newContext = (batchOptions = {}) => {
     batchOptions.triggerHandlers = typeof batchOptions.triggerHandlers === 'boolean'
       ? batchOptions.triggerHandlers
       : true
@@ -102,8 +100,8 @@ const fetchMultipleInit = (fetchJson, batch, api) => {
       return { rejected: handler.reject(reason) }
     }
 
-    if (isPlainObject(job)) {
-      if (!isPlainObject(job._req) ||
+    if (job) {
+      if (!job._req ||
         job._req.method !== handler.method ||
         job._req.uri !== handler.uri) {
         return reject(new Error(errors.FETCH_MULTIPLE.MISMATCHED))
@@ -126,8 +124,7 @@ const fetchMultipleInit = (fetchJson, batch, api) => {
   }
 
   const processJobs = (json, context) => {
-    json.jobs = mustBePlainObject(json.jobs)
-    const { jobs } = json
+    const jobs = json.jobs || {}
     json._handled = 0
     normalizeJobs(jobs, context)
 

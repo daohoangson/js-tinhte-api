@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { isPlainObject, mustBePlainObject } from '../helpers'
 import errors from '../helpers/errors'
 import ApiContext from './ApiContext'
 
@@ -13,12 +12,11 @@ const hocApiProvider = (Component, api, internalApi) => {
     constructor (props) {
       super(props)
 
-      if (isPlainObject(props.apiConfig)) {
+      if (props.apiConfig) {
         api.updateConfig(props.apiConfig)
       }
 
-      let { apiData } = this.props
-      apiData = mustBePlainObject(apiData)
+      const apiData = this.props.apiData || {}
       const apiContext = { api, apiData }
       this.state = { apiContext }
     }

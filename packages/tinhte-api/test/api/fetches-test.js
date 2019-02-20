@@ -403,17 +403,6 @@ describe('api', () => {
       }).then(() => expect(checks).toBe(6))
     })
 
-    it('accepts non-object options', () => {
-      const api = apiFactory()
-      const fetches = () => {}
-
-      return api.fetchMultiple(fetches, 'foo')
-        .then(
-          () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason).toBeAn(Error)
-        )
-    })
-
     it('does not trigger handlers', () => {
       const api = apiFactory()
 

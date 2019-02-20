@@ -1,16 +1,12 @@
-import { isDate } from 'lodash'
-
 import fetchesInit from '../fetches'
-import { isPlainObject, mustBePlainObject } from '../helpers'
 import { hashMd5 } from '../helpers/crypt'
 import oauthTokenGrantTypePassword from '../helpers/oauth/token/grantTypePassword'
 import oauthTokenGrantTypeRefreshToken from '../helpers/oauth/token/grantTypeRefreshToken'
 
-const fetchShortcut = (api, method, options) => {
+const fetchShortcut = (api, method, options = {}) => {
   if (typeof options === 'string') {
     options = { uri: options }
   }
-  options = mustBePlainObject(options)
   options.method = method
   return api.fetchOne(options)
 }
@@ -47,7 +43,7 @@ export default class Api {
     const userId = this.getUserId()
 
     let timestamp
-    if (isDate(ttl)) {
+    if (typeof ttl === 'object' && typeof ttl.getTime === 'function') {
       // ttl is a Date, use its value directly
       timestamp = Math.floor(ttl.getTime() / 1000)
     } else {
@@ -123,7 +119,7 @@ export default class Api {
   setAuth (newAuth) {
     this.auth = {}
 
-    if (!isPlainObject(newAuth) || newAuth.state !== this.uniqueId) {
+    if (!newAuth || newAuth.state !== this.uniqueId) {
       return
     }
 
@@ -142,11 +138,9 @@ export default class Api {
     }
   }
 
-  updateConfig (values) {
-    const config = mustBePlainObject(values)
-
+  updateConfig (config = {}) {
     if (typeof config.apiRoot === 'string') this.apiRoot = config.apiRoot
-    if (isPlainObject(config.auth)) {
+    if (config.auth) {
       this.auth = {
         accessToken: '',
         userId: 0
@@ -158,17 +152,17 @@ export default class Api {
 
       if (this.auth.accessToken.length > 0 && this.auth.userId === 0) {
         // detect XenForo environments
-        if (typeof XenForo !== 'undefined' &&
-          isPlainObject(XenForo) &&
-          isPlainObject(XenForo.visitor) &&
+        if (typeof XenForo === 'object' &&
+          XenForo &&
+          typeof XenForo.visitor === 'object' &&
           typeof XenForo.visitor.user_id === 'number' &&
           typeof XenForo._csrfToken === 'string') {
           // XenForo 1.x
           this.auth.userId = XenForo.visitor.user_id
           this.auth._xf1 = XenForo
-        } else if (typeof XF !== 'undefined' &&
-          isPlainObject(XF) &&
-          isPlainObject(XF.config) &&
+        } else if (typeof XF === 'object' &&
+          XF &&
+          typeof XF.config === 'object' &&
           typeof XF.config.userId === 'number' &&
           typeof XF.config.csrf === 'string') {
           // XenForo 2.x
@@ -219,7 +213,7 @@ export default class Api {
 
   // internal methods
 
-  _cloneConfig (config) {
+  _cloneConfig (config = {}) {
     return {
       apiRoot: this.apiRoot,
       auth: this.auth,
@@ -230,7 +224,7 @@ export default class Api {
       ott: this.ott,
       scope: this.scope,
 
-      ...mustBePlainObject(config)
+      ...config
     }
   }
 

@@ -3,7 +3,6 @@ import unfetch from 'isomorphic-unfetch'
 import batchFactory from './batch'
 import fetchOneInit from './fetchOne'
 import fetchMultipleInit from './fetchMultiple'
-import { mustBePlainObject } from '../helpers'
 
 const fetchesInit = (api) => {
   const batch = batchFactory()
@@ -64,10 +63,7 @@ const fetchesInit = (api) => {
     const url = buildUrl(options)
 
     const { body, headers, method, params, parseJson } = options
-    const unfetchOptions = {
-      headers: { ...mustBePlainObject(headers) },
-      method
-    }
+    const unfetchOptions = { headers, method }
     if (body) unfetchOptions.body = body
     if (params._xfToken) unfetchOptions.credentials = 'include'
 

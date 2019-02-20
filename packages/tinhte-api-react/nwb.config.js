@@ -3,9 +3,6 @@ const StatsWebpackPlugin = require('stats-webpack-plugin')
 const config = {
   type: 'react-component',
   babel: {
-    cherryPick: [
-      'lodash'
-    ],
     runtime: true
   },
   devServer: {

@@ -3,7 +3,6 @@ import React from 'react'
 import { render, unmountComponentAtNode } from 'react-dom'
 
 import { apiFactory, apiHoc } from 'src/'
-import { isPlainObject } from 'src/helpers'
 import errors from 'src/helpers/errors'
 
 describe('hoc', () => {
@@ -189,7 +188,7 @@ describe('hoc', () => {
         const Child = ({ post1 }) => (
           <div className='post1'>
             {
-              isPlainObject(post1) &&
+              post1 &&
               Object.keys(post1).length === 0 &&
               'ok'
             }

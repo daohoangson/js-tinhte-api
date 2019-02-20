@@ -1,7 +1,6 @@
 import React from 'react'
 import { standardizeReqOptions } from 'tinhte-api'
 
-import { isPlainObject } from '../helpers'
 import errors from '../helpers/errors'
 import ApiContext from './ApiContext'
 
@@ -9,8 +8,11 @@ const createFetchObject = (api, element, fetches, key) => {
   let fetch = fetches[key]
   if (typeof fetch === 'function') {
     fetch = fetch(api, element.props)
+    if (!fetch) {
+      return null
+    }
   }
-  if (!isPlainObject(fetch)) {
+  if (typeof fetch !== 'object') {
     return null
   }
 
@@ -18,7 +20,7 @@ const createFetchObject = (api, element, fetches, key) => {
 }
 
 const useApiData = (apiConsumer, fetches) => {
-  if (!isPlainObject(fetches)) {
+  if (typeof fetches !== 'object') {
     return
   }
   const fetchKeys = Object.keys(fetches)
@@ -30,7 +32,7 @@ const useApiData = (apiConsumer, fetches) => {
   const { apiContext } = props
   const { fetchedData } = state
   const { api, apiData } = apiContext
-  if (!api || !isPlainObject(apiData)) {
+  if (!api || !apiData) {
     return
   }
 
@@ -42,15 +44,15 @@ const useApiData = (apiConsumer, fetches) => {
     }
 
     const fetch = createFetchObject(api, apiConsumer, fetches, key)
-    if (!isPlainObject(fetch)) {
+    if (!fetch) {
       return
     }
 
     const uniqueId = standardizeReqOptions(fetch)
     const job = apiData[uniqueId]
 
-    if (!isPlainObject(job) ||
-      !isPlainObject(job._req) ||
+    if (!job ||
+      !job._req ||
       job._req.method !== fetch.method ||
       job._req.uri !== fetch.uri ||
       typeof job._job_result !== 'string' ||
@@ -78,7 +80,7 @@ const useApiData = (apiConsumer, fetches) => {
 const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
   const notify = () => onFetched && onFetched()
 
-  if (!isPlainObject(fetches)) {
+  if (!fetches) {
     return notify()
   }
 
@@ -115,7 +117,7 @@ const executeFetches = (apiConsumer, api, fetches) => {
   const fetchedData = {}
   Object.keys(fetches).forEach((key) => {
     const fetch = createFetchObject(api, apiConsumer, fetches, key)
-    if (!isPlainObject(fetch)) {
+    if (!fetch) {
       return
     }
 
@@ -193,13 +195,13 @@ const hocApiConsumer = (Component) => {
 
   ApiContextConsumer.apiPreFetch = (api, element, queue) => {
     const fetches = Component.apiFetches
-    if (!isPlainObject(fetches)) {
+    if (typeof fetches !== 'object') {
       return
     }
 
     Object.keys(fetches).forEach((key) => {
       const fetch = createFetchObject(api, element, fetches, key)
-      if (!isPlainObject(fetch)) {
+      if (!fetch) {
         return
       }
 

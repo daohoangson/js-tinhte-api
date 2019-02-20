@@ -1,14 +1,12 @@
-import { mustBePlainObject } from '../helpers'
 import standardizeReqOptions from '../helpers/standardizeReqOptions'
 
 const fetchOneInit = (fetchJson, batch, api) => {
   let reqLatestId = 0
 
-  const fetchOne = (options) => {
+  const fetchOne = (options = {}) => {
     if (typeof options === 'string') {
       options = { uri: options }
     }
-    options = mustBePlainObject(options)
     const uniqueId = standardizeReqOptions(options)
 
     reqLatestId++
