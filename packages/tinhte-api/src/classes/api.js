@@ -1,11 +1,11 @@
 import { isDate } from 'lodash'
 
-import fetchesInit from 'src/fetches'
-import { isPlainObject, mustBePlainObject } from 'src/helpers'
-import { hashMd5 } from 'src/helpers/crypt'
-import oauthTokenGrantTypePassword from 'src/helpers/oauth/token/grantTypePassword'
-import oauthTokenGrantTypeRefreshToken from 'src/helpers/oauth/token/grantTypeRefreshToken'
-import errors from 'src/helpers/errors'
+import fetchesInit from '../fetches'
+import { isPlainObject, mustBePlainObject } from '../helpers'
+import { hashMd5 } from '../helpers/crypt'
+import oauthTokenGrantTypePassword from '../helpers/oauth/token/grantTypePassword'
+import oauthTokenGrantTypeRefreshToken from '../helpers/oauth/token/grantTypeRefreshToken'
+import errors from '../helpers/errors'
 
 const assertNotBrowser = (api) => {
   /* istanbul ignore else  */
@@ -39,29 +39,12 @@ export default class Api {
     this.scope = 'read'
     this.updateConfig(config)
 
-    this.providerMounted = false
-    this.uniqueId = ('' + Math.random()).substr(2, 6)
-
     this.fetches = fetchesInit(this)
+    this.uniqueId = ('' + Math.random()).substr(2, 6)
   }
 
   clone (config) {
-    config = mustBePlainObject(config)
-
-    const clonedConfig = {
-      apiRoot: this.apiRoot,
-      auth: this.auth,
-      callbackUrl: this.callbackUrl,
-      clientId: this.clientId,
-      cookiePrefix: this.cookiePrefix,
-      debug: this.debug,
-      ott: this.ott,
-      scope: this.scope,
-
-      ...config
-    }
-
-    return new Api(clonedConfig)
+    return new Api(this._cloneConfig(config))
   }
 
   fetchMultiple (fetches, options = {}) {
@@ -251,6 +234,21 @@ export default class Api {
   }
 
   // internal methods
+
+  _cloneConfig (config) {
+    return {
+      apiRoot: this.apiRoot,
+      auth: this.auth,
+      callbackUrl: this.callbackUrl,
+      clientId: this.clientId,
+      cookiePrefix: this.cookiePrefix,
+      debug: this.debug,
+      ott: this.ott,
+      scope: this.scope,
+
+      ...mustBePlainObject(config)
+    }
+  }
 
   _log (message) {
     if (!this.debug) {
