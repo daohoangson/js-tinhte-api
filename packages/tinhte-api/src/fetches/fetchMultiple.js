@@ -1,7 +1,7 @@
 import errors from '../helpers/errors'
 import standardizeReqOptions from '../helpers/standardizeReqOptions'
 
-const fetchMultipleInit = (fetchJson, batch, api) => {
+const fetchMultipleInit = (fetchJson, batch, internalApi) => {
   const newContext = (batchOptions = {}) => {
     batchOptions.triggerHandlers = typeof batchOptions.triggerHandlers === 'boolean'
       ? batchOptions.triggerHandlers
@@ -91,12 +91,12 @@ const fetchMultipleInit = (fetchJson, batch, api) => {
     const handler = handlers[reqId]
 
     const resolve = (job) => {
-      api._log('Resolving %s %s...', handler.method, handler.uri)
+      internalApi.log('Resolving %s %s...', handler.method, handler.uri)
       return { resolved: handler.resolve(job) }
     }
 
     const reject = (reason) => {
-      api._log('Rejecting %s %s (%s)...', handler.method, handler.uri, reason)
+      internalApi.log('Rejecting %s %s (%s)...', handler.method, handler.uri, reason)
       return { rejected: handler.reject(reason) }
     }
 
@@ -171,7 +171,7 @@ const fetchMultipleInit = (fetchJson, batch, api) => {
       }
       standardizeReqOptions(fetchOptions)
 
-      api._log('Batch #%d is being fetched...', current.getId())
+      internalApi.log('Batch #%d is being fetched...', current.getId())
       fetchJson(fetchOptions)
         .then(
           (json) => {

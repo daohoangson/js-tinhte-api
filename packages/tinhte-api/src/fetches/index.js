@@ -4,7 +4,7 @@ import batchFactory from './batch'
 import fetchOneInit from './fetchOne'
 import fetchMultipleInit from './fetchMultiple'
 
-const fetchesInit = (api) => {
+const fetchesInit = (api, internalApi) => {
   const batch = batchFactory()
 
   const buildUrlQueryParts = (options) => {
@@ -73,7 +73,7 @@ const fetchesInit = (api) => {
       p = p.then(response => {
         return response.json()
           .catch((reason) => {
-            api._log('Fetch %s and could not parse json: %s', url, reason.message)
+            internalApi.log('Fetch %s and could not parse json: %s', url, reason.message)
             throw reason
           })
       })
@@ -81,16 +81,16 @@ const fetchesInit = (api) => {
           const { errors, error_description: desc } = json
           if (errors && Array.isArray(errors)) {
             const e = new Error(errors.join(', '))
-            api._log('Fetched %s and found errors: %s', url, e.message)
+            internalApi.log('Fetched %s and found errors: %s', url, e.message)
             throw e
           }
 
           if (desc) {
-            api._log('Fetched %s and found error_description: %s', url, desc)
+            internalApi.log('Fetched %s and found error_description: %s', url, desc)
             throw new Error(desc)
           }
 
-          api._log('Fetched and parsed %s successfully, total=%d', url, fetchCount)
+          internalApi.log('Fetched and parsed %s successfully, total=%d', url, fetchCount)
 
           return json
         })
@@ -99,9 +99,9 @@ const fetchesInit = (api) => {
     return p
   }
 
-  const fetchOne = fetchOneInit(fetchJson, batch, api)
+  const fetchOne = fetchOneInit(fetchJson, batch, internalApi)
 
-  const fetchMultiple = fetchMultipleInit(fetchJson, batch, api)
+  const fetchMultiple = fetchMultipleInit(fetchJson, batch, internalApi)
 
   return {
     fetchOne,

@@ -106,6 +106,19 @@ describe('api', () => {
     })
   })
 
+  describe('hasAuth', () => {
+    it('returns false', () => {
+      const api = apiFactory()
+      expect(api.hasAuth()).toBe(false)
+    })
+
+    it('returns true', () => {
+      const auth = {}
+      const api = apiFactory({ auth })
+      expect(api.hasAuth()).toBe(true)
+    })
+  })
+
   describe('setAuth', () => {
     it('handles invalid state', () => {
       const accessToken = 'access token'

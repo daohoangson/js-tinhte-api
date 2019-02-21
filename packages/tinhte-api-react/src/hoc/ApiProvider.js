@@ -17,7 +17,7 @@ const hocApiProvider = (Component, api, internalApi) => {
       }
 
       const apiData = this.props.apiData || {}
-      const apiContext = { api, apiData }
+      const apiContext = { api, apiData, internalApi }
       this.state = { apiContext }
     }
 

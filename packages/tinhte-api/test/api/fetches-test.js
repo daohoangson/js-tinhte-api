@@ -461,10 +461,10 @@ describe('api', () => {
 
     beforeEach(() => {
       const mockedFetchJson = () => new Promise((resolve) => setTimeout(() => resolve(mockedResponse), 10))
-      const mockedApi = { _log: () => {} }
+      const mockedInternalApi = { log: () => {} }
       mockedBatch = fetchBatchFactory()
-      mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedApi)
-      mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedApi)
+      mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedInternalApi)
+      mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedInternalApi)
     })
 
     it('handles unknown job in response', () => {

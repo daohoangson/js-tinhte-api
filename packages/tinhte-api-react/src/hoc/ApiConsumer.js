@@ -31,8 +31,8 @@ const useApiData = (apiConsumer, fetches) => {
   const { props, state } = apiConsumer
   const { apiContext } = props
   const { fetchedData } = state
-  const { api, apiData } = apiContext
-  if (!api || !apiData) {
+  const { api, apiData, internalApi } = apiContext
+  if (!api || !apiData || !internalApi) {
     return
   }
 
@@ -74,7 +74,7 @@ const useApiData = (apiConsumer, fetches) => {
     fetchedData[key] = success ? success(foundJobs[key]) : foundJobs[key]
   })
 
-  api._log('useApiData -> fetchedData (keys): ', Object.keys(fetchedData))
+  internalApi.log('useApiData -> fetchedData (keys): ', Object.keys(fetchedData))
 }
 
 const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
@@ -103,12 +103,12 @@ const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
     return notify()
   }
 
-  const { api } = apiContext
-  if (!api || !api[eventName] || typeof api[eventName] !== 'function') {
+  const { api, internalApi } = apiContext
+  if (!api || !api[eventName] || typeof api[eventName] !== 'function' || !internalApi) {
     return notify()
   }
   const onEvent = api[eventName]
-  api._log('executeFetchesIfNeeded -> neededKeys', neededKeys)
+  internalApi.log('executeFetchesIfNeeded -> neededKeys', neededKeys)
   return onEvent.call(api, () => executeFetches(apiConsumer, api, neededFetches).then(notify))
 }
 

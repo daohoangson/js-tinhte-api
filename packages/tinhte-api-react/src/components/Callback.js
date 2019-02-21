@@ -21,10 +21,7 @@ const Callback = ({ api }) => {
     return <span className='ApiCallback' />
   }
 
-  const success = processCallback(function () {
-    return api._log(arguments)
-  })
-
+  const success = processCallback(console.log)
   return <span className='ApiCallback' data-success={success} />
 }
 

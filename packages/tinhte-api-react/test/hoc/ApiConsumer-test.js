@@ -81,8 +81,7 @@ describe('hoc', () => {
       })
 
       it('executes after new auth is available', () => {
-        const debug = true
-        const api = apiFactory({ debug })
+        const api = apiFactory()
 
         let successCount = 0
         const success = () => {

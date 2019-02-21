@@ -75,8 +75,8 @@ class Loader extends React.Component {
         return
       }
       const auth = e.data.auth
-      const { api } = this.props
-      api._log('Received auth via window message', auth)
+      const { api, internalApi } = this.props
+      internalApi.log('Received auth via window message', auth)
 
       api.setAuth(auth)
       this.setState({ userId: api.getUserId() })
@@ -85,17 +85,17 @@ class Loader extends React.Component {
       if (accessToken && accessToken === auth.access_token) {
         const cookie = setCookie(api, auth)
         if (cookie !== null) {
-          api._log('Set cookie %s until %s', cookie.name, cookie.expires)
+          internalApi.log('Set cookie %s until %s', cookie.name, cookie.expires)
         }
       }
     }
   }
 
   componentDidMount () {
-    const { api } = this.props
+    const { api, internalApi } = this.props
     const cookieAuth = getCookie(api)
     if (cookieAuth !== null) {
-      api._log('Restored auth from cookie', cookieAuth)
+      internalApi.log('Restored auth from cookie', cookieAuth)
 
       api.setAuth({
         ...cookieAuth,

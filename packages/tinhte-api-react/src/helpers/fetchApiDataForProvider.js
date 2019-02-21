@@ -1,6 +1,6 @@
 import reactTreeWalker from 'react-tree-walker'
 
-const fetchApiDataForProvider = (api, rootElement) => {
+const fetchApiDataForProvider = (api, internalApi, rootElement) => {
   const queue = []
 
   return reactTreeWalker(rootElement, (element) => {
@@ -16,7 +16,7 @@ const fetchApiDataForProvider = (api, rootElement) => {
     return true
   })
     .then(() => {
-      api._log('fetchApiDataForProvider queue.length = %d', queue.length)
+      internalApi.log('fetchApiDataForProvider queue.length = %d', queue.length)
 
       if (queue.length === 0) {
         return {}
@@ -24,7 +24,7 @@ const fetchApiDataForProvider = (api, rootElement) => {
 
       const fetches = () => queue.forEach(
         (o, i) => api.fetchOne(o)
-          .catch((reason) => api._log('fetchApiDataForProvider queue[%d] has been rejected (%s)', i, reason))
+          .catch((reason) => internalApi.log('fetchApiDataForProvider queue[%d] has been rejected (%s)', i, reason))
       )
       return api.fetchMultiple(fetches)
     })

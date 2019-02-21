@@ -4,7 +4,7 @@ import { algos, encrypt } from '../../crypt'
 
 const algo = algos[0]
 
-const grantTypePassword = (api, clientSecret, username, password) => {
+const grantTypePassword = (api, internalApi, clientSecret, username, password) => {
   let formData = new FormData()
   formData.append('grant_type', 'password')
   formData.append('client_id', api.getClientId())
@@ -21,7 +21,7 @@ const grantTypePassword = (api, clientSecret, username, password) => {
   return api.fetchOne(options)
     .then((json) => {
       if (json.user_id) {
-        api._log('oauth/token?grant_type=password: %s -> %d', username, json.user_id)
+        internalApi.log('oauth/token?grant_type=password: %s -> %d', username, json.user_id)
       }
 
       return json
