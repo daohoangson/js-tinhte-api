@@ -45,7 +45,7 @@ const reactFactory = (apiCore) => {
   const callbackListForProviderMount = { name: 'provider mount', items: [] }
   const callbacks = helperCallbacksInit(api, internalApi)
 
-  api.CallbackComponent = () => <Callback api={api} />
+  api.CallbackComponent = () => <Callback api={api} internalApi={internalApi} />
 
   api.ConsumerHoc = ApiConsumer
 
