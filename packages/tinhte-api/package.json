@@ -1,16 +1,20 @@
 {
   "name": "tinhte-api",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "tinhte-api library",
   "main": "lib/index.js",
   "module": "es/index.js",
   "files": [
     "es",
-    "lib"
+    "lib",
+    "umd/tinhte-api.js",
+    "umd/tinhte-api.min.js",
+    "umd/tinhte-api.min.js.map"
   ],
   "scripts": {
     "build": "nwb build-web-module",
     "clean": "nwb clean-module",
+    "stats:analyzer": "webpack-bundle-analyzer umd/stats.json umd --host 0.0.0.0 --port 3000",
     "test": "standard && nwb test",
     "test:coverage": "standard && nwb test --coverage"
   },
@@ -29,7 +33,9 @@
     "eslint": "^4.19.1",
     "nwb": "0.23.0",
     "standard": "^12.0.1",
-    "webpack": "^4.29.5"
+    "stats-webpack-plugin": "^0.7.0",
+    "webpack": "^4.29.5",
+    "webpack-bundle-analyzer": "^3.0.4"
   },
   "author": "Dao Hoang Son",
   "homepage": "https://tinhte.vn",

@@ -20,9 +20,8 @@ const config = {
     }
   },
   npm: {
-    esModules: true,
     umd: {
-      global: 'TinhteApi',
+      global: 'TinhteApiReact',
       externals: {
         react: 'React'
       }

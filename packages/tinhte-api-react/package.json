@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api-react",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "tinhte-api React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -28,7 +28,7 @@
     "js-cookie": "^2.2.0",
     "querystring": "^0.2.0",
     "react-tree-walker": "^4.3.0",
-    "tinhte-api": "^4.0.1"
+    "tinhte-api": "^4.0.2"
   },
   "peerDependencies": {
     "babel-runtime": "6.x",
