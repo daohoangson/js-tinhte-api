@@ -109,7 +109,7 @@ const executeFetchesIfNeeded = (apiConsumer, eventName, fetches, onFetched) => {
   }
   const onEvent = api[eventName]
   internalApi.log('executeFetchesIfNeeded -> neededKeys', neededKeys)
-  return onEvent.call(api, () => executeFetches(apiConsumer, api, neededFetches).then(notify))
+  return onEvent(() => executeFetches(apiConsumer, api, neededFetches).then(notify))
 }
 
 const executeFetches = (apiConsumer, api, fetches) => {

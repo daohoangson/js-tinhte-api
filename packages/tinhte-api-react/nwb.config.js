@@ -1,7 +1,6 @@
 const StatsWebpackPlugin = require('stats-webpack-plugin')
 
 const config = {
-  type: 'react-component',
   babel: {
     runtime: true
   },
