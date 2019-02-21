@@ -20,6 +20,7 @@ const grantTypePassword = (api, internalApi, clientSecret, username, password) =
 
   return api.fetchOne(options)
     .then((json) => {
+      /* istanbul ignore else */
       if (json.user_id) {
         internalApi.log('oauth/token?grant_type=password: %s -> %d', username, json.user_id)
       }

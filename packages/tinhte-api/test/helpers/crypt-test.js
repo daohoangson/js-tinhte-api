@@ -18,5 +18,27 @@ describe('helpers', () => {
       const result = decrypt(algo, dataEncrypted, key)
       expect(result).toBe(data)
     })
+
+    it('rejects invalid algo for encryption', () => {
+      const catched = []
+      try {
+        encrypt('algo', data, key)
+      } catch (e) {
+        catched.push(e)
+      }
+
+      expect(catched.length).toBe(1)
+    })
+
+    it('rejects invalid algo for decryption', () => {
+      const catched = []
+      try {
+        decrypt('algo', dataEncrypted, key)
+      } catch (e) {
+        catched.push(e)
+      }
+
+      expect(catched.length).toBe(1)
+    })
   })
 })

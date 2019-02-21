@@ -131,11 +131,12 @@ describe('api', () => {
     })
 
     it('rejects on errors', () => {
-      const api = apiFactory()
-      return api.fetchOne('posts/1?oauth_token=invalid')
+      const apiRoot = 'https://xfrocks.com/api/index.php'
+      const api = apiFactory({ apiRoot })
+      return api.fetchOne('posts/1')
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason.message).toBe('The access token provided is invalid')
+          (reason) => expect(reason.message).toBe('The requested post could not be found.')
         )
     })
 
