@@ -14,7 +14,7 @@
   "scripts": {
     "build": "nwb build-web-module",
     "clean": "nwb clean-module",
-    "stats:analyzer": "webpack-bundle-analyzer umd/stats.json umd --host 0.0.0.0 --port 3000",
+    "stats": "webpack-bundle-analyzer umd/stats.json umd --host 0.0.0.0 --port 3000",
     "test": "standard && nwb test",
     "test:coverage": "standard && nwb test --coverage"
   },
