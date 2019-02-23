@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api-react",
-  "version": "1.0.2",
+  "version": "4.0.3",
   "description": "tinhte-api React component",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -15,6 +15,7 @@
     "build": "nwb build-react-component",
     "clean": "nwb clean-module && nwb clean-demo",
     "next": "next",
+    "prepublish": "npm run build",
     "start": "nwb serve-react-demo",
     "stats": "webpack-bundle-analyzer umd/stats.json umd --host 0.0.0.0 --port 3000",
     "test": "standard && nwb test-react",
@@ -25,7 +26,7 @@
     "js-cookie": "^2.2.0",
     "querystring": "^0.2.0",
     "react-tree-walker": "^4.3.0",
-    "tinhte-api": "^4.0.2"
+    "tinhte-api": "^4.0.3"
   },
   "peerDependencies": {
     "babel-runtime": "6.x",
