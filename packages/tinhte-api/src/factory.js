@@ -15,7 +15,7 @@ const apiFactory = (config = {}) => {
 
   const updateConfig = (config = {}) => {
     if (typeof config.apiRoot === 'string') apiRoot = config.apiRoot
-    if (typeof config.auth === 'object') {
+    if (typeof config.auth === 'object' && config.auth !== null) {
       auth = {
         accessToken: '',
         userId: 0
