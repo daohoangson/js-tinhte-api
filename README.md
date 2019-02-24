@@ -6,9 +6,10 @@
 
 Quickly setup API authentication against [Tinh tế](https://tinhte.vn) for React applications. Demo:
 
- - [Client-only app](https://tinhte-api.surge.sh/?client_id=2wseo5fywn)
- - [Server side rendering app](https://tinhte-api-nextjs.herokuapp.com/?client_id=2wseo5fywn)
- - The demos both use the same [set of components](https://github.com/daohoangson/js-tinhte-api/tree/master/demo/src/components)
+ - [Client-only app](https://tinhte-api.now.sh/?client_id=2wseo5fywn)
+ - [Server side rendering app](https://tinhte-api.now.sh/nextjs/?client_id=2wseo5fywn)
+ - The demos both use the same [set of components](https://github.com/daohoangson/js-tinhte-api/tree/master/packages/tinhte-api-react/demo/src/components)
+ 
 
 ## Usage
 
