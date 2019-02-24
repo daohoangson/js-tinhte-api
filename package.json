@@ -15,6 +15,7 @@
     "stats:react": "lerna run stats --scope tinhte-api-react",
     "test": "lerna run test",
     "test:core": "lerna run test --scope tinhte-api",
+    "test:coverage": "lerna run test:coverage",
     "test:react": "lerna run test --scope tinhte-api-react"
   },
   "standard": {

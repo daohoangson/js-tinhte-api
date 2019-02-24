@@ -9,3 +9,8 @@ cache:
 
 before_script:
   - npm run bootstrap
+
+after_success:
+  - curl -so /tmp/codecov.sh https://codecov.io/bash && chmod +x /tmp/codecov.sh
+  - /tmp/codecov.sh -cF core -s packages/tinhte-api
+  - /tmp/codecov.sh -cF react -s packages/tinhte-api-react
