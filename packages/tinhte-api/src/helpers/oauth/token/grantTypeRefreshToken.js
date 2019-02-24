@@ -15,6 +15,7 @@ const grantTypeRefreshToken = (api, internalApi, clientSecret, refreshToken) => 
 
   return api.fetchOne(options)
     .then((json) => {
+      /* istanbul ignore else */
       if (json.user_id) {
         internalApi.log('oauth/token?grant_type=refresh_token: %s -> %d', refreshToken, json.user_id)
       }

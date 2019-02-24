@@ -50,6 +50,9 @@ describe('apiFactory', () => {
     const debug = true
     const api = apiFactory({ debug })
     expect(api.getDebug()).toBe(debug)
+
+    // run the logging code path for debug mode
+    return api.get('index').catch(() => {})
   })
 
   it('accepts ott', () => {

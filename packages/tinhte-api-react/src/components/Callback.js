@@ -1,14 +1,11 @@
 import React from 'react'
 import querystring from 'querystring'
 
-import { mustBePlainObject } from '../helpers'
-
 const processCallback = (log) => {
-  let auth = window.location.hash
+  const auth = window.location.hash
     ? querystring.parse(window.location.hash.replace(/^#/, ''))
-    : {}
-  auth = mustBePlainObject(auth)
-  if (!auth.state) {
+    : false
+  if (!auth || !auth.state) {
     log && log('Couldn\'t extract state from %s', window.location.href)
     return false
   }
@@ -20,17 +17,11 @@ const processCallback = (log) => {
 }
 
 const Callback = ({ api, internalApi }) => {
-  let success = false
-
-  /* istanbul ignore else */
-  if (process.browser) {
-    success = processCallback(internalApi.log)
-  }
-
   if (!api.getDebug()) {
     return <span className='ApiCallback' />
   }
 
+  const success = processCallback(internalApi.log)
   return <span className='ApiCallback' data-success={success} />
 }
 

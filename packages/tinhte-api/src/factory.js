@@ -1,15 +1,7 @@
-import { isDate } from 'lodash'
-
-import components from './components'
 import fetchesInit from './fetches'
-import { isPlainObject, mustBePlainObject } from './helpers'
 import { hashMd5 } from './helpers/crypt'
 import oauthTokenGrantTypePassword from './helpers/oauth/token/grantTypePassword'
 import oauthTokenGrantTypeRefreshToken from './helpers/oauth/token/grantTypeRefreshToken'
-import helperCallbacksInit from './helpers/callbacks'
-import errors from './helpers/errors'
-import fetchApiDataForProvider from './helpers/fetchApiDataForProvider'
-import hoc from './hoc'
 
 const apiFactory = (config = {}) => {
   let apiRoot = 'https://tinhte.vn/appforo/index.php'
@@ -21,23 +13,9 @@ const apiFactory = (config = {}) => {
   let ott = ''
   let scope = 'read'
 
-  const assertNotBrowser = () => {
-    /* istanbul ignore else  */
-    if (process.browser) {
-      const message = 'Running on browser is not allowed'
-      if (debug) {
-        console.error(message)
-      } else {
-        throw new Error(message)
-      }
-    }
-  }
-
-  const updateConfig = (config) => {
-    config = mustBePlainObject(config)
-
+  const updateConfig = (config = {}) => {
     if (typeof config.apiRoot === 'string') apiRoot = config.apiRoot
-    if (isPlainObject(config.auth)) {
+    if (typeof config.auth === 'object') {
       auth = {
         accessToken: '',
         userId: 0
@@ -49,17 +27,17 @@ const apiFactory = (config = {}) => {
 
       if (auth.accessToken.length > 0 && auth.userId === 0) {
         // detect XenForo environments
-        if (typeof XenForo !== 'undefined' &&
-          isPlainObject(XenForo) &&
-          isPlainObject(XenForo.visitor) &&
+        if (typeof XenForo === 'object' &&
+          XenForo !== null &&
+          typeof XenForo.visitor === 'object' &&
           typeof XenForo.visitor.user_id === 'number' &&
           typeof XenForo._csrfToken === 'string') {
           // XenForo 1.x
           auth.userId = XenForo.visitor.user_id
           auth._xf1 = XenForo
-        } else if (typeof XF !== 'undefined' &&
-          isPlainObject(XF) &&
-          isPlainObject(XF.config) &&
+        } else if (typeof XF === 'object' &&
+          XF !== null &&
+          typeof XF.config === 'object' &&
           typeof XF.config.userId === 'number' &&
           typeof XF.config.csrf === 'string') {
           // XenForo 2.x
@@ -78,80 +56,26 @@ const apiFactory = (config = {}) => {
   updateConfig(config)
 
   const uniqueId = ('' + Math.random()).substr(2, 6)
-  const callbackListForAuth = { name: 'auth', items: [] }
-  const callbackListForProviderMount = { name: 'provider mount', items: [] }
-
-  let providerMounted = false
 
   const internalApi = {
-    LoaderComponent: () => components.Loader(api, internalApi),
-
-    getAuth: () => auth,
 
     log: function (message) {
       if (!debug) {
-        return message
+        return false
       }
 
       const args = arguments
-      args[0] = `[api#${uniqueId}] ${args[0]}`
+      args[0] = `[tinhte-api#${uniqueId}] ${args[0]}`
 
       console.log.apply(this, args)
-      return message
-    },
+      return true
+    }
 
-    setAuth: (newAuth) => {
-      auth = {}
-
-      const notify = () => callbacks.fetchList(callbackListForAuth)
-
-      if (!isPlainObject(newAuth) ||
-        typeof newAuth.state !== 'string' ||
-        newAuth.state !== uniqueId) {
-        return notify()
-      }
-
-      if (typeof newAuth.access_token === 'string') {
-        auth.accessToken = newAuth.access_token
-      }
-
-      let userId = 0
-      if (typeof newAuth.user_id === 'number') {
-        userId = newAuth.user_id
-      } else if (typeof newAuth.user_id === 'string') {
-        userId = parseInt(newAuth.user_id)
-      }
-      if (userId > 0) {
-        auth.userId = userId
-      }
-
-      return notify()
-    },
-
-    setProviderMounted: () => {
-      if (providerMounted) {
-        return 0
-      }
-
-      providerMounted = true
-
-      return callbacks.fetchList(callbackListForProviderMount)
-    },
-
-    updateConfig
   }
 
   const api = {
 
-    CallbackComponent: () => components.Callback(api, internalApi),
-
-    ConsumerHoc: hoc.ApiConsumer,
-
-    ProviderHoc: (Component) => hoc.ApiProvider(Component, api, internalApi),
-
-    clone: (config) => {
-      config = mustBePlainObject(config)
-
+    clone: (config = {}) => {
       const clonedConfig = {
         apiRoot,
         auth,
@@ -168,15 +92,11 @@ const apiFactory = (config = {}) => {
       return apiFactory(clonedConfig)
     },
 
-    fetchApiDataForProvider: (rootElement) => fetchApiDataForProvider(api, internalApi, rootElement),
-
     generateOneTimeToken: (clientSecret, ttl) => {
-      assertNotBrowser()
-
       const userId = api.getUserId()
 
       let timestamp
-      if (isDate(ttl)) {
+      if (typeof ttl === 'object' && typeof ttl.getTime === 'function') {
         // ttl is a Date, use its value directly
         timestamp = Math.floor(ttl.getTime() / 1000)
       } else {
@@ -192,6 +112,8 @@ const apiFactory = (config = {}) => {
     getAccessToken: () => (auth && auth.accessToken) ? auth.accessToken : '',
 
     getApiRoot: () => apiRoot,
+
+    getAuth: () => ({ ...(auth || {}) }),
 
     getCallbackUrl: () => callbackUrl,
 
@@ -220,21 +142,31 @@ const apiFactory = (config = {}) => {
 
     getUserId: () => (auth && auth.userId) ? auth.userId : 0,
 
-    onAuthenticated: (callback) => {
-      return callbacks.add(callbackListForAuth, callback, auth !== null)
-    },
-
-    onProviderMounted: (callback) => {
-      return callbacks.add(callbackListForProviderMount, callback, providerMounted)
-    },
+    hasAuth: () => auth != null,
 
     setAuth: (newAuth) => {
-      if (!debug) {
-        throw new Error(errors.SET_AUTH_ACCESS_DENIED)
+      auth = {}
+
+      if (!newAuth || newAuth.state !== uniqueId) {
+        return
       }
 
-      return internalApi.setAuth(newAuth)
-    }
+      if (typeof newAuth.access_token === 'string') {
+        auth.accessToken = newAuth.access_token
+      }
+
+      let userId = 0
+      if (typeof newAuth.user_id === 'number') {
+        userId = newAuth.user_id
+      } else if (typeof newAuth.user_id === 'string') {
+        userId = parseInt(newAuth.user_id)
+      }
+      if (userId > 0) {
+        auth.userId = userId
+      }
+    },
+
+    updateConfig
   }
 
   const fetches = fetchesInit(api, internalApi)
@@ -246,7 +178,6 @@ const apiFactory = (config = {}) => {
     if (typeof options === 'string') {
       options = { uri: options }
     }
-    options = mustBePlainObject(options)
     options.method = method
     return api.fetchOne(options)
   }
@@ -257,17 +188,11 @@ const apiFactory = (config = {}) => {
 
   api.batch = api.fetchMultiple
 
-  api.login = (clientSecret, username, password) => {
-    assertNotBrowser()
-    return oauthTokenGrantTypePassword(api, internalApi, clientSecret, username, password)
-  }
+  api.login = (clientSecret, username, password) =>
+    oauthTokenGrantTypePassword(api, internalApi, clientSecret, username, password)
 
-  api.refreshToken = (clientSecret, refreshToken) => {
-    assertNotBrowser()
-    return oauthTokenGrantTypeRefreshToken(api, internalApi, clientSecret, refreshToken)
-  }
-
-  const callbacks = helperCallbacksInit(api, internalApi)
+  api.refreshToken = (clientSecret, refreshToken) =>
+    oauthTokenGrantTypeRefreshToken(api, internalApi, clientSecret, refreshToken)
 
   return api
 }

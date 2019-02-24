@@ -1,8 +1,6 @@
 import expect from 'expect'
-import React from 'react'
 
 import { apiFactory } from 'src/'
-import { hashMd5 as md5 } from 'src/helpers/crypt'
 
 describe('api', () => {
   describe('clone', () => {
@@ -35,51 +33,12 @@ describe('api', () => {
     })
   })
 
-  describe('fetchApiDataForProvider', () => {
-    it('returns jobs', () => {
-      const api = apiFactory()
-      const Child = () => 'child'
-      Child.apiFetches = { index: { uri: 'index' } }
-      const C = api.ConsumerHoc(Child)
-      const P = api.ProviderHoc(() => <C />)
-
-      return api.fetchApiDataForProvider(<P />)
-        .then((apiData) => {
-          const uniqueId = md5('GET index?')
-          expect(Object.keys(apiData)).toContain(uniqueId)
-        })
-    })
-
-    it('handles no children', () => {
-      const api = apiFactory()
-      const P = api.ProviderHoc(() => 'foo')
-      return api.fetchApiDataForProvider(<P />)
-        .then((apiData) => {
-          expect(Object.keys(apiData).length).toBe(0)
-        })
-    })
-  })
-
   describe('generateOneTimeToken', () => {
-    it('throws error if not debugging', () => {
-      const api = apiFactory()
-
-      let e
-      try {
-        api.generateOneTimeToken()
-      } catch (something) {
-        e = something
-      }
-
-      expect(e).toBeAn(Error)
-    })
-
     it('returns token', () => {
       const clientId = 'ci'
       const clientSecret = 'cs'
-      const debug = true
       const userId = 123
-      const api = apiFactory({ auth: { userId }, clientId, debug })
+      const api = apiFactory({ auth: { userId }, clientId })
       const regEx = new RegExp(`^${userId},\\d+,\\w{32},${clientId}`)
 
       const ott = api.generateOneTimeToken(clientSecret)
@@ -87,8 +46,7 @@ describe('api', () => {
     })
 
     it('accepts ttl', () => {
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const ott = api.generateOneTimeToken('cs', 0)
 
       const m = ott.match(/^0,(\d+),/)
@@ -98,8 +56,7 @@ describe('api', () => {
 
     it('accepts exact date', () => {
       const clientId = 'ci'
-      const debug = true
-      const api = apiFactory({ clientId, debug })
+      const api = apiFactory({ clientId })
       const timestamp = 123456
       const date = new Date(timestamp * 1000)
 
@@ -149,83 +106,79 @@ describe('api', () => {
     })
   })
 
-  describe('setAuth', () => {
-    it('throws error if not debugging', () => {
+  describe('hasAuth', () => {
+    it('returns false', () => {
       const api = apiFactory()
-
-      let e
-      try {
-        api.setAuth()
-      } catch (something) {
-        e = something
-      }
-
-      expect(e).toBeAn(Error)
+      expect(api.hasAuth()).toBe(false)
     })
 
-    it('accepts non-object', () => {
-      // see onAuthenticated tests
+    it('returns true', () => {
+      const auth = {}
+      const api = apiFactory({ auth })
+      expect(api.hasAuth()).toBe(true)
     })
+  })
 
-    it('accepts invalid state', () => {
+  describe('setAuth', () => {
+    it('handles invalid state', () => {
       const accessToken = 'access token'
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         access_token: accessToken,
         state: ''
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getAccessToken()).toBe(''))
+
+      api.setAuth(auth)
+      expect(api.getAccessToken()).toBe('')
     })
 
     it('updates access token', () => {
       const accessToken = 'access token'
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         access_token: accessToken,
         state: api.getUniqueId()
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getAccessToken()).toBe(accessToken))
+
+      api.setAuth(auth)
+      expect(api.getAccessToken()).toBe(accessToken)
     })
 
-    it('accepts invalid user id', () => {
+    it('handles invalid user id', () => {
       const userId = -1
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         user_id: userId,
         state: api.getUniqueId()
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getUserId()).toBe(0))
+
+      api.setAuth(auth)
+      expect(api.getUserId()).toBe(0)
     })
 
     it('updates user id', () => {
       const userId = Math.random()
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         user_id: userId,
         state: api.getUniqueId()
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getUserId()).toBe(userId))
+
+      api.setAuth(auth)
+      expect(api.getUserId()).toBe(userId)
     })
 
     it('updates user id from string', () => {
       const userIdNumber = Math.floor(Math.random() * 1000)
       const userId = `${userIdNumber}`
-      const debug = true
-      const api = apiFactory({ debug })
+      const api = apiFactory()
       const auth = {
         user_id: userId,
         state: api.getUniqueId()
       }
-      return api.setAuth(auth)
-        .then(() => expect(api.getUserId()).toBe(userIdNumber))
+
+      api.setAuth(auth)
+      expect(api.getUserId()).toBe(userIdNumber)
     })
   })
 })

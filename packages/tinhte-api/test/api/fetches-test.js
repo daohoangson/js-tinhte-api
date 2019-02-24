@@ -131,11 +131,12 @@ describe('api', () => {
     })
 
     it('rejects on errors', () => {
-      const api = apiFactory()
-      return api.fetchOne('posts/1?oauth_token=invalid')
+      const apiRoot = 'https://xfrocks.com/api/index.php'
+      const api = apiFactory({ apiRoot })
+      return api.fetchOne('posts/1')
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason.message).toBe('The access token provided is invalid')
+          (reason) => expect(reason.message).toBe('The requested post could not be found.')
         )
     })
 
@@ -403,17 +404,6 @@ describe('api', () => {
       }).then(() => expect(checks).toBe(6))
     })
 
-    it('accepts non-object options', () => {
-      const api = apiFactory()
-      const fetches = () => {}
-
-      return api.fetchMultiple(fetches, 'foo')
-        .then(
-          () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason).toBeAn(Error)
-        )
-    })
-
     it('does not trigger handlers', () => {
       const api = apiFactory()
 
@@ -433,7 +423,7 @@ describe('api', () => {
 
     it('rejects sub-requests on non-json', () => {
       const apiRoot = 'https://httpbin.org/html'
-      const api = apiFactory({ apiRoot, debug: true })
+      const api = apiFactory({ apiRoot })
 
       const promises = []
       let rejected = 0
@@ -472,7 +462,7 @@ describe('api', () => {
 
     beforeEach(() => {
       const mockedFetchJson = () => new Promise((resolve) => setTimeout(() => resolve(mockedResponse), 10))
-      const mockedInternalApi = { log: console.log }
+      const mockedInternalApi = { log: () => {} }
       mockedBatch = fetchBatchFactory()
       mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedInternalApi)
       mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedInternalApi)

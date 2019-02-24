@@ -1,8 +1,6 @@
 import Cookies from 'js-cookie'
 import React from 'react'
 
-import { isPlainObject } from '../helpers'
-
 const buildAuthorizeUrl = (api) => {
   const clientId = api.getClientId()
   const callbackUrl = api.getCallbackUrl()
@@ -32,7 +30,7 @@ const getCookie = (api) => {
   }
 
   const value = Cookies.getJSON(name)
-  if (!isPlainObject(value)) {
+  if (!value) {
     return null
   }
 
@@ -80,7 +78,7 @@ class Loader extends React.Component {
       const { api, internalApi } = this.props
       internalApi.log('Received auth via window message', auth)
 
-      internalApi.setAuth(auth)
+      api.setAuth(auth)
       this.setState({ userId: api.getUserId() })
 
       const accessToken = api.getAccessToken()
@@ -99,7 +97,7 @@ class Loader extends React.Component {
     if (cookieAuth !== null) {
       internalApi.log('Restored auth from cookie', cookieAuth)
 
-      internalApi.setAuth({
+      api.setAuth({
         ...cookieAuth,
         state: api.getUniqueId()
       })

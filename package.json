@@ -5,8 +5,27 @@
     "lerna": "^3.13.0"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "test": "lerna run test",
-    "test:tinhte-api": "lerna run test --scope tinhte-api"
+    "bootstrap": "lerna bootstrap --hoist",
+    "build": "npm run build:core && npm run build:react",
+    "build:core": "lerna run build --scope tinhte-api",
+    "build:react": "lerna run build --scope tinhte-api-react",
+    "clean": "lerna clean",
+    "publish-all": "lerna publish --concurrency=1",
+    "stats:core": "lerna run stats --scope tinhte-api",
+    "stats:react": "lerna run stats --scope tinhte-api-react",
+    "test": "npm run bootstrap && lerna run test",
+    "test:core": "lerna run test --scope tinhte-api",
+    "test:react": "lerna run test --scope tinhte-api-react"
+  },
+  "standard": {
+    "globals": [
+      "XenForo",
+      "XF",
+      "afterEach",
+      "beforeEach",
+      "describe",
+      "it"
+    ],
+    "parser": "babel-eslint"
   }
 }
