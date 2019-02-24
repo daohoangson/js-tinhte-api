@@ -2,7 +2,7 @@
 
 [![Travis][build-badge]][build]
 [![npm package][npm-badge]][npm]
-[![Coveralls][coveralls-badge]][coveralls]
+[![Codecov][codecov-badge]][codecov]
 
 Quickly setup API authentication against [Tinh tế](https://tinhte.vn) for React applications. Demo:
 
@@ -459,11 +459,11 @@ const decrypted = decrypt(algo, encrypted, key)
 assert(encrypted === decrypted)
 ```
 
-[build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
+[build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.svg?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api
 
-[npm-badge]: https://img.shields.io/npm/v/tinhte-api.png?style=flat-square
+[npm-badge]: https://img.shields.io/npm/v/tinhte-api.svg?style=flat-square
 [npm]: https://www.npmjs.org/package/tinhte-api
 
-[coveralls-badge]: https://img.shields.io/coveralls/daohoangson/js-tinhte-api/master.png?style=flat-square
-[coveralls]: https://coveralls.io/github/daohoangson/js-tinhte-api
+[codecov-badge]: https://img.shields.io/codecov/c/github/daohoangson/js-tinhte-api.svg?style=flat-square
+[codecov]: https://codecov.io/gh/daohoangson/js-tinhte-api
