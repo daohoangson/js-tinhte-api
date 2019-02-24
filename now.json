@@ -1,1 +1,17 @@
-{}
+{
+  "alias": "tinhte-api",
+  "builds": [
+    {
+      "src": "packages/tinhte-api-react/package.json",
+      "use": "@now/static-build",
+      "config": {
+        "distDir": "demo/dist"
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/api-callback", "dest": "/packages/tinhte-api-react/index.html" },
+    { "src": "/(.*)", "dest": "/packages/tinhte-api-react/$1" }
+  ],
+  "version": 2
+}
