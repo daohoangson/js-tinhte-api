@@ -13,8 +13,9 @@
     "publish-all": "lerna publish --concurrency=1",
     "stats:core": "lerna run stats --scope tinhte-api",
     "stats:react": "lerna run stats --scope tinhte-api-react",
-    "test": "npm run bootstrap && lerna run test",
+    "test": "lerna run test",
     "test:core": "lerna run test --scope tinhte-api",
+    "test:coverage": "lerna run test:coverage",
     "test:react": "lerna run test --scope tinhte-api-react"
   },
   "standard": {
