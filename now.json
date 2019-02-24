@@ -2,16 +2,19 @@
   "alias": "tinhte-api",
   "builds": [
     {
-      "src": "packages/tinhte-api-react/package.json",
+      "src": "packages/tinhte-api-react/now-build-demo.sh",
       "use": "@now/static-build",
       "config": {
-        "distDir": "demo/dist"
+        "distDir": "demo"
       }
-    }
+    },
+    { "src": "packages/tinhte-api-react/next.config.js", "use": "@now/next" }
   ],
   "routes": [
-    { "src": "/api-callback", "dest": "/packages/tinhte-api-react/index.html" },
-    { "src": "/(.*)", "dest": "/packages/tinhte-api-react/$1" }
+    { "src": "/_next/(.*)", "dest": "/packages/tinhte-api-react/_next/$1" },
+    { "src": "/api-callback", "dest": "/packages/tinhte-api-react/demo/index.html" },
+    { "src": "/nextjs/(.*)", "dest": "/packages/tinhte-api-react/$1" },
+    { "src": "/(.*)", "dest": "/packages/tinhte-api-react/demo/$1" }
   ],
   "version": 2
 }

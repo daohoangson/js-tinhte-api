@@ -8,6 +8,7 @@
     "bootstrap": "lerna bootstrap --hoist",
     "build": "npm run build:core && npm run build:react",
     "build:core": "lerna run build --scope tinhte-api",
+    "build:demo-nextjs": "cd packages/tinhte-api-react/nextjs && next build",
     "build:react": "lerna run build --scope tinhte-api-react",
     "clean": "lerna clean",
     "publish-all": "lerna publish --concurrency=1",
