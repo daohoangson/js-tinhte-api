@@ -32,4 +32,73 @@ describe('api', () => {
       expect(api2.getScope()).toBe(apiConfig.scope)
     })
   })
+
+  describe('internalApi', () => {
+    describe('setAuth', () => {
+      let api = null
+      let internalApi = null
+
+      beforeEach(() => {
+        const debug = true
+        api = apiFactory({ debug })
+        internalApi = api.getInternalApi()
+      })
+
+      it('handles invalid state', () => {
+        const accessToken = 'access token'
+        const auth = {
+          access_token: accessToken,
+          state: ''
+        }
+
+        internalApi.setAuth(auth)
+        expect(api.getAccessToken()).toBe('')
+      })
+
+      it('updates access token', () => {
+        const accessToken = 'access token'
+        const auth = {
+          access_token: accessToken,
+          state: api.getUniqueId()
+        }
+
+        internalApi.setAuth(auth)
+        expect(api.getAccessToken()).toBe(accessToken)
+      })
+
+      it('handles invalid user id', () => {
+        const userId = -1
+        const auth = {
+          user_id: userId,
+          state: api.getUniqueId()
+        }
+
+        internalApi.setAuth(auth)
+        expect(api.getUserId()).toBe(0)
+      })
+
+      it('updates user id', () => {
+        const userId = Math.random()
+        const auth = {
+          user_id: userId,
+          state: api.getUniqueId()
+        }
+
+        internalApi.setAuth(auth)
+        expect(api.getUserId()).toBe(userId)
+      })
+
+      it('updates user id from string', () => {
+        const userIdNumber = Math.floor(Math.random() * 1000)
+        const userId = `${userIdNumber}`
+        const auth = {
+          user_id: userId,
+          state: api.getUniqueId()
+        }
+
+        internalApi.setAuth(auth)
+        expect(api.getUserId()).toBe(userIdNumber)
+      })
+    })
+  })
 })

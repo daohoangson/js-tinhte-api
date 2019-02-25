@@ -81,7 +81,9 @@ describe('hoc', () => {
       })
 
       it('executes after new auth is available', () => {
-        const api = apiFactory()
+        const debug = true
+        const api = apiFactory({ debug })
+        const internalApi = api.getInternalApi()
 
         let successCount = 0
         const success = () => {
@@ -95,7 +97,7 @@ describe('hoc', () => {
 
         return new Promise((resolve) => {
           const P = api.ProviderHoc(() => <C onFetchedWithAuth={resolve} />)
-          render(<P />, node, () => api.setAuth())
+          render(<P />, node, () => internalApi.setAuth())
         })
       })
 

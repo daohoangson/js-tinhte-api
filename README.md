@@ -456,7 +456,6 @@ It's recommended to use `apiFetches` instead of using this method directly.
 ### Setters
 
  - `api.clone(newConfig)`
- - `api.setAuth(newAuth)`
  - `api.updateConfig(newConfig)`
 
 ### crypt

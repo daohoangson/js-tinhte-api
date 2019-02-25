@@ -29,6 +29,34 @@ const reactFactory = (apiCore) => {
       return true
     },
 
+    setAuth: (newAuth) => {
+      const auth = {}
+      const done = () => {
+        api.updateConfig({ auth })
+        callbacks.fetchList(callbackListForAuth)
+      }
+
+      if (!newAuth || newAuth.state !== api.getUniqueId()) {
+        return done()
+      }
+
+      if (typeof newAuth.access_token === 'string') {
+        auth.accessToken = newAuth.access_token
+      }
+
+      let userId = 0
+      if (typeof newAuth.user_id === 'number') {
+        userId = newAuth.user_id
+      } else if (typeof newAuth.user_id === 'string') {
+        userId = parseInt(newAuth.user_id)
+      }
+      if (userId > 0) {
+        auth.userId = userId
+      }
+
+      return done()
+    },
+
     setProviderMounted: () => {
       if (providerMounted) {
         return 0
@@ -66,10 +94,8 @@ const reactFactory = (apiCore) => {
   api.onProviderMounted = (callback) =>
     callbacks.add(callbackListForProviderMount, callback, providerMounted)
 
-  const coreSetAuth = api.setAuth
-  api.setAuth = (newAuth) => {
-    coreSetAuth.call(api, newAuth)
-    callbacks.fetchList(callbackListForAuth)
+  if (api.getDebug()) {
+    api.getInternalApi = () => internalApi
   }
 
   return api

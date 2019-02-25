@@ -78,7 +78,7 @@ class Loader extends React.Component {
       const { api, internalApi } = this.props
       internalApi.log('Received auth via window message', auth)
 
-      api.setAuth(auth)
+      internalApi.setAuth(auth)
       this.setState({ userId: api.getUserId() })
 
       const accessToken = api.getAccessToken()
@@ -97,7 +97,7 @@ class Loader extends React.Component {
     if (cookieAuth !== null) {
       internalApi.log('Restored auth from cookie', cookieAuth)
 
-      api.setAuth({
+      internalApi.setAuth({
         ...cookieAuth,
         state: api.getUniqueId()
       })

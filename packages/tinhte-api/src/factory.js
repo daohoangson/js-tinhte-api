@@ -144,28 +144,6 @@ const apiFactory = (config = {}) => {
 
     hasAuth: () => auth != null,
 
-    setAuth: (newAuth) => {
-      auth = {}
-
-      if (!newAuth || newAuth.state !== uniqueId) {
-        return
-      }
-
-      if (typeof newAuth.access_token === 'string') {
-        auth.accessToken = newAuth.access_token
-      }
-
-      let userId = 0
-      if (typeof newAuth.user_id === 'number') {
-        userId = newAuth.user_id
-      } else if (typeof newAuth.user_id === 'string') {
-        userId = parseInt(newAuth.user_id)
-      }
-      if (userId > 0) {
-        auth.userId = userId
-      }
-    },
-
     updateConfig
   }
 
