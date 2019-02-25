@@ -22,11 +22,13 @@ const processCallback = (log) => {
 }
 
 const Callback = ({ api, internalApi }) => {
+  const log = api.getDebug() ? internalApi.log : null
+  const success = processCallback(log)
+
   if (!api.getDebug()) {
     return <span className='ApiCallback' />
   }
 
-  const success = processCallback(internalApi.log)
   return <span className='ApiCallback' data-success={success} />
 }
 
