@@ -2,6 +2,11 @@ import React from 'react'
 import querystring from 'querystring'
 
 const processCallback = (log) => {
+  /* istanbul ignore else */
+  if (!process.browser) {
+    return false
+  }
+
   const auth = window.location.hash
     ? querystring.parse(window.location.hash.replace(/^#/, ''))
     : false
