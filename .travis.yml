@@ -2,18 +2,15 @@ sudo: false
 
 language: node_js
 node_js:
-  - "8.12.0"
+  - '10.15.1'
 cache:
   directories:
     - node_modules
 
-before_install:
-  - npm install codecov.io coveralls
+before_script:
+  - npm run bootstrap
 
 after_success:
-  - cat ./coverage/lcov.info | ./node_modules/codecov.io/bin/codecov.io.js
-  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
-
-branches:
-  only:
-    - master
+  - curl -so /tmp/codecov.sh https://codecov.io/bash && chmod +x /tmp/codecov.sh
+  - /tmp/codecov.sh -cF core -s packages/tinhte-api
+  - /tmp/codecov.sh -cF react -s packages/tinhte-api-react

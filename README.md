@@ -2,36 +2,39 @@
 
 [![Travis][build-badge]][build]
 [![npm package][npm-badge]][npm]
-[![Coveralls][coveralls-badge]][coveralls]
+[![Codecov][codecov-badge]][codecov]
 
 Quickly setup API authentication against [Tinh tế](https://tinhte.vn) for React applications. Demo:
 
- - [Client-only app](https://tinhte-api.surge.sh/?client_id=2wseo5fywn)
- - [Server side rendering app](https://tinhte-api-nextjs.herokuapp.com/?client_id=2wseo5fywn)
- - The demos both use the same [set of components](https://github.com/daohoangson/js-tinhte-api/tree/master/demo/src/components)
+ - [Client-only app](https://tinhte-api.now.sh/?client_id=2wseo5fywn)
+ - [Next.js SSR app](https://tinhte-api.now.sh/nextjs/?client_id=2wseo5fywn)
+ - The demos both use the same [set of components](https://github.com/daohoangson/js-tinhte-api/tree/master/packages/tinhte-api-react/demo/src/components)
+ 
 
 ## Usage
 
 ### Install
 
-Use npm...
+Install the React library:
+
+```bash
+npm install --save tinhte-api-react
+```
+
+Or install the core library only:
 
 ```bash
 npm install --save tinhte-api
 ```
 
-...or yarn:
-
-```bash
-yarn add tinhte-api
-```
+Both library works similarly in initialization, api calling, etc. The React library is built on top of the core one and provide React components for easy usage in React web app.
 
 ### Initialize
 
-For proper operation, clientId and callbackUrl are both required. See below for callback explanation.
+`clientId` is required for api instance to work. For React library: `callbackUrl` is also required (see below for callback explanation).
 
 ```js
-import { apiFactory } from 'tinhte-api'
+import { apiFactory } from 'tinhte-api-react'
 
 const api = apiFactory({
     clientId: 'clientId',
@@ -59,7 +62,7 @@ const HomeWithApi = api.ProviderHoc(Home)
 
 ### Render Callback
 
-The Provider HOC will attempt to authenticate user using [OAuth2 implicit flow](https://tools.ietf.org/html/rfc6749#section-1.3.2) and that requires serving an additional page as the target redirection URL. We are going to use [React Router](https://reacttraining.com/react-router/) below but you can use anything (next.js page, expressjs route, etc.):
+The Provider HOC will attempt to authenticate user using [OAuth2 implicit flow](https://tools.ietf.org/html/rfc6749#section-1.3.2) and that requires serving an additional page as the target redirection URL. We are going to use [React Router](https://reacttraining.com/react-router/) below but you can use anything (Next.js page, expressjs route, etc.):
 
 ```js
 import {BrowserRouter as Router, Route} from 'react-router-dom'
@@ -82,8 +85,8 @@ You can also trigger the function `processCallback` directly on the callback pag
 
 ```html
 <script type="text/javascript" src="https://unpkg.com/react@^16/umd/react.production.min.js"></script>
-<script type="text/javascript" src="https://unpkg.com/tinhte-api@^2.2.3/umd/tinhte-api.min.js"></script>
-<script type="text/javascript">TinhteApi.processCallback();</script>
+<script type="text/javascript" src="https://unpkg.com/tinhte-api-react@4/umd/tinhte-api-react.min.js"></script>
+<script type="text/javascript">TinhteApiReact.processCallback();</script>
 ```
 
 ### Fetch from API
@@ -93,7 +96,7 @@ It's recommended to only use `api` if you fetch during some user action (e.g. `o
 implement `apiFetches` or `apiFetchesWithAuth` and let `ApiConsumer` manages those for better performance.
 
 ```js
-import { apiHoc } from 'tinhte-api'
+import { apiHoc } from 'tinhte-api-react'
 
 const UsersMeBase = ({ api }) => {
     const fetch = () => api.get('users/me')
@@ -144,10 +147,12 @@ const api = apiFactory({ apiRoot, clientId })
 
 ### api.CallbackComponent
 
+*tinhte-api-react only.*
 Returns a React component.
 
 ### api.ConsumerHoc
 
+*tinhte-api-react only.*
 Alias: `apiHoc.ApiConsumer`
 
 Params:
@@ -224,6 +229,7 @@ Additionally, you can specify the `error` callback to provide some default value
 
 ### api.ProviderHoc
 
+*tinhte-api-react only.*
 Params:
 
  - `Component` required React component
@@ -246,13 +252,6 @@ The general use case for these props are server side rendering, you can safely i
  return <ApiProvider apiConfig={{ott}} />
  ```
  - **You want to render components on the server but they need api data to work?** You may use `fetchApiDataForProvider`, it will give you the `apiData` object, ready to be use with `ApiProvider`.
-
-### api.clone
-
-Returns a new api instance with merged configuration.
-
-Params:
- - `config` object
 
 ### api.fetchApiDataForProvider
 
@@ -389,6 +388,10 @@ Returns the authenticated access token or empty string.
 
 Returns the configured API root string.
 
+### api.getAuth
+
+Returns the authentication object.
+
 ### api.getCallbackUrl
 
 Returns the configured callback URL string.
@@ -426,8 +429,13 @@ Returns the unique ID string of this api instance.
 
 Returns the authenticated access token or `0`.
 
+### api.hasAuth
+
+Returns `true` if authentication has been set, or `false` otherwise.
+
 ### api.onAuthenticated
 
+*tinhte-api-react only.*
 Params:
 
  - `callback` required func
@@ -437,12 +445,19 @@ It's recommended to use `apiFetchesWithAuth` instead of using this method direct
 
 ### api.onProviderMounted
 
+*tinhte-api-react only.*
 Params:
 
  - `callback` required function
 
 Returns a `function` that can be used to cancel the callback.
 It's recommended to use `apiFetches` instead of using this method directly.
+
+### Setters
+
+ - `api.clone(newConfig)`
+ - `api.setAuth(newAuth)`
+ - `api.updateConfig(newConfig)`
 
 ### crypt
 
@@ -459,11 +474,22 @@ const decrypted = decrypt(algo, encrypted, key)
 assert(encrypted === decrypted)
 ```
 
-[build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.png?style=flat-square
+### standardizeReqOptions
+
+```js
+import { standardizeReqOptions } from 'tinhte-api'
+
+const method = 'POST'
+const params = { q: 'foo' }
+const uri = 'search'
+const uniqueId = standardizeReqOptions({ method, params, uri })
+```
+
+[build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.svg?style=flat-square
 [build]: https://travis-ci.org/daohoangson/js-tinhte-api
 
-[npm-badge]: https://img.shields.io/npm/v/tinhte-api.png?style=flat-square
+[npm-badge]: https://img.shields.io/npm/v/tinhte-api.svg?style=flat-square
 [npm]: https://www.npmjs.org/package/tinhte-api
 
-[coveralls-badge]: https://img.shields.io/coveralls/daohoangson/js-tinhte-api/master.png?style=flat-square
-[coveralls]: https://coveralls.io/github/daohoangson/js-tinhte-api
+[codecov-badge]: https://img.shields.io/codecov/c/github/daohoangson/js-tinhte-api.svg?style=flat-square
+[codecov]: https://codecov.io/gh/daohoangson/js-tinhte-api

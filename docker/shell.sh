@@ -9,6 +9,11 @@ if [ ! -d "$_dataPath" ]; then
   mkdir "$_dataPath"
 fi
 
+_gitconfigPath="$HOME/.gitconfig"
+if [ ! -f "$_gitconfigPath" ]; then
+  touch "$_gitconfigPath"
+fi
+
 _netrcPath="$_dataPath/netrc"
 if [ ! -f "$_netrcPath" ]; then
   touch "$_netrcPath"
@@ -20,10 +25,12 @@ if [ ! -f "$_npmrcPath" ]; then
 fi
 
 # https://github.com/nodejs/Release
-_nodejsVersionLTS='8.12.0'
+_nodejsVersionLTS=10.15.1
 
 docker run --rm -it \
   -p "13000:3000" \
+  -v "$HOME/.ssh:/root/.ssh:ro" \
+  -v "$_gitconfigPath:/root/.gitconfig:ro" \
   -v "$_srcPath:/src" \
   -v "$_netrcPath:/root/.netrc" \
   -v "$_dataPath/npm:/root/.npm" \
