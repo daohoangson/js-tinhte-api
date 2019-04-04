@@ -111,12 +111,12 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
         return reject(new Error(errors.FETCH_MULTIPLE.JOB_RESULT_NOT_FOUND))
       }
 
-      if (job._job_result === 'ok') {
+      if (job._job_result === 'ok' || job._job_result === 'message') {
         return resolve(job)
       } else if (job._job_error) {
         return reject(new Error(job._job_error))
       } else {
-        return reject(new Error(job._job_result))
+        return reject(job)
       }
     }
 

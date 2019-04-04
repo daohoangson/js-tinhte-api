@@ -517,6 +517,17 @@ describe('api', () => {
         })
     })
 
+    it('handles _job_result=message', () => {
+      const uri = `uri${Math.random()}`
+      const job = { _job_result: 'message', _job_message: `job message ${Math.random()}` }
+      const uniqueId = md5(`GET ${uri}?`)
+      mockedResponse = { jobs: { [uniqueId]: job } }
+      return mockedFetchMultiple(
+        () => mockedFetchOne(uri)
+          .then(one => expect(one).toBe(job))
+      )
+    })
+
     it('handles _job_error', () => {
       const uri = `uri${Math.random()}`
       const job = { _job_result: 'error', _job_error: `job error ${Math.random()}` }
@@ -531,7 +542,7 @@ describe('api', () => {
         })
     })
 
-    it('handles non-ok _job_result without _job_error', () => {
+    it('handles unknown error', () => {
       const uri = `uri${Math.random()}`
       const job = { _job_result: 'foo', bar: Math.random() }
       const uniqueId = md5(`GET ${uri}?`)
@@ -541,7 +552,7 @@ describe('api', () => {
         .then((json) => {
           expect(json._handled).toBe(1)
           expect(catched.length).toBe(1)
-          expect(catched[0].message).toBe(job._job_result)
+          expect(catched[0]).toBe(job)
         })
     })
   })
