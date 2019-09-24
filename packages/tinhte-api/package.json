@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "tinhte-api library",
   "main": "lib/index.js",
   "module": "es/index.js",
