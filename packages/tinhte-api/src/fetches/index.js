@@ -79,10 +79,21 @@ const fetchesInit = (api, internalApi) => {
       })
         .then((json) => {
           const { errors, error_description: desc } = json
-          if (errors && Array.isArray(errors)) {
-            const e = new Error(errors.join(', '))
-            internalApi.log('Fetched %s and found errors: %s', url, e.message)
-            throw e
+          if (errors) {
+            if (Array.isArray(errors) && errors.length > 0) {
+              const errorArray = new Error(errors.join(', '))
+              internalApi.log('Fetched %s and found errors: %s', url, errorArray.message)
+              throw errorArray
+            }
+
+            if (typeof errors === 'object') {
+              const errorMessages = []
+              Object.keys(errors).forEach((key) => errorMessages.push(`${key}: ${errors[key]}`))
+              if (errorMessages.length > 0) {
+                const errorObject = new Error(errorMessages.join('\n'))
+                throw errorObject
+              }
+            }
           }
 
           if (desc) {

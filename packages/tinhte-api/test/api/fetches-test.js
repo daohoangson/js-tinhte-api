@@ -130,13 +130,26 @@ describe('api', () => {
         .then((json) => expect(json.args._xfToken).toBe(csrf))
     })
 
-    it('rejects on errors', () => {
+    it('rejects on errors (array)', () => {
       const apiRoot = 'https://xfrocks.com/api/index.php'
       const api = apiFactory({ apiRoot })
       return api.fetchOne('posts/1')
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
           (reason) => expect(reason.message).toBe('The requested post could not be found.')
+        )
+    })
+
+    it('rejects on errors (object)', () => {
+      const apiRoot = 'https://xfrocks.com/api/index.php'
+      const api = apiFactory({ apiRoot })
+      return api.post({ uri: 'users', params: { client_id: 'gljf4391k3' } })
+        .then(
+          () => Promise.reject(new Error('Unexpected success?!')),
+          (reason) => {
+            expect(reason.message).toContain('email:')
+            expect(reason.message).toContain('username:')
+          }
         )
     })
 
