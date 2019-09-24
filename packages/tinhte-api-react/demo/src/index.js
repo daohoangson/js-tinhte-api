@@ -45,7 +45,7 @@ class Demo extends Component {
   render () {
     const debug = true
     const api = apiFactory({
-      callbackUrl: window.location.origin + apiCallbackRoute,
+      callbackUrl: apiCallbackRoute,
       clientId,
       debug
     })

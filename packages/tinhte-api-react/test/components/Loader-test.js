@@ -39,6 +39,23 @@ describe('components', () => {
       })
     })
 
+    it('displays an iframe (with origin in callback url)', (done) => {
+      const api = apiFactory({
+        callbackUrl: '/path',
+        clientId: 'client ID'
+      })
+
+      const P = api.ProviderHoc(() => 'foo')
+
+      render(<P />, node, () => {
+        setTimeout(() => {
+          const callbackFullUrl = window.location.origin + '/path'
+          expect(node.innerHTML).toContain(encodeURIComponent(callbackFullUrl))
+          done()
+        }, 10)
+      })
+    })
+
     it('does not show up with access token already set', () => {
       const api = apiFactory({
         auth: { accessToken: 'access token' },

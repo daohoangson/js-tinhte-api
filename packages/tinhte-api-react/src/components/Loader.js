@@ -9,8 +9,9 @@ const buildAuthorizeUrl = (api) => {
   }
 
   const encodedUniqueId = encodeURIComponent(api.getUniqueId())
-  const guestRedirectUri = `${callbackUrl}#user_id=0&state=${encodedUniqueId}`
-  const redirectUri = callbackUrl
+  const callbackFullUrl = callbackUrl.charAt(0) === '/' ? window.location.origin + callbackUrl : callbackUrl
+  const guestRedirectUri = `${callbackFullUrl}#user_id=0&state=${encodedUniqueId}`
+  const redirectUri = callbackFullUrl
 
   const authorizeUrl = `${api.getApiRoot()}?oauth/authorize&` +
     `client_id=${encodeURIComponent(clientId)}&` +

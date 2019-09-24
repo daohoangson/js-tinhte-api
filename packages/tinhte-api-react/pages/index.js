@@ -9,9 +9,8 @@ import NewThread from '../demo/src/components/NewThread'
 import Visitor from '../demo/src/components/Visitor'
 import VisitorThreads from '../demo/src/components/VisitorThreads'
 
-const callbackUrl = process.browser ? window.location.origin + '/api-callback' : ''
 const debug = true
-const apiConfig = { callbackUrl, debug }
+const apiConfig = { callbackUrl: '/api-callback', debug }
 const api = apiFactory(apiConfig)
 
 const Index = () => (
