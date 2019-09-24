@@ -2,7 +2,7 @@
   "name": "tinhte-api-lerna",
   "private": true,
   "devDependencies": {
-    "lerna": "^3.13.0"
+    "lerna": "^3.16.4"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
