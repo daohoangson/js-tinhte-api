@@ -31,6 +31,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^10.0.3",
+    "eslint": "^6.4.0",
     "nwb": "0.23.0",
     "standard": "^14.3.1",
     "stats-webpack-plugin": "^0.7.0",
