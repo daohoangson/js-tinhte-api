@@ -18,7 +18,7 @@ describe('hoc', () => {
     })
 
     it('check for required param', () => {
-      let catched = []
+      const catched = []
 
       try {
         apiHoc.ApiConsumer()
@@ -51,7 +51,7 @@ describe('hoc', () => {
       const C = apiHoc.ApiConsumer(Child)
 
       render(<C />, node, () => {
-        expect(node.innerHTML).toContain(`<div class="Child">ok</div>`)
+        expect(node.innerHTML).toContain('<div class="Child">ok</div>')
       })
     })
 
@@ -64,7 +64,7 @@ describe('hoc', () => {
         const P = api.ProviderHoc(() => <C />)
 
         render(<P />, node, () => {
-          expect(node.innerHTML).toContain(`<div class="Child">ok</div>`)
+          expect(node.innerHTML).toContain('<div class="Child">ok</div>')
         })
       })
 

@@ -33,7 +33,7 @@ const hocApiProvider = (Component, api, internalApi) => {
       return (
         <ApiContext.Provider className='ApiProvider' value={this.state.apiContext}>
           <Component {...props} />
-          { api.getAccessToken() === '' && <internalApi.LoaderComponent /> }
+          {api.getAccessToken() === '' && <internalApi.LoaderComponent />}
         </ApiContext.Provider>
       )
     }

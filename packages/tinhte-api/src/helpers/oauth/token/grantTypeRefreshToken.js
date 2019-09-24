@@ -1,7 +1,7 @@
 import FormData from 'form-data'
 
 const grantTypeRefreshToken = (api, internalApi, clientSecret, refreshToken) => {
-  let formData = new FormData()
+  const formData = new FormData()
   formData.append('grant_type', 'refresh_token')
   formData.append('client_id', api.getClientId())
   formData.append('client_secret', clientSecret)

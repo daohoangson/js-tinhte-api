@@ -5,7 +5,7 @@ import { algos, encrypt } from '../../crypt'
 const algo = algos[0]
 
 const grantTypePassword = (api, internalApi, clientSecret, username, password) => {
-  let formData = new FormData()
+  const formData = new FormData()
   formData.append('grant_type', 'password')
   formData.append('client_id', api.getClientId())
   formData.append('username', username)

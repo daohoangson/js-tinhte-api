@@ -51,7 +51,7 @@ class Item extends React.Component {
     return (
       <li>
         {`${element.navigation_type}: ${getTitle(element)} `}
-        <a href={getLink(element)} target='_blank'>link</a>
+        <a href={getLink(element)} target='_blank' rel='noopener noreferrer'>link</a>
         {childrenCount > 0 && <span onClick={toggle} style={{ cursor: 'pointer' }}>{` -> ${childrenCount}`}</span>}
         {this.state.expand && <List elements={elements} parentId={element.navigation_id} />}
       </li>
@@ -67,7 +67,7 @@ const List = ({ elements, parentId }) => {
 
   return (
     <ul>
-      { filtered.map((element) => <Item element={element} elements={elements} key={element.navigation_id} />) }
+      {filtered.map((element) => <Item element={element} elements={elements} key={element.navigation_id} />)}
     </ul>
   )
 }

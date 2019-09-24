@@ -41,7 +41,7 @@ describe('api', () => {
       it('includes access token', () => {
         const accessToken = `at${Math.random()}`
         const api = apiFactory({ auth: { accessToken } })
-        const url = `https://httpbin.org/get`
+        const url = 'https://httpbin.org/get'
         return api.fetchOne(url)
           .then((json) => expect(json.args.oauth_token).toBe(accessToken))
       })
@@ -155,7 +155,7 @@ describe('api', () => {
 
     it('rejects on error_description', () => {
       const api = apiFactory()
-      return api.fetchOne({ method: 'POST', 'uri': 'oauth/token' })
+      return api.fetchOne({ method: 'POST', uri: 'oauth/token' })
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
           (reason) => expect(reason.message).toBe('The grant type was not specified in the request')
@@ -483,7 +483,7 @@ describe('api', () => {
 
     it('handles unknown job in response', () => {
       mockedResponse = { jobs: { foo: 'bar' } }
-      let catched = []
+      const catched = []
 
       return mockedFetchMultiple(() => mockedFetchOne('index').catch(reason => (catched.push(reason))))
         .then((json) => {

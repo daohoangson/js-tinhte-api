@@ -90,7 +90,7 @@ describe('components', () => {
         const apiConfig = {}
         const messageFactory = () => ({ foo: 'bar' })
         testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).toContain(`data-user-id="0"`)
+          expect(node.innerHTML).toContain('data-user-id="0"')
           done()
         })
       })
@@ -99,7 +99,7 @@ describe('components', () => {
         const apiConfig = {}
         const messageFactory = () => ({ auth: {} })
         testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).toContain(`data-user-id="0"`)
+          expect(node.innerHTML).toContain('data-user-id="0"')
           done()
         })
       })

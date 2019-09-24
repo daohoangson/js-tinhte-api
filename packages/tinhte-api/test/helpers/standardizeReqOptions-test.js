@@ -64,7 +64,7 @@ describe('helpers', () => {
       })
 
       it('capitalizes method', () => {
-        const options = { 'method': 'foo' }
+        const options = { method: 'foo' }
         _(options)
         expect(options.method).toBe('FOO')
       })

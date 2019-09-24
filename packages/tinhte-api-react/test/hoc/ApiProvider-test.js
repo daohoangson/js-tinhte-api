@@ -19,7 +19,7 @@ describe('hoc', () => {
 
     describe('required params', () => {
       const testRequiredParam = (Component, api, internalApi) => {
-        let catched = []
+        const catched = []
 
         try {
           apiHoc.ApiProvider(Component, api, internalApi)

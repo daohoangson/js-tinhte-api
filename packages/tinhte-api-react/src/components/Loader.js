@@ -128,9 +128,11 @@ class Loader extends React.Component {
 
   render () {
     return (
-      <iframe className='ApiLoader' data-user-id={this.state.userId}
+      <iframe
+        className='ApiLoader' data-user-id={this.state.userId}
         sandbox='allow-same-origin allow-scripts' src={this.state.src}
-        style={{ display: 'block', height: 0, width: 0 }} />
+        style={{ display: 'block', height: 0, width: 0 }}
+      />
     )
   }
 }

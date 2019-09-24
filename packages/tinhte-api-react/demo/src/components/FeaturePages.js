@@ -8,11 +8,11 @@ const FeaturePage = ({ page }) => (
       ? <img src={page.links.image} style={{ maxHeight: '18px', verticalAlign: 'bottom' }} title={page.fullName} />
       : page.fullName}
     {' '}
-    <a href={page.links && page.links.permalink} target='_blank'>link</a>
+    <a href={page.links && page.links.permalink} target='_blank' rel='noopener noreferrer'>link</a>
   </li>
 )
 
-const FeaturePages = ({ pages }) =>  (
+const FeaturePages = ({ pages }) => (
   <ul>
     {Array.isArray(pages) ? pages.map((page) => <FeaturePage page={page} key={page.tagText} />) : ''}
   </ul>
