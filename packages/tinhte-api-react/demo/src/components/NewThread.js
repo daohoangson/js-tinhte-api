@@ -21,7 +21,7 @@ class NewThread extends React.Component {
 
   render () {
     const { api, forums } = this.props
-    if (!api || !forums) {
+    if (!api || !Array.isArray(forums)) {
       return null
     }
 

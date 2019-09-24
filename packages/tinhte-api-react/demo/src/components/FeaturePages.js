@@ -12,12 +12,10 @@ const FeaturePage = ({ page }) => (
   </li>
 )
 
-const FeaturePages = ({ pages }) => (
-  (pages && typeof pages.map === 'function')
-    ? <ul>
-      { pages.map((page) => <FeaturePage page={page} key={page.tagText} />) }
-    </ul>
-    : null
+const FeaturePages = ({ pages }) =>  (
+  <ul>
+    {Array.isArray(pages) ? pages.map((page) => <FeaturePage page={page} key={page.tagText} />) : ''}
+  </ul>
 )
 
 FeaturePages.apiFetches = {

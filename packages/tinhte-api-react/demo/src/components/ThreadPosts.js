@@ -7,7 +7,7 @@ const preparePostBody = (post) => {
   return { __html: sanitizeHtml(post.post_body_html) }
 }
 
-const ThreadPosts = ({ posts }) => (posts ? (
+const ThreadPosts = ({ posts }) => (Array.isArray(posts) ? (
   <ul>
     {posts.map((post) => (
       <li key={post.post_id}>
@@ -33,7 +33,7 @@ ThreadPosts.apiFetches = {
           'post_body_html'
         ].join(',')
       },
-      success: (json) => json.posts || []
+      success: (json) => json.posts
     }
   }
 }
