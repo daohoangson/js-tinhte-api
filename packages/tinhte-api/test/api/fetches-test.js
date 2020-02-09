@@ -137,8 +137,9 @@ describe('api', () => {
 
       return api.fetchOne({ uri: '/', headers: { F: 5, B: undefined } })
         .then((json) => {
-          expect(json.headers).toMatchObject({ A: '1', C: '[object object]', D: 'null', E: '3', F: '5' })
-          expect(json.headers).toEqual(expect.not.objectContaining({ B: expect.anything() }))
+          // expect(json.headers).toMatchObject({ A: '1', C: '[object object]', D: 'null', E: '3', F: '5' })
+          expect((({ A, C, D, E, F }) => ({ A, C, D, E, F }))(json.headers)).toEqual({ A: '1', C: '[object Object]', D: 'null', E: '3', F: '5' })
+          expect('B' in json.headers).toEqual(false)
         })
     })
 
