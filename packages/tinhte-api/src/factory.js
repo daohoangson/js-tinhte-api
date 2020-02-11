@@ -54,8 +54,8 @@ const apiFactory = (config = {}) => {
     if (typeof config.ott === 'string') ott = config.ott
     if (typeof config.scope === 'string') scope = config.scope
 
-    if (config.headers && typeof config.headers === 'object') {
-      headers = config.headers
+    if (typeof config.headers === 'object') {
+      headers = Object.assign({}, config.headers)
     }
   }
   updateConfig(config)

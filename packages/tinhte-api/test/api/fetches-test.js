@@ -132,14 +132,19 @@ describe('api', () => {
 
     it('includes configured default headers', () => {
       const apiRoot = 'https://httpbin.org/headers'
-      const headers = { A: 1, B: '2', C: { X: 'y' }, D: null, E: '3', F: '4' }
+      const headers = { A: '1', B: 2, C: { x: 'y' }, D: null, E: undefined, F: '6', G: '7' }
       const api = apiFactory({ apiRoot, headers })
 
-      return api.fetchOne({ uri: '/', headers: { F: 5, B: undefined } })
+      return api.fetchOne({ uri: '/', headers: { F: undefined, G: 8 } })
         .then((json) => {
-          // expect(json.headers).toMatchObject({ A: '1', C: '[object object]', D: 'null', E: '3', F: '5' })
-          expect((({ A, C, D, E, F }) => ({ A, C, D, E, F }))(json.headers)).toEqual({ A: '1', C: '[object Object]', D: 'null', E: '3', F: '5' })
-          expect('B' in json.headers).toEqual(false)
+          const { A, B, C, D, E, G } = json.headers
+          expect(A).toBe(headers.A)
+          expect(B).toBe(headers.B.toString())
+          expect(C).toBe('[object Object]')
+          expect(D).toBe('null')
+          expect(E).toBe('undefined')
+          expect('F' in json.headers).toBe(false)
+          expect(G).toBe('8')
         })
     })
 
