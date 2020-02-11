@@ -134,6 +134,7 @@ Params:
    - `debug` default=`false`
    - `ott` default=`''`
    - `scope` default=`'read'`
+   - `headers` default=`{}`: the default headers to be used in all API calls
 
 Returns an `api` object.
 
