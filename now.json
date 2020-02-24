@@ -1,13 +1,6 @@
 {
   "alias": "tinhte-api",
   "builds": [
-    {
-      "src": "packages/tinhte-api-react/now-build-demo.sh",
-      "use": "@now/static-build",
-      "config": {
-        "distDir": "demo"
-      }
-    },
     { "src": "packages/tinhte-api-react/next.config.js", "use": "@now/next" }
   ],
   "routes": [
