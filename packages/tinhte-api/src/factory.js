@@ -124,18 +124,7 @@ const apiFactory = (config = {}) => {
 
     getClientId: () => clientId,
 
-    getCookieName: () => {
-      if (!cookiePrefix || !clientId) {
-        return ''
-      }
-
-      const safeClientId = clientId.replace(/[^a-z0-9]/gi, '')
-      if (!safeClientId) {
-        return ''
-      }
-
-      return cookiePrefix + safeClientId
-    },
+    getCookiePrefix: () => cookiePrefix,
 
     getDebug: () => debug,
 

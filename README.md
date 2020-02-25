@@ -401,10 +401,9 @@ Returns the configured callback URL string.
 
 Returns the configured client ID string.
 
-### api.getCookieName
+### api.getCookiePrefix
 
-Returns cookie name if cookie prefix and client ID have been configured,
-or empty string otherwise.
+Returns the configured cookie prefix.
 
 ### api.getDebug
 

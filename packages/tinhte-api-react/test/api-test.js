@@ -26,7 +26,7 @@ describe('api', () => {
       expect(api2.getUserId()).toBe(apiConfig.auth.userId)
       expect(api2.getCallbackUrl()).toBe(apiConfig.callbackUrl)
       expect(api2.getClientId()).toBe(apiConfig.clientId)
-      expect(api2.getCookieName()).toMatch(new RegExp('^' + apiConfig.cookiePrefix))
+      expect(api2.getCookiePrefix()).toBe(apiConfig.cookiePrefix)
       expect(api2.getDebug()).toBe(apiConfig.debug)
       expect(api2.getOtt()).toBe(apiConfig.ott)
       expect(api2.getScope()).toBe(apiConfig.scope)

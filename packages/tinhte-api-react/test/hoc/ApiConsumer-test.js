@@ -240,15 +240,16 @@ describe('hoc', () => {
       })
 
       it('merge batch with apiFetchesWithAuth', () => {
-        const clientId = 'client ID'
-        const cookiePrefix = `auth${Math.random()}_`
+        const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+        const cookiePrefix = `auth${Math.random()}_`.replace(/[^a-z0-9]/gi, '')
         const api = apiFactory({ clientId, cookiePrefix })
 
         const auth = {
           access_token: 'access token',
           user_id: Math.random()
         }
-        document.cookie = `${api.getCookieName()}=${JSON.stringify(auth)}`
+        expect(document.cookie).toNotContain(cookiePrefix)
+        document.cookie = `${cookiePrefix}${clientId}=${JSON.stringify(auth)}`
 
         const Child = () => 'foo'
         Child.apiFetchesWithAuth = { post1: { uri: 'posts/1' } }

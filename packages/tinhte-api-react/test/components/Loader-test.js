@@ -174,8 +174,8 @@ describe('components', () => {
     })
 
     it('restores auth from cookie', (done) => {
-      const clientId = 'client ID'
-      const cookiePrefix = `auth${Math.random()}_`
+      const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+      const cookiePrefix = `auth${Math.random()}_`.replace(/[^a-z0-9]/gi, '')
       const api = apiFactory({ clientId, cookiePrefix })
       const P = api.ProviderHoc(() => 'foo')
       const auth = {
@@ -184,7 +184,7 @@ describe('components', () => {
       }
 
       expect(document.cookie).toNotContain(cookiePrefix)
-      document.cookie = `${api.getCookieName()}=${JSON.stringify(auth)}`
+      document.cookie = `${cookiePrefix}${clientId}=${JSON.stringify(auth)}`
 
       render(<P />, node, () => {
         setTimeout(() => {

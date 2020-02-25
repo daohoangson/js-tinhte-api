@@ -39,11 +39,9 @@ describe('apiFactory', () => {
   })
 
   it('accepts cookiePrefix', () => {
-    const cookiePrefix = 'cookie prefix'
-    const clientId = 'client ID'
-    const api = apiFactory({ clientId, cookiePrefix })
-    const regEx = new RegExp('^' + cookiePrefix)
-    expect(api.getCookieName()).toMatch(regEx)
+    const cookiePrefix = 'cookie_prefix_'
+    const api = apiFactory({ cookiePrefix })
+    expect(api.getCookiePrefix()).toBe(cookiePrefix)
   })
 
   it('accepts debug', () => {

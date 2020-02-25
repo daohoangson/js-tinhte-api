@@ -24,8 +24,23 @@ const buildAuthorizeUrl = (api) => {
   return authorizeUrl
 }
 
+const generateCookieName = (api) => {
+  const prefix = api.getCookiePrefix()
+  const clientId = api.getClientId()
+  if (!prefix || !clientId) {
+    return ''
+  }
+
+  const safeClientId = clientId.replace(/[^a-z0-9]/gi, '')
+  if (!safeClientId) {
+    return ''
+  }
+
+  return prefix + safeClientId
+}
+
 const getCookie = (api) => {
-  const name = api.getCookieName()
+  const name = generateCookieName(api)
   if (!name) {
     return null
   }
@@ -45,7 +60,7 @@ const setCookie = (api, auth) => {
     return null
   }
 
-  const name = api.getCookieName()
+  const name = generateCookieName(api)
   if (!name) {
     return null
   }

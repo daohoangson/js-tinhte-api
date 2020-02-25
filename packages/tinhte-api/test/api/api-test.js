@@ -26,7 +26,7 @@ describe('api', () => {
       expect(api2.getUserId()).toBe(apiConfig.auth.userId)
       expect(api2.getCallbackUrl()).toBe(apiConfig.callbackUrl)
       expect(api2.getClientId()).toBe(apiConfig.clientId)
-      expect(api2.getCookieName()).toMatch(new RegExp('^' + apiConfig.cookiePrefix))
+      expect(api2.getCookiePrefix()).toBe(apiConfig.cookiePrefix)
       expect(api2.getDebug()).toBe(apiConfig.debug)
       expect(api2.getOtt()).toBe(apiConfig.ott)
       expect(api2.getScope()).toBe(apiConfig.scope)
@@ -71,31 +71,10 @@ describe('api', () => {
     })
   })
 
-  describe('getCookieName', () => {
+  describe('getCookiePrefix', () => {
     it('returns default cookie prefix', () => {
-      const clientId = 'client ID'
-      const api = apiFactory({ clientId })
-      expect(api.getCookieName()).toMatch(/^auth_/)
-    })
-
-    it('returns empty string without client ID', () => {
-      const cookiePrefix = 'cookie prefix'
-      const api = apiFactory({ cookiePrefix })
-      expect(api.getCookieName()).toBe('')
-    })
-
-    it('returns empty string without cookie prefix', () => {
-      const clientId = 'client ID'
-      const cookiePrefix = ''
-      const api = apiFactory({ clientId, cookiePrefix })
-      expect(api.getCookieName()).toBe('')
-    })
-
-    it('returns empty string with unsafe client ID', () => {
-      const clientId = '#'
-      const cookiePrefix = 'cookie prefix'
-      const api = apiFactory({ clientId, cookiePrefix })
-      expect(api.getCookieName()).toBe('')
+      const api = apiFactory()
+      expect(api.getCookiePrefix()).toBe('auth_')
     })
   })
 
