@@ -24,8 +24,28 @@ const buildAuthorizeUrl = (api) => {
   return authorizeUrl
 }
 
+const generateCookieName = (api) => {
+  const prefix = api.getCookiePrefix()
+  const clientId = api.getClientId()
+  if (!prefix || !clientId) {
+    return ''
+  }
+
+  const prefixValue = (Cookies.get(prefix) || '').replace(/[^a-z0-9]/gi, '')
+  if (prefixValue) {
+    return `${prefix}__${prefixValue}`
+  }
+
+  const safeClientId = clientId.replace(/[^a-z0-9]/gi, '')
+  if (!safeClientId) {
+    return ''
+  }
+
+  return prefix + safeClientId
+}
+
 const getCookie = (api) => {
-  const name = api.getCookieName()
+  const name = generateCookieName(api)
   if (!name) {
     return null
   }
@@ -45,7 +65,7 @@ const setCookie = (api, auth) => {
     return null
   }
 
-  const name = api.getCookieName()
+  const name = generateCookieName(api)
   if (!name) {
     return null
   }
@@ -80,10 +100,11 @@ class Loader extends React.Component {
       internalApi.log('Received auth via window message', auth)
 
       internalApi.setAuth(auth)
-      this.setState({ userId: api.getUserId() })
+      const userId = api.getUserId()
+      this.setState({ userId })
 
       const accessToken = api.getAccessToken()
-      if (accessToken && accessToken === auth.access_token) {
+      if (userId > 0 && accessToken && accessToken === auth.access_token) {
         const cookie = setCookie(api, auth)
         if (cookie !== null) {
           internalApi.log('Set cookie %s until %s', cookie.name, cookie.expires)
