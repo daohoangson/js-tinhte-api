@@ -12,6 +12,7 @@ const apiFactory = (config = {}) => {
   let debug = false
   let ott = ''
   let scope = 'read'
+  let headers = {}
 
   const updateConfig = (config = {}) => {
     if (typeof config.apiRoot === 'string') apiRoot = config.apiRoot
@@ -52,6 +53,10 @@ const apiFactory = (config = {}) => {
     if (typeof config.debug === 'boolean') debug = config.debug
     if (typeof config.ott === 'string') ott = config.ott
     if (typeof config.scope === 'string') scope = config.scope
+
+    if (typeof config.headers === 'object') {
+      headers = Object.assign({}, config.headers)
+    }
   }
   updateConfig(config)
 
@@ -137,6 +142,8 @@ const apiFactory = (config = {}) => {
     getOtt: () => ott,
 
     getScope: () => scope,
+
+    getHeaders: () => Object.assign({}, headers),
 
     getUniqueId: () => uniqueId,
 

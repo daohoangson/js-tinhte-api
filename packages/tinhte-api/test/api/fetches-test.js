@@ -130,6 +130,24 @@ describe('api', () => {
         .then((json) => expect(json.args._xfToken).toBe(csrf))
     })
 
+    it('includes configured default headers', () => {
+      const apiRoot = 'https://httpbin.org/headers'
+      const headers = { A: '1', B: 2, C: { x: 'y' }, D: null, E: undefined, F: '6', G: '7' }
+      const api = apiFactory({ apiRoot, headers })
+
+      return api.fetchOne({ uri: '/', headers: { F: undefined, G: 8 } })
+        .then((json) => {
+          const { A, B, C, D, E, G } = json.headers
+          expect(A).toBe(headers.A)
+          expect(B).toBe(headers.B.toString())
+          expect(C).toBe('[object Object]')
+          expect(D).toBe('null')
+          expect(E).toBe('undefined')
+          expect('F' in json.headers).toBe(false)
+          expect(G).toBe('8')
+        })
+    })
+
     it('rejects on errors (array)', () => {
       const apiRoot = 'https://xfrocks.com/api/index.php'
       const api = apiFactory({ apiRoot })

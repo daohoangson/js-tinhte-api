@@ -134,6 +134,7 @@ Params:
    - `debug` default=`false`
    - `ott` default=`''`
    - `scope` default=`'read'`
+   - `headers` default=`{}`: the headers to be sent with all requests. To delete some default header for a specific request, set it to `undefined`.
 
 Returns an `api` object.
 

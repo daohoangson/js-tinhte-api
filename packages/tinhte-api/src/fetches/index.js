@@ -62,7 +62,19 @@ const fetchesInit = (api, internalApi) => {
 
     const url = buildUrl(options)
 
-    const { body, headers, method, params, parseJson } = options
+    const { body, method, params, parseJson } = options
+
+    const headers = api.getHeaders()
+    if (options.headers && typeof options.headers === 'object') {
+      Object.keys(options.headers).forEach((key) => {
+        if (options.headers[key] === undefined) {
+          delete headers[key]
+        } else {
+          headers[key] = options.headers[key]
+        }
+      })
+    }
+
     const unfetchOptions = { headers, method }
     if (body) unfetchOptions.body = body
     if (params._xfToken) unfetchOptions.credentials = 'include'
