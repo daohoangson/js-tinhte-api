@@ -130,7 +130,7 @@ Params:
      - `userId` default=`0`
    - `callbackUrl` default=`''`
    - `clientId` default=`''`
-   - `cookiePrefix` default=`'auth_'`
+   - `cookiePrefix` default=`'auth_'`: it is possible to use `xf_session` as the prefix, the React component will then save auth data for each session ID, effectively sync logged in status between server side XenForo and client side JavaScript.
    - `debug` default=`false`
    - `ott` default=`''`
    - `scope` default=`'read'`
