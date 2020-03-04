@@ -105,7 +105,7 @@ class Loader extends React.Component {
       this.setState({ userId })
 
       const accessToken = api.getAccessToken()
-      if (userId > 0 && accessToken && accessToken === auth.access_token) {
+      if (accessToken && accessToken === auth.access_token) {
         const cookie = setCookie(api, auth)
         if (cookie !== null) {
           internalApi.log('Set cookie %s until %s', cookie.name, cookie.expires)
