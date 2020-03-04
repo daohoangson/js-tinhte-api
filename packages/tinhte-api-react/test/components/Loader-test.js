@@ -73,10 +73,6 @@ describe('components', () => {
 
     describe('receives message', () => {
       const testReceiveMessage = (apiConfig, messageFactory, callback) => {
-        if (apiConfig.cookiePrefix) {
-          document.cookie = `${apiConfig.cookiePrefix}session=1`
-        }
-
         const api = apiFactory(apiConfig)
         const P = api.ProviderHoc(() => 'foo')
 
@@ -111,6 +107,7 @@ describe('components', () => {
       it('with valid auth', (done) => {
         const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
         const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+        const cookieSession = `${Math.random()}`.replace(/[^0-9]/gi, '')
         const apiConfig = { clientId, cookiePrefix }
         const userId = Math.random()
         const messageFactory = (api) => {
@@ -125,9 +122,11 @@ describe('components', () => {
         }
 
         expect(document.cookie).toNotContain(cookiePrefix)
+        document.cookie = `${apiConfig.cookiePrefix}session=${cookieSession}`
+
         testReceiveMessage(apiConfig, messageFactory, () => {
           expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
-          expect(document.cookie).toContain(`${clientId}__1`)
+          expect(document.cookie).toContain(`${clientId}__${cookieSession}`)
           done()
         })
       })
@@ -135,6 +134,7 @@ describe('components', () => {
       it('without expires_in -> set auth but no cookie', (done) => {
         const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
         const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+        const cookieSession = `${Math.random()}`.replace(/[^0-9]/gi, '')
         const apiConfig = { clientId, cookiePrefix }
         const userId = Math.random()
         const messageFactory = (api) => {
@@ -147,9 +147,37 @@ describe('components', () => {
           return message
         }
 
+        expect(document.cookie).toNotContain(cookiePrefix)
+        document.cookie = `${apiConfig.cookiePrefix}session=${cookieSession}`
+
         testReceiveMessage(apiConfig, messageFactory, () => {
           expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
-          expect(document.cookie).toNotContain(`${clientId}__1`)
+          expect(document.cookie).toNotContain(`${clientId}__${cookieSession}`)
+          done()
+        })
+      })
+
+      it('without session -> set auth but no cookie', (done) => {
+        const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+        const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+        const apiConfig = { clientId, cookiePrefix, debug: true }
+        const userId = Math.random()
+        const messageFactory = (api) => {
+          const auth = {
+            access_token: 'access token',
+            expires_in: 3600,
+            user_id: userId,
+            state: api.getUniqueId()
+          }
+          const message = { auth }
+          return message
+        }
+
+        expect(document.cookie).toNotContain(cookiePrefix)
+
+        testReceiveMessage(apiConfig, messageFactory, () => {
+          expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
+          expect(document.cookie).toNotContain(`${clientId}__`)
           done()
         })
       })

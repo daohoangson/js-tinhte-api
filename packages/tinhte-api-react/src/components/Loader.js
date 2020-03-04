@@ -115,6 +115,11 @@ class Loader extends React.Component {
   }
 
   componentDidMount () {
+    /* istanbul ignore else */
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('message', this.onWindowMessage)
+    }
+
     const { api, internalApi } = this.props
     const cookie = getCookie(api)
     if (cookie === null) {
@@ -137,11 +142,6 @@ class Loader extends React.Component {
     const authorizeUrl = buildAuthorizeUrl(api)
     if (authorizeUrl) {
       this.setState({ src: authorizeUrl })
-    }
-
-    /* istanbul ignore else */
-    if (typeof window.addEventListener === 'function') {
-      window.addEventListener('message', this.onWindowMessage)
     }
   }
 
