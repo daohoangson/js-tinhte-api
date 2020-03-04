@@ -8,7 +8,7 @@ const apiFactory = (config = {}) => {
   let auth = null
   let callbackUrl = ''
   let clientId = ''
-  let cookiePrefix = 'auth_'
+  let cookiePrefix = ''
   let debug = false
   let ott = ''
   let scope = 'read'
