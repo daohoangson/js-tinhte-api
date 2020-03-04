@@ -123,9 +123,11 @@ class Loader extends React.Component {
     const { api, internalApi } = this.props
     const cookie = getCookie(api)
     if (cookie === null) {
-      // bad config or no cookie -> no auth
+      internalApi.log('Skipped authentication due to bad config or no cookie')
+      internalApi.setAuth({ state: api.getUniqueId() })
       return
     }
+
     if (cookie.value) {
       internalApi.log('Restored auth from cookie', cookie)
 

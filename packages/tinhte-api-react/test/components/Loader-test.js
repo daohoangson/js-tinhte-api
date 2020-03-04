@@ -105,11 +105,15 @@ describe('components', () => {
       })
       const P = api.ProviderHoc(() => 'foo')
 
+      let hasAuthenticated = false
+      api.onAuthenticated(() => (hasAuthenticated = true))
+
       expect(document.cookie).toNotContain(cookiePrefix)
 
       render(<P />, node, () => {
         setTimeout(() => {
           expect(node.innerHTML).toContain('src=""')
+          expect(hasAuthenticated).toBe(true)
           done()
         }, 10)
       })
