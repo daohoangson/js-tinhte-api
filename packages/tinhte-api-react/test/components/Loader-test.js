@@ -56,6 +56,65 @@ describe('components', () => {
       })
     })
 
+    it('displays an iframe with user cookie', (done) => {
+      const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+      const api = apiFactory({
+        callbackUrl: '/path',
+        clientId: 'client ID',
+        cookiePrefix
+      })
+      const P = api.ProviderHoc(() => 'foo')
+
+      expect(document.cookie).toNotContain(cookiePrefix)
+      document.cookie = `${cookiePrefix}user=xxx`
+
+      render(<P />, node, () => {
+        setTimeout(() => {
+          expect(node.innerHTML).toNotContain('src=""')
+          done()
+        }, 10)
+      })
+    })
+
+    it('displays an iframe with session cookie', (done) => {
+      const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+      const api = apiFactory({
+        callbackUrl: '/path',
+        clientId: 'client ID',
+        cookiePrefix
+      })
+      const P = api.ProviderHoc(() => 'foo')
+
+      expect(document.cookie).toNotContain(cookiePrefix)
+      document.cookie = `${cookiePrefix}session=xxx`
+
+      render(<P />, node, () => {
+        setTimeout(() => {
+          expect(node.innerHTML).toNotContain('src=""')
+          done()
+        }, 10)
+      })
+    })
+
+    it('skips auth without user/session cookie', (done) => {
+      const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+      const api = apiFactory({
+        callbackUrl: '/path',
+        clientId: 'client ID',
+        cookiePrefix
+      })
+      const P = api.ProviderHoc(() => 'foo')
+
+      expect(document.cookie).toNotContain(cookiePrefix)
+
+      render(<P />, node, () => {
+        setTimeout(() => {
+          expect(node.innerHTML).toContain('src=""')
+          done()
+        }, 10)
+      })
+    })
+
     it('does not show up with access token already set', () => {
       const api = apiFactory({
         auth: { accessToken: 'access token' },
@@ -201,22 +260,6 @@ describe('components', () => {
       render(<P />, node, () => {
         setTimeout(() => {
           expect(node.innerHTML).toContain(`data-user-id="${auth.user_id}"`)
-          done()
-        }, 10)
-      })
-    })
-
-    it('skips auth without user/session cookie', (done) => {
-      const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
-      const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
-      const api = apiFactory({ clientId, cookiePrefix })
-      const P = api.ProviderHoc(() => 'foo')
-
-      expect(document.cookie).toNotContain(cookiePrefix)
-
-      render(<P />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).toContain('src=""')
           done()
         }, 10)
       })
