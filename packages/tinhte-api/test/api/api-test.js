@@ -74,7 +74,7 @@ describe('api', () => {
   describe('getCookiePrefix', () => {
     it('returns default cookie prefix', () => {
       const api = apiFactory()
-      expect(api.getCookiePrefix()).toBe('auth_')
+      expect(api.getCookiePrefix()).toBe('')
     })
   })
 

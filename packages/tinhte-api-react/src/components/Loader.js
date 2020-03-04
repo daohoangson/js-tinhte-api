@@ -26,38 +26,39 @@ const buildAuthorizeUrl = (api) => {
 
 const generateCookieName = (api) => {
   const prefix = api.getCookiePrefix()
-  const clientId = api.getClientId()
-  if (!prefix || !clientId) {
+  if (!prefix) {
+    // no prefix -> always auth
     return ''
   }
 
-  const prefixValue = (Cookies.get(prefix) || '').replace(/[^a-z0-9]/gi, '')
-  if (prefixValue) {
-    return `${prefix}__${prefixValue}`
+  const cookieSession = Cookies.get(`${prefix}session`)
+  const cookieUser = Cookies.get(`${prefix}user`)
+  if (!cookieSession && !cookieUser) {
+    // no session AND user -> no authentication
+    return null
   }
-
-  const safeClientId = clientId.replace(/[^a-z0-9]/gi, '')
-  if (!safeClientId) {
+  if (!cookieSession) {
+    // no session -> try to auth
     return ''
   }
 
-  return prefix + safeClientId
+  const safeClientId = api.getClientId().replace(/[^a-z0-9]/gi, '')
+  const safeSession = cookieSession.replace(/[^a-z0-9]/gi, '')
+  return `${safeClientId}__${safeSession}`
 }
 
 const getCookie = (api) => {
   const name = generateCookieName(api)
   if (!name) {
-    return null
+    if (name === null) {
+      return null
+    } else {
+      return { name }
+    }
   }
 
   const value = Cookies.getJSON(name)
-  if (!value) {
-    return null
-  }
-
-  value._cookieName = name
-
-  return value
+  return { name, value }
 }
 
 const setCookie = (api, auth) => {
@@ -114,13 +115,24 @@ class Loader extends React.Component {
   }
 
   componentDidMount () {
+    /* istanbul ignore else */
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('message', this.onWindowMessage)
+    }
+
     const { api, internalApi } = this.props
-    const cookieAuth = getCookie(api)
-    if (cookieAuth !== null) {
-      internalApi.log('Restored auth from cookie', cookieAuth)
+    const cookie = getCookie(api)
+    if (cookie === null) {
+      internalApi.log('Skipped authentication due to bad config or no cookie')
+      internalApi.setAuth({ state: api.getUniqueId() })
+      return
+    }
+
+    if (cookie.value) {
+      internalApi.log('Restored auth from cookie', cookie)
 
       internalApi.setAuth({
-        ...cookieAuth,
+        ...cookie.value,
         state: api.getUniqueId()
       })
       this.setState({ userId: api.getUserId() })
@@ -132,11 +144,6 @@ class Loader extends React.Component {
     const authorizeUrl = buildAuthorizeUrl(api)
     if (authorizeUrl) {
       this.setState({ src: authorizeUrl })
-    }
-
-    /* istanbul ignore else */
-    if (typeof window.addEventListener === 'function') {
-      window.addEventListener('message', this.onWindowMessage)
     }
   }
 

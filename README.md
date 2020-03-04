@@ -130,7 +130,7 @@ Params:
      - `userId` default=`0`
    - `callbackUrl` default=`''`
    - `clientId` default=`''`
-   - `cookiePrefix` default=`'auth_'`: it is possible to use `xf_session` as the prefix, the React component will then save auth data for each session ID, effectively sync logged in status between server side XenForo and client side JavaScript.
+   - `cookiePrefix` default=`''`: it is possible to use `xf_` and the React component will **only** attempt authentication when `xf_session` or `xf_user` cookies exists -- effectively sync logged in status between server side XenForo and client side JavaScript. This requires a patched version of XenForo to work because XF sets the cookie to be http only.
    - `debug` default=`false`
    - `ott` default=`''`
    - `scope` default=`'read'`
