@@ -177,5 +177,21 @@ describe('components', () => {
         }, 10)
       })
     })
+
+    it('skips auth without user/session cookie', (done) => {
+      const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+      const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+      const api = apiFactory({ clientId, cookiePrefix })
+      const P = api.ProviderHoc(() => 'foo')
+
+      expect(document.cookie).toNotContain(cookiePrefix)
+
+      render(<P />, node, () => {
+        setTimeout(() => {
+          expect(node.innerHTML).toContain('src=""')
+          done()
+        }, 10)
+      })
+    })
   })
 })

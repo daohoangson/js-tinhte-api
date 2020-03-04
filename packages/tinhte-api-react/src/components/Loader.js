@@ -44,11 +44,6 @@ const generateCookieName = (api) => {
 
   const safeClientId = api.getClientId().replace(/[^a-z0-9]/gi, '')
   const safeSession = cookieSession.replace(/[^a-z0-9]/gi, '')
-  if (!safeClientId || !safeSession) {
-    // bad data -> no auth
-    return null
-  }
-
   return `${safeClientId}__${safeSession}`
 }
 
