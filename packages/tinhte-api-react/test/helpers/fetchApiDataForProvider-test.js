@@ -24,7 +24,7 @@ describe('fetchApiDataForProvider', () => {
     const Child = () => 'child'
     Child.apiFetches = { index: (_, { foo }) => ({ uri: 'index?foo=' + foo }) }
     const C = api.ConsumerHoc(Child)
-    const P = api.ProviderHoc(() => <C foo="bar" />)
+    const P = api.ProviderHoc(() => <C foo='bar' />)
 
     return api.fetchApiDataForProvider(<P />)
       .then((apiData) => {
