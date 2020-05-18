@@ -19,6 +19,20 @@ describe('fetchApiDataForProvider', () => {
       })
   })
 
+  it('returns jobs with a function in apiFetches', () => {
+    const api = apiFactory()
+    const Child = () => 'child'
+    Child.apiFetches = { index: (_, { foo }) => ({ uri: 'index?foo=' + foo }) }
+    const C = api.ConsumerHoc(Child)
+    const P = api.ProviderHoc(() => <C foo="bar" />)
+
+    return api.fetchApiDataForProvider(<P />)
+      .then((apiData) => {
+        const uniqueId = crypt.hashMd5('GET index?foo=bar')
+        expect(Object.keys(apiData)).toContain(uniqueId)
+      })
+  })
+
   it('handles no children', () => {
     const api = apiFactory()
     const P = api.ProviderHoc(() => 'foo')
