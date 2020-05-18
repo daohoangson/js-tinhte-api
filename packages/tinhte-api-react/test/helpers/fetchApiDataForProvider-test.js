@@ -33,6 +33,23 @@ describe('fetchApiDataForProvider', () => {
       })
   })
 
+  it('returns jobs with nested api consumers', () => {
+    const api = apiFactory()
+    const Grandchild = () => 'grandchild'
+    Grandchild.apiFetches = { grandchild: { uri: 'grandchild' } }
+    const Gc = api.ConsumerHoc(Grandchild)
+    const Child = () => <Gc />
+    Child.apiFetches = { child: { uri: 'child' } }
+    const C = api.ConsumerHoc(Child)
+    const P = api.ProviderHoc(() => <C />)
+
+    return api.fetchApiDataForProvider(<P />)
+      .then((apiData) => {
+        expect(Object.keys(apiData)).toContain(crypt.hashMd5('GET child?'))
+        expect(Object.keys(apiData)).toContain(crypt.hashMd5('GET grandchild?'))
+      })
+  })
+
   it('handles no children', () => {
     const api = apiFactory()
     const P = api.ProviderHoc(() => 'foo')
