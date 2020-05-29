@@ -12,7 +12,12 @@ const createFetchObject = (api, element, fetches, key) => {
       return null
     }
   }
-  if (typeof fetch !== 'object') {
+
+  if (
+    typeof fetch !== 'object' ||
+    typeof fetch.body !== 'undefined' ||
+    typeof fetch.parseJson !== 'undefined'
+  ) {
     return null
   }
 

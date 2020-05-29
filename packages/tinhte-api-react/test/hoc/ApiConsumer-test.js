@@ -181,6 +181,14 @@ describe('hoc', () => {
           const random = Math.random()
           return testDoesNoFetch({ index: { uri: 'foo' } }, { index: random }, random)
         })
+
+        it('with fetch.body', () => {
+          return testDoesNoFetch({ index: { uri: 'foo', body: 'bar' } })
+        })
+
+        it('with fetch.parseJson', () => {
+          return testDoesNoFetch({ index: { uri: 'foo', parseJson: false } })
+        })
       })
 
       it('returns empty object on error', () => {

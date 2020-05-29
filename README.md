@@ -178,10 +178,10 @@ They can be configured this way:
 
 ComponentBase.apiFetches = {
   someKey: {
-    uri: 'some-uri',
     method: 'GET',
     headers: [],
-    body: {},
+    params: {},
+    uri: 'some-uri',
     success: (json) => json.jsonKey,
     error: (reason) => someDefaultValue
   },
@@ -295,12 +295,12 @@ Alias:
 Params:
  
  - `options` object or string (will be used as `uri`)
-   - `method` default=`'GET'`
-   - `uri` default=`''`
-   - `params` default=`{}`
-   - `headers` default=`{}`
    - `body` default=`null`
+   - `method` default=`'GET'`
+   - `headers` default=`{}`
+   - `params` default=`{}`
    - `parseJson` default=`true`
+   - `uri` default=`''`
 
 Returns a `Promise` that will resolve to the parsed json or raw response object.
 
