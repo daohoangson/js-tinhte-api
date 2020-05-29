@@ -36,13 +36,11 @@ const useApiData = (apiConsumer, fetches) => {
   const { props, state } = apiConsumer
   const { apiContext } = props
   const { fetchedData } = state
-  const { api, apiData, internalApi } = apiContext
-  if (!api || !apiData || !internalApi) {
+  const { api, apiData: { jobs, reasons }, internalApi } = apiContext
+  if (!api || !jobs || !internalApi) {
     return
   }
 
-  const foundJobs = {}
-  const successRefs = {}
   fetchKeys.forEach((key) => {
     if (typeof props[key] !== 'undefined') {
       return
@@ -54,29 +52,21 @@ const useApiData = (apiConsumer, fetches) => {
     }
 
     const uniqueId = standardizeReqOptions(fetch)
-    const job = apiData[uniqueId]
-
+    const job = jobs[uniqueId]
     if (!job ||
       !job._req ||
       job._req.method !== fetch.method ||
-      job._req.uri !== fetch.uri ||
-      typeof job._job_result !== 'string' ||
-      job._job_result !== 'ok') {
+      job._req.uri !== fetch.uri) {
       return
     }
 
-    foundJobs[key] = job
-    successRefs[key] = fetch.success
-  })
-
-  const foundKeys = Object.keys(foundJobs)
-  if (foundKeys.length === 0) {
-    return
-  }
-
-  foundKeys.forEach((key) => {
-    const success = successRefs[key]
-    fetchedData[key] = success ? success(foundJobs[key]) : foundJobs[key]
+    if (reasons[uniqueId]) {
+      const { error } = fetch
+      fetchedData[key] = error ? error(reasons[uniqueId]) : {}
+    } else {
+      const { success } = fetch
+      fetchedData[key] = success ? success(job) : job
+    }
   })
 
   internalApi.log('useApiData -> fetchedData (keys): ', Object.keys(fetchedData))

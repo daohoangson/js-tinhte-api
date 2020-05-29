@@ -13,9 +13,9 @@ describe('fetchApiDataForProvider', () => {
     const P = api.ProviderHoc(() => <C />)
 
     return api.fetchApiDataForProvider(<P />)
-      .then((apiData) => {
+      .then(({ jobs }) => {
         const uniqueId = crypt.hashMd5('GET index?')
-        expect(Object.keys(apiData)).toContain(uniqueId)
+        expect(Object.keys(jobs)).toContain(uniqueId)
       })
   })
 
@@ -27,9 +27,9 @@ describe('fetchApiDataForProvider', () => {
     const P = api.ProviderHoc(() => <C foo='bar' />)
 
     return api.fetchApiDataForProvider(<P />)
-      .then((apiData) => {
+      .then(({ jobs }) => {
         const uniqueId = crypt.hashMd5('GET index?foo=bar')
-        expect(Object.keys(apiData)).toContain(uniqueId)
+        expect(Object.keys(jobs)).toContain(uniqueId)
       })
   })
 
@@ -44,9 +44,9 @@ describe('fetchApiDataForProvider', () => {
     const P = api.ProviderHoc(() => <C />)
 
     return api.fetchApiDataForProvider(<P />)
-      .then((apiData) => {
-        expect(Object.keys(apiData)).toContain(crypt.hashMd5('GET child?'))
-        expect(Object.keys(apiData)).toContain(crypt.hashMd5('GET grandchild?'))
+      .then(({ jobs }) => {
+        expect(Object.keys(jobs)).toContain(crypt.hashMd5('GET child?'))
+        expect(Object.keys(jobs)).toContain(crypt.hashMd5('GET grandchild?'))
       })
   })
 
@@ -54,8 +54,8 @@ describe('fetchApiDataForProvider', () => {
     const api = apiFactory()
     const P = api.ProviderHoc(() => 'foo')
     return api.fetchApiDataForProvider(<P />)
-      .then((apiData) => {
-        expect(Object.keys(apiData).length).toBe(0)
+      .then(({ jobs }) => {
+        expect(Object.keys(jobs).length).toBe(0)
       })
   })
 })
