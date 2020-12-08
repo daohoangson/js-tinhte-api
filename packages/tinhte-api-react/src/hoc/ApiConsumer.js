@@ -62,7 +62,8 @@ const useApiData = (apiConsumer, fetches) => {
 
     if (reasons[uniqueId]) {
       const { error } = fetch
-      fetchedData[key] = error ? error(reasons[uniqueId]) : {}
+      const reason = typeof reasons[uniqueId] === 'string' ? new Error(reasons[uniqueId]) : reasons[uniqueId]
+      fetchedData[key] = error ? error(reason) : {}
     } else {
       const { success } = fetch
       fetchedData[key] = success ? success(job) : job

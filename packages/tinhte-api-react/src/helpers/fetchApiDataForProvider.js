@@ -22,7 +22,7 @@ const fetchApiDataForProvider = (api, internalApi, rootElement) => {
           .catch((reason) => {
             const uniqueId = standardizeReqOptions(fetch)
             internalApi.log('fetchApiDataForProvider queue[%d] has been rejected (%s, %s)', i, uniqueId, reason)
-            reasons[uniqueId] = reason
+            reasons[uniqueId] = reason instanceof Error ? reason.message : reason
           })
       )
       return api.fetchMultiple(fetches)
