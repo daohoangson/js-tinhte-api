@@ -1,6 +1,6 @@
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 
-import { algos, encrypt, decrypt } from '../../src/helpers/crypt'
+import { algos, encrypt, decrypt } from './crypt'
 
 describe('helpers', () => {
   describe('crypt', () => {
@@ -11,12 +11,12 @@ describe('helpers', () => {
 
     it('should encrypt', () => {
       const result = encrypt(algo, data, key)
-      expect(result).toBe(dataEncrypted)
+      expect(result).equals(dataEncrypted)
     })
 
     it('should decrypt', () => {
       const result = decrypt(algo, dataEncrypted, key)
-      expect(result).toBe(data)
+      expect(result).equals(data)
     })
 
     it('rejects invalid algo for encryption', () => {
@@ -27,7 +27,7 @@ describe('helpers', () => {
         catched.push(e)
       }
 
-      expect(catched.length).toBe(1)
+      expect(catched.length).equals(1)
     })
 
     it('rejects invalid algo for decryption', () => {
@@ -38,7 +38,7 @@ describe('helpers', () => {
         catched.push(e)
       }
 
-      expect(catched.length).toBe(1)
+      expect(catched.length).equals(1)
     })
   })
 })

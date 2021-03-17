@@ -1,6 +1,6 @@
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 
-import { apiFactory } from 'src/'
+import apiFactory from './factory'
 
 describe('api', () => {
   describe('clone', () => {
@@ -21,15 +21,15 @@ describe('api', () => {
       const api1 = apiFactory(apiConfig)
       const api2 = api1.clone()
 
-      expect(api2.getApiRoot()).toBe(apiConfig.apiRoot)
-      expect(api2.getAccessToken()).toBe(apiConfig.auth.accessToken)
-      expect(api2.getUserId()).toBe(apiConfig.auth.userId)
-      expect(api2.getCallbackUrl()).toBe(apiConfig.callbackUrl)
-      expect(api2.getClientId()).toBe(apiConfig.clientId)
-      expect(api2.getCookiePrefix()).toBe(apiConfig.cookiePrefix)
-      expect(api2.getDebug()).toBe(apiConfig.debug)
-      expect(api2.getOtt()).toBe(apiConfig.ott)
-      expect(api2.getScope()).toBe(apiConfig.scope)
+      expect(api2.getApiRoot()).equals(apiConfig.apiRoot)
+      expect(api2.getAccessToken()).equals(apiConfig.auth.accessToken)
+      expect(api2.getUserId()).equals(apiConfig.auth.userId)
+      expect(api2.getCallbackUrl()).equals(apiConfig.callbackUrl)
+      expect(api2.getClientId()).equals(apiConfig.clientId)
+      expect(api2.getCookiePrefix()).equals(apiConfig.cookiePrefix)
+      expect(api2.getDebug()).equals(apiConfig.debug)
+      expect(api2.getOtt()).equals(apiConfig.ott)
+      expect(api2.getScope()).equals(apiConfig.scope)
     })
   })
 
@@ -42,7 +42,7 @@ describe('api', () => {
       const regEx = new RegExp(`^${userId},\\d+,\\w{32},${clientId}`)
 
       const ott = api.generateOneTimeToken(clientSecret)
-      expect(ott).toMatch(regEx)
+      expect(ott).matches(regEx)
     })
 
     it('accepts ttl', () => {
@@ -51,7 +51,7 @@ describe('api', () => {
 
       const m = ott.match(/^0,(\d+),/)
       const timestamp = parseInt(m[1])
-      expect(timestamp).toBe(Math.floor(new Date().getTime() / 1000))
+      expect(timestamp).equals(Math.floor(new Date().getTime() / 1000))
     })
 
     it('accepts exact date', () => {
@@ -60,41 +60,41 @@ describe('api', () => {
       const timestamp = 123456
       const date = new Date(timestamp * 1000)
 
-      expect(api.generateOneTimeToken('cs', date)).toBe(`0,${timestamp},54aeb4733955fe782fd69b1b2d30235d,${clientId}`)
+      expect(api.generateOneTimeToken('cs', date)).equals(`0,${timestamp},54aeb4733955fe782fd69b1b2d30235d,${clientId}`)
     })
   })
 
   describe('getAccessToken', () => {
     it('returns default empty string', () => {
       const api = apiFactory()
-      expect(api.getAccessToken()).toBe('')
+      expect(api.getAccessToken()).equals('')
     })
   })
 
   describe('getCookiePrefix', () => {
     it('returns default cookie prefix', () => {
       const api = apiFactory()
-      expect(api.getCookiePrefix()).toBe('')
+      expect(api.getCookiePrefix()).equals('')
     })
   })
 
   describe('getUserId', () => {
     it('returns default zero', () => {
       const api = apiFactory()
-      expect(api.getUserId()).toBe(0)
+      expect(api.getUserId()).equals(0)
     })
   })
 
   describe('hasAuth', () => {
     it('returns false', () => {
       const api = apiFactory()
-      expect(api.hasAuth()).toBe(false)
+      expect(api.hasAuth()).equals(false)
     })
 
     it('returns true', () => {
       const auth = {}
       const api = apiFactory({ auth })
-      expect(api.hasAuth()).toBe(true)
+      expect(api.hasAuth()).equals(true)
     })
   })
 })

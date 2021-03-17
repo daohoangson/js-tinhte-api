@@ -1,25 +1,24 @@
-import FormData from 'form-data'
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 
-import { apiFactory } from 'src/'
-import fetchBatchFactory from 'src/fetches/batch'
-import fetchMultipleInit from 'src/fetches/fetchMultiple'
-import fetchOneInit from 'src/fetches/fetchOne'
-import errors from 'src/helpers/errors'
-import { hashMd5 as md5 } from 'src/helpers/crypt'
+import apiFactory from '../factory'
+import fetchBatchFactory from './batch'
+import fetchMultipleInit from './fetchMultiple'
+import fetchOneInit from './fetchOne'
+import errors from '../helpers/errors'
+import { hashMd5 as md5 } from '../helpers/crypt'
 
 describe('api', () => {
   describe('fetchOne', function () {
     afterEach(() => {
-      global.XenForo = null
-      global.XF = null
+      window.XenForo = null
+      window.XF = null
     })
 
     it('uses root url', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({ apiRoot })
       return api.fetchOne()
-        .then((json) => expect(json.url).toBe(apiRoot))
+        .then((json) => expect(json.url).equals(apiRoot))
     })
 
     describe('full uri', () => {
@@ -27,7 +26,7 @@ describe('api', () => {
         const api = apiFactory()
         const url = 'https://httpbin.org/get?action&foo=1&bar=2'
         return api.fetchOne(url)
-          .then((json) => expect(json.url).toBe(url))
+          .then((json) => expect(json.url).equals(url))
       })
 
       it('keeps oauth_token', () => {
@@ -35,7 +34,7 @@ describe('api', () => {
         const api = apiFactory({ auth: { accessToken } })
         const url = `https://httpbin.org/get?action&oauth_token=${Math.random()}`
         return api.fetchOne(url)
-          .then((json) => expect(json.url).toBe(url))
+          .then((json) => expect(json.url).equals(url))
       })
 
       it('includes access token', () => {
@@ -43,7 +42,7 @@ describe('api', () => {
         const api = apiFactory({ auth: { accessToken } })
         const url = 'https://httpbin.org/get'
         return api.fetchOne(url)
-          .then((json) => expect(json.args.oauth_token).toBe(accessToken))
+          .then((json) => expect(json.args.oauth_token).equals(accessToken))
       })
     })
 
@@ -51,7 +50,7 @@ describe('api', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({ apiRoot })
       return api.fetchOne('path?foo=bar')
-        .then((json) => expect(json.url).toBe(apiRoot + '?path&foo=bar'))
+        .then((json) => expect(json.url).equals(apiRoot + '?path&foo=bar'))
     })
 
     it('keeps oauth_token in url', () => {
@@ -60,7 +59,7 @@ describe('api', () => {
       const api = apiFactory({ apiRoot, auth: { accessToken } })
       const oauthToken = `${Math.random()}`
       return api.fetchOne(`path?oauth_token=${oauthToken}`)
-        .then((json) => expect(json.args.oauth_token).toBe(oauthToken))
+        .then((json) => expect(json.args.oauth_token).equals(oauthToken))
     })
 
     it('includes access token', () => {
@@ -68,7 +67,7 @@ describe('api', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({ apiRoot, auth: { accessToken } })
       return api.fetchOne('path')
-        .then((json) => expect(json.args.oauth_token).toBe(accessToken))
+        .then((json) => expect(json.args.oauth_token).equals(accessToken))
     })
 
     it('includes one time token', () => {
@@ -76,12 +75,12 @@ describe('api', () => {
       const apiRoot = 'https://httpbin.org/anything'
       const api = apiFactory({ apiRoot, ott })
       return api.fetchOne('path')
-        .then((json) => expect(json.args.oauth_token).toBe(ott))
+        .then((json) => expect(json.args.oauth_token).equals(ott))
     })
 
     describe('XenForo 1 csrf token', () => {
       const testXenForo1CsrfToken = (csrfToken, uri) => {
-        global.XenForo = {
+        window.XenForo = {
           visitor: {
             user_id: Math.random()
           },
@@ -100,7 +99,7 @@ describe('api', () => {
         const csrfToken = `csrf token ${Math.random()}`
         const uri = 'xenforo1'
         return testXenForo1CsrfToken(csrfToken, uri)
-          .then((json) => expect(json.args._xfToken).toBe(csrfToken))
+          .then((json) => expect(json.args._xfToken).equals(csrfToken))
       })
 
       it('keeps value from uri', () => {
@@ -108,13 +107,13 @@ describe('api', () => {
         const uriValue = `xf token ${Math.random()}`
         const uri = `xenforo1?_xfToken=${uriValue}`
         return testXenForo1CsrfToken(csrfToken, uri)
-          .then((json) => expect(json.args._xfToken).toBe(uriValue))
+          .then((json) => expect(json.args._xfToken).equals(uriValue))
       })
     })
 
     it('includes XenForo 2 csrf token', () => {
       const csrf = `csrf token ${Math.random()}`
-      global.XF = {
+      window.XF = {
         config: {
           csrf,
           userId: Math.random()
@@ -127,7 +126,7 @@ describe('api', () => {
         auth: { accessToken: 'access token' }
       })
       return api.fetchOne('xenforo2')
-        .then((json) => expect(json.args._xfToken).toBe(csrf))
+        .then((json) => expect(json.args._xfToken).equals(csrf))
     })
 
     it('includes configured default headers', () => {
@@ -138,13 +137,13 @@ describe('api', () => {
       return api.fetchOne({ uri: '/', headers: { F: undefined, G: 8 } })
         .then((json) => {
           const { A, B, C, D, E, G } = json.headers
-          expect(A).toBe(headers.A)
-          expect(B).toBe(headers.B.toString())
-          expect(C).toBe('[object Object]')
-          expect(D).toBe('null')
-          expect(E).toBe('undefined')
-          expect('F' in json.headers).toBe(false)
-          expect(G).toBe('8')
+          expect(A).equals(headers.A)
+          expect(B).equals(headers.B.toString())
+          expect(C).equals('[object Object]')
+          expect(D).equals('null')
+          expect(E).equals('undefined')
+          expect('F' in json.headers).equals(false)
+          expect(G).equals('8')
         })
     })
 
@@ -154,7 +153,7 @@ describe('api', () => {
       return api.fetchOne('posts/1')
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason.message).toBe('The requested post could not be found.')
+          (reason) => expect(reason.message).equals('The requested post could not be found.')
         )
     })
 
@@ -165,8 +164,8 @@ describe('api', () => {
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
           (reason) => {
-            expect(reason.message).toContain('email:')
-            expect(reason.message).toContain('username:')
+            expect(reason.message).contains('email:')
+            expect(reason.message).contains('username:')
           }
         )
     })
@@ -176,7 +175,7 @@ describe('api', () => {
       return api.fetchOne({ method: 'POST', uri: 'oauth/token' })
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason.message).toBe('The grant type was not specified in the request')
+          (reason) => expect(reason.message).equals('The grant type was not specified in the request')
         )
     })
 
@@ -186,7 +185,7 @@ describe('api', () => {
       return api.fetchOne()
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason).toBeAn(Error)
+          (reason) => expect(reason).an('Error')
         )
     })
 
@@ -194,7 +193,7 @@ describe('api', () => {
       const apiRoot = 'https://httpbin.org/html'
       const api = apiFactory({ apiRoot })
       return api.fetchOne({ parseJson: false })
-        .then(response => expect(response.text()).toNotBe(''))
+        .then(response => expect(response.text()).does.not.equal(''))
     })
 
     describe('shortcut', () => {
@@ -204,8 +203,8 @@ describe('api', () => {
         const api = apiFactory({ apiRoot })
         return api[apiMethod](uri)
           .then((json) => {
-            expect(json.method).toBe(expectedJsonMethod)
-            expect(json.url).toBe(`${apiRoot}?${uri}`)
+            expect(json.method).equals(expectedJsonMethod)
+            expect(json.url).equals(`${apiRoot}?${uri}`)
           })
       }
 
@@ -219,18 +218,17 @@ describe('api', () => {
         const api = apiFactory({ apiRoot })
         const options = { params: { foo: `foo${Math.random()}` } }
         return api.post(options)
-          .then((json) => expect(json.args.foo).toBe(options.params.foo))
+          .then((json) => expect(json.args.foo).equals(options.params.foo))
       })
 
-      it('posts form data', () => {
+      it('posts form data', async () => {
         const apiRoot = 'https://httpbin.org/anything'
         const api = apiFactory({ apiRoot })
         const body = new FormData()
         const foo = `foo${Math.random()}`
         body.append('foo', foo)
-        const options = { body }
-        return api.post(options)
-          .then((json) => expect(json.form.foo).toBe(foo))
+        const json = await api.post({ body })
+        expect(json.form.foo).equals(foo)
       })
 
       it('posts json', () => {
@@ -242,7 +240,7 @@ describe('api', () => {
           headers: { 'Content-Type': 'application/json' }
         }
         return api.post(options)
-          .then((json) => expect(json.json.foo).toBe(bodyJson.foo))
+          .then((json) => expect(json.json.foo).equals(bodyJson.foo))
       })
 
       it('posts raw body', () => {
@@ -251,7 +249,7 @@ describe('api', () => {
         const body = 'foo'
         const options = { body }
         return api.post(options)
-          .then((json) => expect(json.data).toBe(body))
+          .then((json) => expect(json.data).equals(body))
       })
     })
 
@@ -266,10 +264,10 @@ describe('api', () => {
             headers: { 'Content-Type': 'application/json' }
           }
           api.fetchOne(options)
-            .then((json) => expect(json.json.foo).toBe(bodyJson.foo))
+            .then((json) => expect(json.json.foo).equals(bodyJson.foo))
         }).then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason).toBeAn(Error)
+          (reason) => expect(reason).an('Error')
         )
       })
 
@@ -278,10 +276,10 @@ describe('api', () => {
         const api = apiFactory({ apiRoot })
         return api.fetchMultiple(() => {
           api.fetchOne({ parseJson: false })
-            .then(response => expect(response.text()).toNotBe(''))
+            .then(response => expect(response.text()).does.not.equal(''))
         }).then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason).toBeAn(Error)
+          (reason) => expect(reason).an('Error')
         )
       })
     })
@@ -290,12 +288,12 @@ describe('api', () => {
   describe('fetchMultiple', () => {
     it('does nothing if no fetches', () => {
       const api = apiFactory()
-      const fetches = () => {}
+      const fetches = () => { }
 
       return api.fetchMultiple(fetches)
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason).toBeAn(Error)
+          (reason) => expect(reason).an('Error')
         )
     })
 
@@ -309,9 +307,9 @@ describe('api', () => {
 
       return api.fetchMultiple(fetches)
         .then((json) => {
-          expect(Object.keys(json.jobs).length).toBe(3)
-          expect(json._handled).toBe(3)
-          expect(api.getFetchCount()).toBe(1)
+          expect(Object.keys(json.jobs).length).equals(3)
+          expect(json._handled).equals(3)
+          expect(api.getFetchCount()).equals(1)
         })
     })
 
@@ -328,9 +326,9 @@ describe('api', () => {
       return api.fetchMultiple(fetches)
         .then((json) => {
           const { headers } = json
-          expect(headers).toContain(oneHeaders)
-          expect(headers).toContain(twoHeaders)
-          expect(headers['Content-Type']).toBe('application/json')
+          expect(headers).contains(oneHeaders)
+          expect(headers).contains(twoHeaders)
+          expect(headers['Content-Type']).equals('application/json')
         })
     })
 
@@ -349,27 +347,27 @@ describe('api', () => {
 
       it('sends method, params, uri', () => {
         return testSubRequestData({}, (received, sent) => {
-          expect(received.id).toBeA('string')
-          expect(received.method).toBe(sent.method)
-          expect(received.uri).toBe(sent.uri)
-          expect(received.params).toEqual(sent.params)
-          expect(Object.keys(received).length).toBe(4)
+          expect(received.id).a('string')
+          expect(received.method).equals(sent.method)
+          expect(received.uri).equals(sent.uri)
+          expect(received.params).deep.equals(sent.params)
+          expect(Object.keys(received).length).equals(4)
         })
       })
 
       it('skips method GET', () => testSubRequestData({ method: 'GET' }, (received) => {
-        expect(received.method).toBeAn('undefined')
-        expect(Object.keys(received).length).toBe(3)
+        expect(received.method).an('undefined')
+        expect(Object.keys(received).length).equals(3)
       }))
 
       it('sends \'index\' as uri', () => testSubRequestData({ uri: '' }, (received) => {
-        expect(received.uri).toBe('index')
-        expect(Object.keys(received).length).toBe(4)
+        expect(received.uri).equals('index')
+        expect(Object.keys(received).length).equals(4)
       }))
 
       it('skips params empty', () => testSubRequestData({ params: {} }, (received) => {
-        expect(received.params).toBeAn('undefined')
-        expect(Object.keys(received).length).toBe(3)
+        expect(received.params).an('undefined')
+        expect(Object.keys(received).length).equals(3)
       }))
     })
 
@@ -386,15 +384,15 @@ describe('api', () => {
       }
 
       promises.push(api.fetchMultiple(fetches).then((json) => {
-        expect(Object.keys(json.jobs).length).toBe(2)
-        expect(json._handled).toBe(3)
+        expect(Object.keys(json.jobs).length).equals(2)
+        expect(json._handled).equals(3)
       }))
 
       return Promise.all(promises)
         .then(() => {
-          expect(posts1).toBe(2, 'posts1 twice')
-          expect(posts2).toBe(1, 'posts2 once')
-          expect(api.getFetchCount()).toBe(1)
+          expect(posts1).equals(2, 'posts1 twice')
+          expect(posts2).equals(1, 'posts2 once')
+          expect(api.getFetchCount()).equals(1)
         })
     })
 
@@ -419,20 +417,20 @@ describe('api', () => {
         fetches1()
         api.fetchMultiple(fetches2)
           .then((json) => {
-            expect(Object.keys(json.jobs)).toContain(md5('GET posts/3?'))
-            expect(Object.keys(json.jobs)).toContain(md5('GET posts/4?'))
-            expect(Object.keys(json.jobs)).toContain(md5('GET posts/5?'))
+            expect(Object.keys(json.jobs)).contains(md5('GET posts/3?'))
+            expect(Object.keys(json.jobs)).contains(md5('GET posts/4?'))
+            expect(Object.keys(json.jobs)).contains(md5('GET posts/5?'))
             checks += 3
-            expect(api.getFetchCount()).toBe(1)
+            expect(api.getFetchCount()).equals(1)
           })
         fetches3()
       }).then((json) => {
-        expect(Object.keys(json.jobs)).toContain(md5('GET posts/1?'))
-        expect(Object.keys(json.jobs)).toContain(md5('GET posts/2?'))
-        expect(Object.keys(json.jobs)).toContain(md5('GET posts/6?'))
+        expect(Object.keys(json.jobs)).contains(md5('GET posts/1?'))
+        expect(Object.keys(json.jobs)).contains(md5('GET posts/2?'))
+        expect(Object.keys(json.jobs)).contains(md5('GET posts/6?'))
         checks += 3
-        expect(api.getFetchCount()).toBe(1)
-      }).then(() => expect(checks).toBe(6))
+        expect(api.getFetchCount()).equals(1)
+      }).then(() => expect(checks).equals(6))
     })
 
     it('does not trigger handlers', () => {
@@ -446,9 +444,9 @@ describe('api', () => {
 
       return api.fetchMultiple(fetches, { triggerHandlers: false })
         .then((json) => {
-          expect(Object.keys(json.jobs).length).toBe(3)
-          expect(json._handled).toBe(0)
-          expect(api.getFetchCount()).toBe(1)
+          expect(Object.keys(json.jobs).length).equals(3)
+          expect(json._handled).equals(0)
+          expect(api.getFetchCount()).equals(1)
         })
     })
 
@@ -476,12 +474,12 @@ describe('api', () => {
       promises.push(api.fetchMultiple(fetches)
         .then(
           () => Promise.reject(new Error('Unexpected success?!')),
-          (reason) => expect(reason).toBeAn(Error)
+          (reason) => expect(reason).an('Error')
         )
       )
 
       return Promise.all(promises)
-        .then(() => expect(rejected).toBe(2))
+        .then(() => expect(rejected).equals(2))
     })
   })
 
@@ -493,7 +491,7 @@ describe('api', () => {
 
     beforeEach(() => {
       const mockedFetchJson = () => new Promise((resolve) => setTimeout(() => resolve(mockedResponse), 10))
-      const mockedInternalApi = { log: () => {} }
+      const mockedInternalApi = { log: () => { } }
       mockedBatch = fetchBatchFactory()
       mockedFetchMultiple = fetchMultipleInit(mockedFetchJson, mockedBatch, mockedInternalApi)
       mockedFetchOne = fetchOneInit(mockedFetchJson, mockedBatch, mockedInternalApi)
@@ -505,9 +503,9 @@ describe('api', () => {
 
       return mockedFetchMultiple(() => mockedFetchOne('index').catch(reason => (catched.push(reason))))
         .then((json) => {
-          expect(json._handled).toBe(1)
-          expect(catched.length).toBe(1)
-          expect(catched[0].message).toBe(errors.FETCH_MULTIPLE.JOB_NOT_FOUND)
+          expect(json._handled).equals(1)
+          expect(catched.length).equals(1)
+          expect(catched[0].message).equals(errors.FETCH_MULTIPLE.JOB_NOT_FOUND)
         })
     })
 
@@ -526,11 +524,11 @@ describe('api', () => {
         mockedReqs[0].uniqueId = uniqueId
         mockedReqs[1].uniqueId = uniqueId
       }).then((json) => {
-        expect(json._handled).toBe(2)
-        expect(jsons.length).toBe(1)
-        expect(jsons[0].foo).toBe(job.foo)
-        expect(catched.length).toBe(1)
-        expect(catched[0].message).toBe(errors.FETCH_MULTIPLE.MISMATCHED)
+        expect(json._handled).equals(2)
+        expect(jsons.length).equals(1)
+        expect(jsons[0].foo).equals(job.foo)
+        expect(catched.length).equals(1)
+        expect(catched[0].message).equals(errors.FETCH_MULTIPLE.MISMATCHED)
       })
     })
 
@@ -542,9 +540,9 @@ describe('api', () => {
       const catched = []
       return mockedFetchMultiple(() => mockedFetchOne(uri).catch(reason => catched.push(reason)))
         .then((json) => {
-          expect(json._handled).toBe(1)
-          expect(catched.length).toBe(1)
-          expect(catched[0].message).toBe(errors.FETCH_MULTIPLE.JOB_RESULT_NOT_FOUND)
+          expect(json._handled).equals(1)
+          expect(catched.length).equals(1)
+          expect(catched[0].message).equals(errors.FETCH_MULTIPLE.JOB_RESULT_NOT_FOUND)
         })
     })
 
@@ -555,7 +553,7 @@ describe('api', () => {
       mockedResponse = { jobs: { [uniqueId]: job } }
       return mockedFetchMultiple(
         () => mockedFetchOne(uri)
-          .then(one => expect(one).toBe(job))
+          .then(one => expect(one).equals(job))
       )
     })
 
@@ -567,9 +565,9 @@ describe('api', () => {
       const catched = []
       return mockedFetchMultiple(() => mockedFetchOne(uri).catch(reason => catched.push(reason)))
         .then((json) => {
-          expect(json._handled).toBe(1)
-          expect(catched.length).toBe(1)
-          expect(catched[0].message).toBe(job._job_error)
+          expect(json._handled).equals(1)
+          expect(catched.length).equals(1)
+          expect(catched[0].message).equals(job._job_error)
         })
     })
 
@@ -581,9 +579,9 @@ describe('api', () => {
       const catched = []
       return mockedFetchMultiple(() => mockedFetchOne(uri).catch(reason => catched.push(reason)))
         .then((json) => {
-          expect(json._handled).toBe(1)
-          expect(catched.length).toBe(1)
-          expect(catched[0]).toBe(job)
+          expect(json._handled).equals(1)
+          expect(catched.length).equals(1)
+          expect(catched[0]).equals(job)
         })
     })
   })

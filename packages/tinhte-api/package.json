@@ -2,41 +2,28 @@
   "name": "tinhte-api",
   "version": "5.0.0",
   "description": "tinhte-api library",
-  "main": "lib/index.js",
-  "module": "es/index.js",
+  "module": "src/index.js",
   "files": [
-    "es",
-    "lib",
-    "umd/tinhte-api.js",
-    "umd/tinhte-api.min.js",
-    "umd/tinhte-api.min.js.map"
+    "src"
   ],
   "scripts": {
-    "build": "nwb build-web-module",
-    "clean": "nwb clean-module",
-    "prepublish": "npm run build",
-    "stats": "webpack-bundle-analyzer umd/stats.json umd --host 0.0.0.0 --port 3000",
-    "test": "standard && nwb test",
-    "test:coverage": "standard && nwb test --coverage"
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "test": "web-test-runner",
+    "test:coverage": "standard && web-test-runner --coverage"
   },
   "dependencies": {
-    "crypto-js": "^3.1.9-1",
-    "form-data": "^2.5.1",
-    "isomorphic-unfetch": "^3.0.0",
-    "querystring": "^0.2.0"
-  },
-  "peerDependencies": {
-    "babel-runtime": "6.x"
+    "crypto-es": "^1.2.7"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-eslint": "^10.0.3",
-    "eslint": "^6.4.0",
-    "nwb": "0.25.2",
-    "standard": "^14.3.1",
-    "stats-webpack-plugin": "^0.7.0",
-    "webpack": "^4.29.5",
-    "webpack-bundle-analyzer": "^3.5.1"
+    "@esm-bundle/chai": "^4.3.4",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@web/dev-server-import-maps": "0.0.5",
+    "@web/dev-server-rollup": "^0.3.2",
+    "@web/test-runner": "^0.12.17",
+    "@web/test-runner-puppeteer": "^0.9.3",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "standard": "^14.3.1"
   },
   "author": "Dao Hoang Son",
   "homepage": "https://tinhte.vn",
@@ -44,13 +31,14 @@
   "repository": "https://github.com/daohoangson/js-tinhte-api",
   "standard": {
     "globals": [
+      "FormData",
       "XenForo",
       "XF",
       "afterEach",
       "beforeEach",
       "describe",
+      "fetch",
       "it"
-    ],
-    "parser": "babel-eslint"
+    ]
   }
 }

@@ -1,5 +1,3 @@
-import FormData from 'form-data'
-
 import { algos, encrypt } from '../../crypt'
 
 const algo = algos[0]

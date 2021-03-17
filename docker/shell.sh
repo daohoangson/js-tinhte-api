@@ -24,8 +24,8 @@ if [ ! -f "$_npmrcPath" ]; then
   touch "$_npmrcPath"
 fi
 
-# https://github.com/nodejs/Release
-_nodejsVersionLTS=14.16.0
+_dockerImage=github.com/daohoangson/js-tinhte-api
+docker build -t "$_dockerImage" "$_dockerPath"
 
 docker run --rm -it \
   -p "13000:3000" \
@@ -36,4 +36,4 @@ docker run --rm -it \
   -v "$_dataPath/npm:/root/.npm" \
   -v "$_npmrcPath:/root/.npmrc" \
   -w "/src" \
-  "node:$_nodejsVersionLTS" bash
+  --privileged "$_dockerImage" bash

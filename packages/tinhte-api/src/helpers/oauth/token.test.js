@@ -1,10 +1,10 @@
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 
-import { apiFactory } from 'src/'
+import apiFactory from '../../factory'
 
 describe('helpers', () => {
   describe('oauth/token', () => {
-    const apiRoot = 'https://xfrocks.com/api'
+    const apiRoot = 'https://xfrocks.com/api/'
     const clientId = 'gljf4391k3'
     const clientSecret = 'zw3lj0zox6be4z2'
     const username = 'api-tester'
@@ -16,13 +16,13 @@ describe('helpers', () => {
       it('works with username/password', () => {
         const api = apiFactory({ apiRoot, clientId })
         return api.login(clientSecret, username, password)
-          .then((json) => expect(json.user_id).toBe(userId))
+          .then((json) => expect(json.user_id).equals(userId))
       })
 
       it('works with email/password', () => {
         const api = apiFactory({ apiRoot, clientId })
         return api.login(clientSecret, email, password)
-          .then((json) => expect(json.user_id).toBe(userId))
+          .then((json) => expect(json.user_id).equals(userId))
       })
 
       it('fails with wrong password', () => {
@@ -30,7 +30,7 @@ describe('helpers', () => {
         return api.login(clientSecret, username, 'xxx')
           .then(
             () => Promise.reject(new Error('Unexpected success?!')),
-            (reason) => expect(reason).toBeAn(Error)
+            (reason) => expect(reason).an('Error')
           )
       })
     })
@@ -40,7 +40,7 @@ describe('helpers', () => {
         const api = apiFactory({ apiRoot, clientId })
         return api.login(clientSecret, username, password)
           .then((loginJson) => api.refreshToken(clientSecret, loginJson.refresh_token))
-          .then((refreshTokenJson) => expect(refreshTokenJson.user_id).toBe(userId))
+          .then((refreshTokenJson) => expect(refreshTokenJson.user_id).equals(userId))
       })
     })
   })
