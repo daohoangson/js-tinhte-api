@@ -1,9 +1,6 @@
 const StatsWebpackPlugin = require('stats-webpack-plugin')
 
 const config = {
-  babel: {
-    runtime: true
-  },
   devServer: {
     disableHostCheck: true
   },
