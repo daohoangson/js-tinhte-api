@@ -25,7 +25,7 @@ if [ ! -f "$_npmrcPath" ]; then
 fi
 
 # https://github.com/nodejs/Release
-_nodejsVersionLTS=10.15.1
+_nodejsVersionLTS=14.16.0
 
 docker run --rm -it \
   -p "13000:3000" \
