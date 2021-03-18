@@ -1,8 +1,8 @@
-import rollupCommonjs from '@rollup/plugin-commonjs'
-import rollupNodePolyfills from 'rollup-plugin-node-polyfills'
-import { esbuildPlugin } from '@web/dev-server-esbuild'
-import { fromRollup } from '@web/dev-server-rollup'
-import { puppeteerLauncher } from '@web/test-runner-puppeteer'
+const rollupCommonjs = require('@rollup/plugin-commonjs')
+const rollupNodePolyfills = require('rollup-plugin-node-polyfills')
+const { esbuildPlugin } = require('@web/dev-server-esbuild')
+const { fromRollup } = require('@web/dev-server-rollup')
+const { puppeteerLauncher } = require('@web/test-runner-puppeteer')
 
 const patcher = fromRollup(() => ({
   name: 'patcher',
@@ -28,7 +28,7 @@ const patcher = fromRollup(() => ({
 const commonjs = fromRollup(rollupCommonjs)
 const nodePolyfills = fromRollup(rollupNodePolyfills)
 
-export default {
+module.exports = {
   files: [
     'src/**/*.test.{js,jsx}'
   ],

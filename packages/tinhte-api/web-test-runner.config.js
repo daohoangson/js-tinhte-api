@@ -1,12 +1,12 @@
-import rollupCommonjs from '@rollup/plugin-commonjs'
-import rollupNodePolyfills from 'rollup-plugin-node-polyfills'
-import { fromRollup } from '@web/dev-server-rollup'
-import { puppeteerLauncher } from '@web/test-runner-puppeteer'
+const rollupCommonjs = require('@rollup/plugin-commonjs')
+const rollupNodePolyfills = require('rollup-plugin-node-polyfills')
+const { fromRollup } = require('@web/dev-server-rollup')
+const { puppeteerLauncher } = require('@web/test-runner-puppeteer')
 
 const commonjs = fromRollup(rollupCommonjs)
 const nodePolyfills = fromRollup(rollupNodePolyfills)
 
-export default {
+module.exports = {
   files: [
     'src/**/*.test.js'
   ],
