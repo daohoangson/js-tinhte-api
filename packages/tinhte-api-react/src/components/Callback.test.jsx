@@ -1,8 +1,10 @@
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 import React from 'react'
-import { render, unmountComponentAtNode } from 'react-dom'
+import ReactDom from 'react-dom'
 
-import { apiFactory } from 'src/'
+import { apiFactory } from '..'
+
+const { render, unmountComponentAtNode } = ReactDom
 
 describe('components', () => {
   describe('Callback', () => {
@@ -23,7 +25,7 @@ describe('components', () => {
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).toContain('data-success="false"')
+        expect(node.innerHTML).contains('data-success="false"')
       })
     })
 
@@ -35,7 +37,7 @@ describe('components', () => {
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).toContain('data-success="true"')
+        expect(node.innerHTML).contains('data-success="true"')
       })
     })
 
@@ -44,7 +46,7 @@ describe('components', () => {
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).toNotContain('data-success')
+        expect(node.innerHTML).does.not.contain('data-success')
       })
     })
   })

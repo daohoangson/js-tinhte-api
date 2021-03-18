@@ -1,5 +1,5 @@
 import React from 'react'
-import querystring from 'querystring'
+import { parse } from 'querystring'
 
 const processCallback = (log) => {
   /* istanbul ignore else */
@@ -8,7 +8,7 @@ const processCallback = (log) => {
   }
 
   const auth = window.location.hash
-    ? querystring.parse(window.location.hash.replace(/^#/, ''))
+    ? parse(window.location.hash.replace(/^#/, ''))
     : false
   if (!auth || !auth.state) {
     log && log('Couldn\'t extract state from %s', window.location.href)

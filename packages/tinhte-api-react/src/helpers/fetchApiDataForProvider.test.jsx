@@ -1,8 +1,8 @@
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 import React from 'react'
 import { crypt } from 'tinhte-api'
 
-import { apiFactory } from 'src/'
+import { apiFactory } from '..'
 
 describe('fetchApiDataForProvider', () => {
   it('returns jobs', () => {
@@ -15,7 +15,7 @@ describe('fetchApiDataForProvider', () => {
     return api.fetchApiDataForProvider(<P />)
       .then(({ jobs }) => {
         const uniqueId = crypt.hashMd5('GET index?')
-        expect(Object.keys(jobs)).toContain(uniqueId)
+        expect(Object.keys(jobs)).contains(uniqueId)
       })
   })
 
@@ -29,7 +29,7 @@ describe('fetchApiDataForProvider', () => {
     return api.fetchApiDataForProvider(<P />)
       .then(({ jobs }) => {
         const uniqueId = crypt.hashMd5('GET index?foo=bar')
-        expect(Object.keys(jobs)).toContain(uniqueId)
+        expect(Object.keys(jobs)).contains(uniqueId)
       })
   })
 
@@ -45,8 +45,8 @@ describe('fetchApiDataForProvider', () => {
 
     return api.fetchApiDataForProvider(<P />)
       .then(({ jobs }) => {
-        expect(Object.keys(jobs)).toContain(crypt.hashMd5('GET child?'))
-        expect(Object.keys(jobs)).toContain(crypt.hashMd5('GET grandchild?'))
+        expect(Object.keys(jobs)).contains(crypt.hashMd5('GET child?'))
+        expect(Object.keys(jobs)).contains(crypt.hashMd5('GET grandchild?'))
       })
   })
 
@@ -73,7 +73,7 @@ describe('fetchApiDataForProvider', () => {
 
     return api.fetchApiDataForProvider(<ContextP />).then(({ jobs }) => {
       const uniqueId = crypt.hashMd5('GET bar?')
-      expect(Object.keys(jobs)).toContain(uniqueId)
+      expect(Object.keys(jobs)).contains(uniqueId)
     })
   })
 
@@ -82,7 +82,7 @@ describe('fetchApiDataForProvider', () => {
     const P = api.ProviderHoc(() => 'foo')
     return api.fetchApiDataForProvider(<P />)
       .then(({ jobs }) => {
-        expect(Object.keys(jobs).length).toBe(0)
+        expect(Object.keys(jobs).length).equals(0)
       })
   })
 })

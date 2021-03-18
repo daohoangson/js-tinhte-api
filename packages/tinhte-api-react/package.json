@@ -2,50 +2,43 @@
   "name": "tinhte-api-react",
   "version": "5.0.2",
   "description": "tinhte-api React component",
-  "main": "lib/index.js",
-  "module": "es/index.js",
+  "module": "src/index.js",
   "files": [
-    "es",
-    "lib",
-    "umd/tinhte-api-react.js",
-    "umd/tinhte-api-react.min.js",
-    "umd/tinhte-api-react.min.js.map"
+    "src"
   ],
   "scripts": {
-    "build": "nwb build-react-component",
-    "clean": "nwb clean-module && nwb clean-demo",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
     "next": "next",
     "now-build": "next build",
-    "prepublish": "npm run build",
-    "start": "nwb serve-react-demo",
-    "stats": "webpack-bundle-analyzer umd/stats.json umd --host 0.0.0.0 --port 3000",
-    "test": "standard && nwb test-react",
-    "test:coverage": "standard && nwb test-react --coverage",
-    "test:watch": "nwb test-react --server"
+    "test": "web-test-runner",
+    "test:coverage": "standard && web-test-runner --coverage"
   },
   "dependencies": {
     "js-cookie": "^2.2.1",
-    "querystring": "^0.2.0",
     "react-ssr-prepass": "^1.2.1",
     "tinhte-api": "^5.0.0"
   },
   "peerDependencies": {
-    "babel-runtime": "6.x",
     "react": "^16.x"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-eslint": "^10.0.3",
+    "@babel/preset-env": "^7.13.10",
+    "@babel/preset-react": "^7.12.13",
+    "@esm-bundle/chai": "^4.3.4",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@web/dev-server-esbuild": "^0.2.11",
+    "@web/dev-server-rollup": "^0.3.2",
+    "@web/test-runner": "^0.12.17",
+    "@web/test-runner-puppeteer": "^0.9.3",
     "lodash": "^4.17.15",
     "next": "^9.0.6",
-    "nwb": "0.25.2",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
+    "rollup-plugin-node-polyfills": "^0.2.1",
     "sanitize-html": "^1.20.1",
-    "standard": "^14.3.1",
-    "stats-webpack-plugin": "^0.7.0",
-    "webpack-bundle-analyzer": "^3.5.1"
+    "standard": "^14.3.1"
   },
   "author": "Dao Hoang Son",
   "homepage": "https://tinhte.vn",
@@ -56,13 +49,10 @@
   ],
   "standard": {
     "globals": [
-      "XenForo",
-      "XF",
       "afterEach",
       "beforeEach",
       "describe",
       "it"
-    ],
-    "parser": "babel-eslint"
+    ]
   }
 }

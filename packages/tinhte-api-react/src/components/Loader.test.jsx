@@ -1,8 +1,10 @@
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 import React from 'react'
-import { render, unmountComponentAtNode } from 'react-dom'
+import ReactDom from 'react-dom'
 
-import { apiFactory } from 'src/'
+import { apiFactory } from '..'
+
+const { render, unmountComponentAtNode } = ReactDom
 
 describe('components', () => {
   describe('Loader', () => {
@@ -27,13 +29,13 @@ describe('components', () => {
 
       render(<P />, node, () => {
         setTimeout(() => {
-          expect(node.innerHTML).toContain('<iframe')
-          expect(node.innerHTML).toContain('src="')
+          expect(node.innerHTML).contains('<iframe')
+          expect(node.innerHTML).contains('src="')
 
-          expect(node.innerHTML).toContain(api.getApiRoot())
-          expect(node.innerHTML).toContain(encodeURIComponent(api.getCallbackUrl()))
-          expect(node.innerHTML).toContain(encodeURIComponent(api.getClientId()))
-          expect(node.innerHTML).toContain(encodeURIComponent(api.getScope()))
+          expect(node.innerHTML).contains(api.getApiRoot())
+          expect(node.innerHTML).contains(encodeURIComponent(api.getCallbackUrl()))
+          expect(node.innerHTML).contains(encodeURIComponent(api.getClientId()))
+          expect(node.innerHTML).contains(encodeURIComponent(api.getScope()))
           done()
         }, 10)
       })
@@ -50,7 +52,7 @@ describe('components', () => {
       render(<P />, node, () => {
         setTimeout(() => {
           const callbackFullUrl = window.location.origin + '/path'
-          expect(node.innerHTML).toContain(encodeURIComponent(callbackFullUrl))
+          expect(node.innerHTML).contains(encodeURIComponent(callbackFullUrl))
           done()
         }, 10)
       })
@@ -65,12 +67,12 @@ describe('components', () => {
       })
       const P = api.ProviderHoc(() => 'foo')
 
-      expect(document.cookie).toNotContain(cookiePrefix)
+      expect(document.cookie).does.not.contain(cookiePrefix)
       document.cookie = `${cookiePrefix}user=xxx`
 
       render(<P />, node, () => {
         setTimeout(() => {
-          expect(node.innerHTML).toNotContain('src=""')
+          expect(node.innerHTML).does.not.contain('src=""')
           done()
         }, 10)
       })
@@ -85,12 +87,12 @@ describe('components', () => {
       })
       const P = api.ProviderHoc(() => 'foo')
 
-      expect(document.cookie).toNotContain(cookiePrefix)
+      expect(document.cookie).does.not.contain(cookiePrefix)
       document.cookie = `${cookiePrefix}session=xxx`
 
       render(<P />, node, () => {
         setTimeout(() => {
-          expect(node.innerHTML).toNotContain('src=""')
+          expect(node.innerHTML).does.not.contain('src=""')
           done()
         }, 10)
       })
@@ -108,12 +110,12 @@ describe('components', () => {
       let hasAuthenticated = false
       api.onAuthenticated(() => (hasAuthenticated = true))
 
-      expect(document.cookie).toNotContain(cookiePrefix)
+      expect(document.cookie).does.not.contain(cookiePrefix)
 
       render(<P />, node, () => {
         setTimeout(() => {
-          expect(node.innerHTML).toContain('src=""')
-          expect(hasAuthenticated).toBe(true)
+          expect(node.innerHTML).contains('src=""')
+          expect(hasAuthenticated).equals(true)
           done()
         }, 10)
       })
@@ -130,7 +132,7 @@ describe('components', () => {
       const P = api.ProviderHoc(() => 'foo')
 
       render(<P />, node, () => {
-        expect(node.innerHTML).toNotContain('<iframe')
+        expect(node.innerHTML).does.not.contain('<iframe')
       })
     })
 
@@ -153,7 +155,7 @@ describe('components', () => {
         const apiConfig = {}
         const messageFactory = () => ({ foo: 'bar' })
         testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).toContain('data-user-id="0"')
+          expect(node.innerHTML).contains('data-user-id="0"')
           done()
         })
       })
@@ -162,7 +164,7 @@ describe('components', () => {
         const apiConfig = {}
         const messageFactory = () => ({ auth: {} })
         testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).toContain('data-user-id="0"')
+          expect(node.innerHTML).contains('data-user-id="0"')
           done()
         })
       })
@@ -184,12 +186,12 @@ describe('components', () => {
           return message
         }
 
-        expect(document.cookie).toNotContain(cookiePrefix)
+        expect(document.cookie).does.not.contain(cookiePrefix)
         document.cookie = `${apiConfig.cookiePrefix}session=${cookieSession}`
 
         testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
-          expect(document.cookie).toContain(`${clientId}__${cookieSession}`)
+          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
+          expect(document.cookie).contains(`${clientId}__${cookieSession}`)
           done()
         })
       })
@@ -210,12 +212,12 @@ describe('components', () => {
           return message
         }
 
-        expect(document.cookie).toNotContain(cookiePrefix)
+        expect(document.cookie).does.not.contain(cookiePrefix)
         document.cookie = `${apiConfig.cookiePrefix}session=${cookieSession}`
 
         testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
-          expect(document.cookie).toNotContain(`${clientId}__${cookieSession}`)
+          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
+          expect(document.cookie).does.not.contain(`${clientId}__${cookieSession}`)
           done()
         })
       })
@@ -236,11 +238,11 @@ describe('components', () => {
           return message
         }
 
-        expect(document.cookie).toNotContain(cookiePrefix)
+        expect(document.cookie).does.not.contain(cookiePrefix)
 
         testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).toContain(`data-user-id="${userId}"`)
-          expect(document.cookie).toNotContain(`${clientId}__`)
+          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
+          expect(document.cookie).does.not.contain(`${clientId}__`)
           done()
         })
       })
@@ -257,13 +259,13 @@ describe('components', () => {
         user_id: Math.random()
       }
 
-      expect(document.cookie).toNotContain(cookiePrefix)
+      expect(document.cookie).does.not.contain(cookiePrefix)
       document.cookie = `${cookiePrefix}session=${cookieSession}`
       document.cookie = `${clientId}__${cookieSession}=${JSON.stringify(auth)}`
 
       render(<P />, node, () => {
         setTimeout(() => {
-          expect(node.innerHTML).toContain(`data-user-id="${auth.user_id}"`)
+          expect(node.innerHTML).contains(`data-user-id="${auth.user_id}"`)
           done()
         }, 10)
       })

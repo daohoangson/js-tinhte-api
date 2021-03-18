@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 import { BrowserRouter as Router, Route } from 'react-router-dom'
-import querystring from 'querystring'
+import { parse } from 'querystring'
 
 import { apiFactory } from '../../src'
 import Buttons from './components/Buttons'
@@ -19,7 +19,7 @@ const apiCallbackRoute = '/api-callback'
 // extract clientId from request URL for demo reason
 // normally it should be set from app config directly
 let clientId = ''
-const s = querystring.parse(window.location.search.replace(/^\?/, ''))
+const s = parse(window.location.search.replace(/^\?/, ''))
 if (s.client_id) {
   clientId = s.client_id
 }

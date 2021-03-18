@@ -1,9 +1,11 @@
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 import React from 'react'
-import { render, unmountComponentAtNode } from 'react-dom'
+import ReactDom from 'react-dom'
 
-import { apiFactory, apiHoc } from 'src/'
-import errors from 'src/helpers/errors'
+import { apiFactory, apiHoc } from '..'
+import errors from '../helpers/errors'
+
+const { render, unmountComponentAtNode } = ReactDom
 
 describe('hoc', () => {
   describe('ApiConsumer', () => {
@@ -26,8 +28,8 @@ describe('hoc', () => {
         catched.push(e)
       }
 
-      expect(catched.length).toBe(1)
-      expect(catched[0].message).toBe(errors.API_CONSUMER.REQUIRED_PARAM_MISSING)
+      expect(catched.length).equals(1)
+      expect(catched[0].message).equals(errors.API_CONSUMER.REQUIRED_PARAM_MISSING)
     })
 
     it('populates api', (done) => {
@@ -40,7 +42,7 @@ describe('hoc', () => {
 
       render(<P />, node, () => {
         setTimeout(() => {
-          expect(node.innerHTML).toContain(`<span class="userId">${userId}</span>`)
+          expect(node.innerHTML).contains(`<span class="userId">${userId}</span>`)
           done()
         }, 10)
       })
@@ -51,7 +53,7 @@ describe('hoc', () => {
       const C = apiHoc.ApiConsumer(Child)
 
       render(<C />, node, () => {
-        expect(node.innerHTML).toContain('<div class="Child">ok</div>')
+        expect(node.innerHTML).contains('<div class="Child">ok</div>')
       })
     })
 
@@ -64,7 +66,7 @@ describe('hoc', () => {
         const P = api.ProviderHoc(() => <C />)
 
         render(<P />, node, () => {
-          expect(node.innerHTML).toContain('<div class="Child">ok</div>')
+          expect(node.innerHTML).contains('<div class="Child">ok</div>')
         })
       })
 
@@ -88,7 +90,7 @@ describe('hoc', () => {
         let successCount = 0
         const success = () => {
           successCount++
-          expect(successCount).toBe(1)
+          expect(successCount).equals(1)
         }
 
         const Child = () => 'foo'
@@ -113,7 +115,7 @@ describe('hoc', () => {
         render(<P />, testNode, () => {
           setTimeout(() => {
             const unmounted = unmountComponentAtNode(testNode)
-            expect(unmounted).toBe(true)
+            expect(unmounted).equals(true)
           }, 10)
         })
       })
@@ -127,8 +129,8 @@ describe('hoc', () => {
         const Child = ({ index }) => <div className='index'>{index && index.links ? 'ok' : 'not'}</div>
         Child.apiFetches = {
           index: (api, props) => {
-            expect(api).toBeAn('object')
-            expect(props.foo).toBe(foo)
+            expect(api).an('object')
+            expect(props.foo).equals(foo)
             return { uri: 'index' }
           }
         }
@@ -136,7 +138,7 @@ describe('hoc', () => {
 
         return new Promise((resolve) => {
           const check = () => {
-            expect(node.innerHTML).toContain('<div class="index">ok</div>')
+            expect(node.innerHTML).contains('<div class="index">ok</div>')
             resolve()
           }
           const P = api.ProviderHoc(() => <C onFetched={check} foo={foo} />)
@@ -156,8 +158,8 @@ describe('hoc', () => {
 
           return new Promise((resolve) => {
             const check = () => {
-              expect(node.innerHTML).toContain(`<div class="index">${expectedOutput}</div>`)
-              expect(api.getFetchCount()).toBe(0)
+              expect(node.innerHTML).contains(`<div class="index">${expectedOutput}</div>`)
+              expect(api.getFetchCount()).equals(0)
               resolve()
             }
 
@@ -208,7 +210,7 @@ describe('hoc', () => {
 
         return new Promise((resolve) => {
           const check = () => {
-            expect(node.innerHTML).toContain('<div class="post1">ok</div>')
+            expect(node.innerHTML).contains('<div class="post1">ok</div>')
             resolve()
           }
           const P = api.ProviderHoc(() => <C onFetched={check} />)
@@ -257,7 +259,7 @@ describe('hoc', () => {
           access_token: 'access token',
           user_id: Math.random()
         }
-        expect(document.cookie).toNotContain(cookiePrefix)
+        expect(document.cookie).does.not.contain(cookiePrefix)
         document.cookie = `${cookiePrefix}session=${cookieSession}`
         document.cookie = `${clientId}__${cookieSession}=${JSON.stringify(auth)}`
 
@@ -273,7 +275,7 @@ describe('hoc', () => {
             const P = api.ProviderHoc(() => <C onFetchedWithAuth={resolve1} onFetched={resolve2} />)
             render(<P />, node)
           })
-        }).then(() => expect(api.getFetchCount()).toBe(1))
+        }).then(() => expect(api.getFetchCount()).equals(1))
       })
     })
   })

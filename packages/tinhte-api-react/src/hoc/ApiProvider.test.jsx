@@ -1,9 +1,11 @@
-import expect from 'expect'
+import { expect } from '@esm-bundle/chai'
 import React from 'react'
-import { render, unmountComponentAtNode } from 'react-dom'
+import ReactDom from 'react-dom'
 
-import { apiFactory, apiHoc } from 'src/'
-import errors from 'src/helpers/errors'
+import { apiFactory, apiHoc } from '..'
+import errors from '../helpers/errors'
+
+const { render, unmountComponentAtNode } = ReactDom
 
 describe('hoc', () => {
   describe('ApiProvider', () => {
@@ -27,8 +29,8 @@ describe('hoc', () => {
           catched.push(e)
         }
 
-        expect(catched.length).toBe(1)
-        expect(catched[0].message).toBe(errors.API_PROVIDER.REQUIRED_PARAMS_MISSING)
+        expect(catched.length).equals(1)
+        expect(catched[0].message).equals(errors.API_PROVIDER.REQUIRED_PARAMS_MISSING)
       }
 
       it('checks for Component', () => {
@@ -60,7 +62,7 @@ describe('hoc', () => {
       const prop = 'foo'
       const P = api.ProviderHoc((props) => <div className='P'>{JSON.stringify(props)}</div>)
       render(<P prop={prop} apiConfig={apiConfig} apiData={apiData} />, node, () => {
-        expect(node.innerHTML).toContain('<div class="P">' + JSON.stringify({ prop }) + '</div>')
+        expect(node.innerHTML).contains('<div class="P">' + JSON.stringify({ prop }) + '</div>')
       })
     })
 
@@ -74,14 +76,14 @@ describe('hoc', () => {
       it('accepts non-object', () => {
         const apiData = 'bar'
         testApiData(apiData, () => {
-          expect(node.innerHTML).toContain('<div class="P">ok</div')
+          expect(node.innerHTML).contains('<div class="P">ok</div')
         })
       })
 
       it('accepts empty object', () => {
         const apiData = {}
         testApiData(apiData, () => {
-          expect(node.innerHTML).toContain('<div class="P">ok</div')
+          expect(node.innerHTML).contains('<div class="P">ok</div')
         })
       })
 
@@ -96,7 +98,7 @@ describe('hoc', () => {
           return new Promise((resolve) => {
             const P = api.ProviderHoc(() => <C onFetched={resolve} />)
             render(<P apiData={apiData} />, node)
-          }).then(() => expect(api.getFetchCount()).toBe(1))
+          }).then(() => expect(api.getFetchCount()).equals(1))
         }
 
         it('fetches with non-object job data', () => {
@@ -148,29 +150,29 @@ describe('hoc', () => {
       let onC2Fetched = null
       const P2 = api2.ProviderHoc(() => <C2 onFetched={onC2Fetched} />)
 
-      expect(api.getFetchCount()).toBe(0)
-      expect(api2.getFetchCount()).toBe(0)
+      expect(api.getFetchCount()).equals(0)
+      expect(api2.getFetchCount()).equals(0)
       api.fetchApiDataForProvider(<P />)
         .then((apiData) => {
-          expect(api.getFetchCount()).toBe(1)
-          expect(api2.getFetchCount()).toBe(0)
+          expect(api.getFetchCount()).equals(1)
+          expect(api2.getFetchCount()).equals(0)
 
           // test 1: renders from apiData
           render(<P apiData={apiData} />, node, () => {
             setTimeout(() => {
-              expect(node.innerHTML).toContain('<div class="test1a">ok</div>')
-              expect(node.innerHTML).toContain('<div class="test1b">ok</div>')
-              expect(node.innerHTML).toContain('<div class="test1c">ok</div>')
-              expect(api.getFetchCount()).toBe(1)
-              expect(api2.getFetchCount()).toBe(0)
+              expect(node.innerHTML).contains('<div class="test1a">ok</div>')
+              expect(node.innerHTML).contains('<div class="test1b">ok</div>')
+              expect(node.innerHTML).contains('<div class="test1c">ok</div>')
+              expect(api.getFetchCount()).equals(1)
+              expect(api2.getFetchCount()).equals(0)
 
               // test 2: fetches for missing data
               onC2Fetched = () => {
                 setTimeout(() => {
-                  expect(node2.innerHTML).toContain('<div class="test2a">ok</div>')
-                  expect(node2.innerHTML).toContain('<div class="test2b">ok</div>')
-                  expect(api.getFetchCount()).toBe(1)
-                  expect(api2.getFetchCount()).toBe(1)
+                  expect(node2.innerHTML).contains('<div class="test2a">ok</div>')
+                  expect(node2.innerHTML).contains('<div class="test2b">ok</div>')
+                  expect(api.getFetchCount()).equals(1)
+                  expect(api2.getFetchCount()).equals(1)
 
                   unmountComponentAtNode(node2)
                   done()
