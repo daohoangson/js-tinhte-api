@@ -1,4 +1,4 @@
-import querystring from 'querystring'
+import { parse, stringify } from 'querystring'
 
 import { hashMd5 } from './crypt'
 
@@ -58,14 +58,14 @@ const standardizeReqOptions = (options = {}) => {
     /* istanbul ignore else */
     if (uriMatches !== null) {
       options.uri = uriMatches[1]
-      options.params = { ...options.params, ...querystring.parse(uriMatches[3]) }
+      options.params = { ...options.params, ...parse(uriMatches[3]) }
     }
   } else {
     isFullUri = true
   }
 
   options.params = filterEmptyKeyOrValueFromParams(options.params)
-  const paramsStringified = querystring.stringify(options.params)
+  const paramsStringified = stringify(options.params)
   const paramsParts = paramsStringified.split(/&/).sort()
   options.paramsAsString = paramsParts.join('&')
 
@@ -75,7 +75,7 @@ const standardizeReqOptions = (options = {}) => {
     // still parse query from options.uri to make sure options.param is correct
     const uriQueryMatches = options.uri.match(/\?(.+)$/)
     if (uriQueryMatches !== null) {
-      options.params = { ...options.params, ...querystring.parse(uriQueryMatches[1]) }
+      options.params = { ...options.params, ...parse(uriQueryMatches[1]) }
     }
 
     options.explain = `${options.method} full=${options.uri} params=${options.paramsAsString}`

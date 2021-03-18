@@ -1,0 +1,30 @@
+{
+  "name": "tinhte-api-demo",
+  "version": "5.0.2",
+  "description": "tinhte-api DEMO",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "lint": "standard",
+    "lint:fix": "standard --fix",
+    "prestart": "npm run build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "lodash": "^4.17.15",
+    "next": "^9.0.6",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "react-router-dom": "^5.0.1",
+    "sanitize-html": "^1.20.1",
+    "tinhte-api-react": "^5.0.0"
+  },
+  "devDependencies": {
+    "standard": "^14.3.1"
+  },
+  "author": "Dao Hoang Son",
+  "homepage": "https://tinhte.vn",
+  "license": "MIT",
+  "repository": "https://github.com/daohoangson/js-tinhte-api"
+}

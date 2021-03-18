@@ -1,5 +1,3 @@
-import unfetch from 'isomorphic-unfetch'
-
 import batchFactory from './batch'
 import fetchOneInit from './fetchOne'
 import fetchMultipleInit from './fetchMultiple'
@@ -75,11 +73,12 @@ const fetchesInit = (api, internalApi) => {
       })
     }
 
-    const unfetchOptions = { headers, method }
-    if (body) unfetchOptions.body = body
-    if (params._xfToken) unfetchOptions.credentials = 'include'
-
-    let p = unfetch(url, unfetchOptions)
+    let p = fetch(url, {
+      body,
+      credentials: params._xfToken ? 'include' : undefined,
+      headers,
+      method
+    })
 
     if (parseJson !== false) {
       p = p.then(response => {
