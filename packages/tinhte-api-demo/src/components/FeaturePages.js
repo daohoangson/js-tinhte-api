@@ -1,5 +1,5 @@
 import React from 'react'
-import { apiHoc } from '../../../src'
+import { apiHoc } from 'tinhte-api-react'
 
 const FeaturePage = ({ page }) => (
   <li>

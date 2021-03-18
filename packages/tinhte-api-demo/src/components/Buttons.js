@@ -1,5 +1,5 @@
 import React from 'react'
-import { apiHoc } from '../../../src'
+import { apiHoc } from 'tinhte-api-react'
 
 const get = (api, uri) => api.get(uri)
   .then(

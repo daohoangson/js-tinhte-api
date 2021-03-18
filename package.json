@@ -6,28 +6,15 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
-    "build": "npm run build:core && npm run build:react",
+    "build": "npm run build:core && npm run build:react && npm run build:demo",
     "build:core": "lerna run build --scope tinhte-api",
-    "build:demo-nextjs": "cd packages/tinhte-api-react/nextjs && next build",
+    "build:demo": "lerna run build --scope tinhte-api-demo",
     "build:react": "lerna run build --scope tinhte-api-react",
     "clean": "lerna clean",
     "publish-all": "lerna publish --concurrency=1 --no-push",
-    "stats:core": "lerna run stats --scope tinhte-api",
-    "stats:react": "lerna run stats --scope tinhte-api-react",
     "test": "lerna run test",
     "test:core": "lerna run test --scope tinhte-api",
     "test:coverage": "lerna run test:coverage",
     "test:react": "lerna run test --scope tinhte-api-react"
-  },
-  "standard": {
-    "globals": [
-      "XenForo",
-      "XF",
-      "afterEach",
-      "beforeEach",
-      "describe",
-      "it"
-    ],
-    "parser": "babel-eslint"
   }
 }

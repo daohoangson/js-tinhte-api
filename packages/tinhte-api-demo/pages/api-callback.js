@@ -1,5 +1,5 @@
 import React from 'react'
-import { processCallback } from '../src'
+import { processCallback } from 'tinhte-api-react'
 
 class ApiCallbackPage extends React.Component {
   componentDidMount () {

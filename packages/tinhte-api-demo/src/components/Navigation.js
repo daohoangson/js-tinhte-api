@@ -1,6 +1,6 @@
 import React from 'react'
 import { filter } from 'lodash'
-import { apiHoc } from '../../../src'
+import { apiHoc } from 'tinhte-api-react'
 
 const getLink = (element) => {
   if (!element.links) {

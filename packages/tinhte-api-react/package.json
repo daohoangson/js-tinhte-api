@@ -12,8 +12,6 @@
     "build": "rollup -c",
     "lint": "standard",
     "lint:fix": "standard --fix",
-    "next": "next",
-    "now-build": "next build",
     "test": "web-test-runner",
     "test:coverage": "standard && web-test-runner --coverage"
   },
@@ -35,14 +33,10 @@
     "@web/dev-server-rollup": "^0.3.2",
     "@web/test-runner": "^0.12.17",
     "@web/test-runner-puppeteer": "^0.9.3",
-    "lodash": "^4.17.15",
-    "next": "^9.0.6",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
-    "react-router-dom": "^5.0.1",
     "rollup": "^2.41.5",
     "rollup-plugin-node-polyfills": "^0.2.1",
-    "sanitize-html": "^1.20.1",
     "standard": "^14.3.1"
   },
   "author": "Dao Hoang Son",

@@ -1,7 +1,7 @@
 import React from 'react'
 import sanitizeHtml from 'sanitize-html'
 
-import { apiHoc } from '../../../src'
+import { apiHoc } from 'tinhte-api-react'
 
 const preparePostBody = (post) => {
   return { __html: sanitizeHtml(post.post_body_html) }

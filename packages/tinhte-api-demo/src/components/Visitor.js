@@ -1,5 +1,5 @@
 import React from 'react'
-import { apiHoc } from '../../../src'
+import { apiHoc } from 'tinhte-api-react'
 
 const Visitor = ({ user }) => user ? <h1>Hello {user.username}</h1> : null
 
