@@ -11,6 +11,7 @@ cache:
 
 before_script:
   - npm run bootstrap
+  - npm run build
 
 after_success:
   - curl -so /tmp/codecov.sh https://codecov.io/bash && chmod +x /tmp/codecov.sh

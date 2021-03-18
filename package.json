@@ -6,15 +6,12 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
-    "build": "npm run build:core && npm run build:react && npm run build:demo",
+    "build": "lerna run build --concurrency=1",
     "build:core": "lerna run build --scope tinhte-api",
     "build:demo": "lerna run build --scope tinhte-api-demo",
     "build:react": "lerna run build --scope tinhte-api-react",
     "clean": "lerna clean",
     "publish-all": "lerna publish --concurrency=1 --no-push",
-    "test": "lerna run test",
-    "test:core": "lerna run test --scope tinhte-api",
-    "test:coverage": "lerna run test:coverage",
-    "test:react": "lerna run test --scope tinhte-api-react"
+    "test": "lerna run test:coverage"
   }
 }
