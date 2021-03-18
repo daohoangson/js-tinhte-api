@@ -6,7 +6,7 @@
   "module": "dist/tinhte-api.esm.js",
   "browser": "dist/tinhte-api.umd.js",
   "files": [
-    "src"
+    "dist"
   ],
   "scripts": {
     "build": "rollup -c",
