@@ -81,7 +81,7 @@ You can also trigger the function `processCallback` directly on the callback pag
 
 ```html
 <script type="text/javascript" src="https://unpkg.com/react@^16/umd/react.production.min.js"></script>
-<script type="text/javascript" src="https://unpkg.com/tinhte-api-react@4/umd/tinhte-api-react.min.js"></script>
+<script type="text/javascript" src="https://unpkg.com/tinhte-api-react@5/dist/tinhte-api-react.umd.js"></script>
 <script type="text/javascript">TinhteApiReact.processCallback();</script>
 ```
 
