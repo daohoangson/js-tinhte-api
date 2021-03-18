@@ -6,12 +6,11 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
+    "prebuild": "npm run bootstrap",
     "build": "lerna run build --concurrency=1",
-    "build:core": "lerna run build --scope tinhte-api",
-    "build:demo": "lerna run build --scope tinhte-api-demo",
-    "build:react": "lerna run build --scope tinhte-api-react",
+    "pretest": "npm run build",
+    "test": "lerna run test:coverage",
     "clean": "lerna clean",
-    "publish-all": "lerna publish --concurrency=1 --no-push",
-    "test": "lerna run test:coverage"
+    "publish-all": "lerna publish --concurrency=1 --no-push"
   }
 }

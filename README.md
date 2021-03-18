@@ -4,12 +4,8 @@
 [![npm package][npm-badge]][npm]
 [![Codecov][codecov-badge]][codecov]
 
-Quickly setup API authentication against [Tinh tế](https://tinhte.vn) for React applications. Demo:
-
- - [Client-only app](https://tinhte-api.now.sh/?client_id=2wseo5fywn)
- - [Next.js SSR app](https://tinhte-api.now.sh/nextjs/?client_id=2wseo5fywn)
- - The demos both use the same [set of components](https://github.com/daohoangson/js-tinhte-api/tree/master/packages/tinhte-api-react/demo/src/components)
- 
+Quickly setup API authentication against [Tinh tế](https://tinhte.vn) for React applications.
+See the [demo Next.js app](https://tinhte-api.vercel.app/?client_id=2wseo5fywn).
 
 ## Usage
 

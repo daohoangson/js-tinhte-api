@@ -1,0 +1,28 @@
+{
+  "build": {
+    "env": {
+      "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true"
+    }
+  },
+  "builds": [
+    {
+      "src": "packages/tinhte-api-demo/next.config.js",
+      "use": "@vercel/next",
+      "config": {
+        "installCommand": "( cd ../.. && npm ci && npm run build )",
+        "buildCommand": ""
+      }
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/packages/tinhte-api-demo"
+    },
+    {
+      "source": "/:match*",
+      "destination": "/packages/tinhte-api-demo/:match*"
+    }
+  ],
+  "version": 2
+}
