@@ -1,6 +1,6 @@
 # tinhte-api React Component
 
-[![Travis][build-badge]][build]
+[![build][build-badge]][build]
 [![npm package][npm-badge]][npm]
 [![Codecov][codecov-badge]][codecov]
 
@@ -480,8 +480,8 @@ const uri = 'search'
 const uniqueId = standardizeReqOptions({ method, params, uri })
 ```
 
-[build-badge]: https://img.shields.io/travis/daohoangson/js-tinhte-api/master.svg?style=flat-square
-[build]: https://travis-ci.org/daohoangson/js-tinhte-api
+[build-badge]: https://github.com/daohoangson/js-tinhte-api/actions/workflows/npm.yml/badge.svg
+[build]: https://github.com/daohoangson/js-tinhte-api/actions/workflows/npm.yml
 
 [npm-badge]: https://img.shields.io/npm/v/tinhte-api.svg?style=flat-square
 [npm]: https://www.npmjs.org/package/tinhte-api
