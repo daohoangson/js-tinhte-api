@@ -33,6 +33,21 @@ describe('api', () => {
     })
   })
 
+  describe('getInternalApi', () => {
+    it('exposes internal (debug=true)', () => {
+      const debug = true
+      const api = apiFactory({ debug })
+      expect(api.getInternalApi).a('function')
+    })
+
+    it('doesn\'t exposes internal (debug=fase)', () => {
+      const debug = false
+      const api = apiFactory({ debug })
+      // eslint-disable-next-line
+      expect(api.getInternalApi).is.undefined
+    })
+  })
+
   describe('internalApi', () => {
     describe('setAuth', () => {
       let api = null
