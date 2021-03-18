@@ -2,11 +2,14 @@
   "name": "tinhte-api",
   "version": "5.0.0",
   "description": "tinhte-api library",
-  "module": "src/index.js",
+  "main": "dist/tinhte-api.cjs.js",
+  "module": "dist/tinhte-api.esm.js",
+  "browser": "dist/tinhte-api.umd.js",
   "files": [
     "src"
   ],
   "scripts": {
+    "build": "rollup -c",
     "lint": "standard",
     "lint:fix": "standard --fix",
     "test": "web-test-runner",
@@ -21,6 +24,7 @@
     "@web/dev-server-rollup": "^0.3.2",
     "@web/test-runner": "^0.12.17",
     "@web/test-runner-puppeteer": "^0.9.3",
+    "rollup": "^2.41.5",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "standard": "^14.3.1"
   },

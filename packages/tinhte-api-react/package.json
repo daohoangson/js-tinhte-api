@@ -2,11 +2,14 @@
   "name": "tinhte-api-react",
   "version": "5.0.2",
   "description": "tinhte-api React component",
-  "module": "src/index.js",
+  "main": "dist/tinhte-api-react.cjs.js",
+  "module": "dist/tinhte-api-react.esm.js",
+  "browser": "dist/tinhte-api-react.umd.js",
   "files": [
     "src"
   ],
   "scripts": {
+    "build": "rollup -c",
     "lint": "standard",
     "lint:fix": "standard --fix",
     "next": "next",
@@ -20,12 +23,13 @@
     "tinhte-api": "^5.0.0"
   },
   "peerDependencies": {
-    "react": "^16.x"
+    "react": "*"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.10",
     "@babel/preset-react": "^7.12.13",
     "@esm-bundle/chai": "^4.3.4",
+    "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@web/dev-server-esbuild": "^0.2.11",
     "@web/dev-server-rollup": "^0.3.2",
@@ -36,6 +40,7 @@
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
+    "rollup": "^2.41.5",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "sanitize-html": "^1.20.1",
     "standard": "^14.3.1"

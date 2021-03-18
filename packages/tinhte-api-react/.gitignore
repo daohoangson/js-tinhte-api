@@ -1,4 +1,3 @@
-/.next
 /coverage
-/demo/dist
+/dist/
 /node_modules
