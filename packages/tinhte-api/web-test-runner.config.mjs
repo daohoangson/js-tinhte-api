@@ -15,6 +15,7 @@ export default {
     commonjs(),
     nodePolyfills()
   ],
+  rootDir: '../..',
   browsers: [
     puppeteerLauncher()
   ]

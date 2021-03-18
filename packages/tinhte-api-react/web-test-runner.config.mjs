@@ -7,6 +7,8 @@ import { puppeteerLauncher } from '@web/test-runner-puppeteer'
 const patcher = fromRollup(() => ({
   name: 'patcher',
   transform: (code, id) => {
+    code = code.replace(/process\.env\.NODE_ENV/g, '"production"')
+
     if (id.endsWith('/react-ssr-prepass.es.js')) {
       return code.replace(
         'import React, { Children, createElement } from "react";',
