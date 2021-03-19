@@ -1,14 +1,13 @@
-import babel from '@rollup/plugin-babel'
 import nodePolyfills from 'rollup-plugin-node-polyfills'
 import resolve from '@rollup/plugin-node-resolve'
-import commonjs from '@rollup/plugin-commonjs'
+import typescript from '@rollup/plugin-typescript'
 import pkg from './package.json'
 
-const extensions = ['.js', '.jsx']
+const extensions = ['.ts', '.tsx']
 
 export default [
   {
-    input: 'src/index.js',
+    input: 'src/index.ts',
     external: Object.keys(pkg.peerDependencies),
     output: {
       name: 'TinhteApiReact',
@@ -16,41 +15,39 @@ export default [
       format: 'umd',
       globals: {
         react: 'React'
-      }
+      },
+      sourcemap: true
     },
     plugins: [
       nodePolyfills(),
-      resolve({
-        extensions
-      }),
-      commonjs(),
-      babel({
-        babelHelpers: 'bundled',
-        extensions,
-        presets: ['@babel/env', '@babel/react']
-      })
+      typescript(),
+      resolve(),
+      commonjs()
     ]
   },
 
   {
-    input: 'src/index.js',
+    input: 'src/index.ts',
     external: [
       ...Object.keys(pkg.peerDependencies),
       ...Object.keys(pkg.dependencies)
     ],
     output: [
-      { file: pkg.main, format: 'cjs' },
-      { file: pkg.module, format: 'es' }
+      {
+        file: pkg.main,
+        format: 'cjs',
+        sourcemap: true
+      },
+      {
+        file: pkg.module,
+        format: 'es',
+        sourcemap: true
+      }
     ],
     plugins: [
+      typescript(),
       resolve({
-        extensions,
         preferBuiltins: true
-      }),
-      babel({
-        babelHelpers: 'bundled',
-        extensions,
-        presets: ['@babel/env', '@babel/react']
       })
     ]
   }

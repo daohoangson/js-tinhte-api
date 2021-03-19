@@ -6,8 +6,8 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "standard",
-    "lint:fix": "standard --fix",
+    "lint": "ts-standard",
+    "lint:fix": "ts-standard --fix",
     "prestart": "npm run build",
     "start": "next start"
   },
@@ -21,7 +21,7 @@
     "tinhte-api-react": "^5.0.0"
   },
   "devDependencies": {
-    "standard": "^14.3.1"
+    "ts-standard": "^10.0.0"
   },
   "author": "Dao Hoang Son",
   "homepage": "https://tinhte.vn",

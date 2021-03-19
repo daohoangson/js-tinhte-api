@@ -1,5 +1,6 @@
 import React from 'react'
 import { apiFactory as coreFactory } from 'tinhte-api'
+import type { Api } from 'tinhte-api'
 
 import Callback from './components/Callback'
 import Loader from './components/Loader'
