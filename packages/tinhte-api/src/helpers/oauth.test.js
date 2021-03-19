@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai'
 
-import apiFactory from '../../factory'
+import apiFactory from '../factory'
 
 describe('helpers', () => {
   describe('oauth/token', () => {

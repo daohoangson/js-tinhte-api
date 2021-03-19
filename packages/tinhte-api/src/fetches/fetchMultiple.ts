@@ -1,8 +1,58 @@
 import errors from '../helpers/errors'
-import standardizeReqOptions from '../helpers/standardizeReqOptions'
+import standardizeReqOptions, { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
+import { ApiInternal } from '../types'
+import { Batches, BatchReject, BatchRequest, BatchResolve } from './batch'
+import { FetchHeaders, FetchJson, FetchMultiple, FetchMultipleOptions, FetchParams } from './types'
 
-const fetchMultipleInit = (fetchJson, batch, internalApi) => {
-  const newContext = (batchOptions = {}) => {
+interface _Context {
+  batchHeaders: FetchHeaders
+  batchOptions: FetchMultipleOptions
+
+  headers: FetchHeaders
+  handlers: Record<string, _Handler>
+  reqIds: Record<string, string[]>
+  requests: _Request[]
+}
+
+interface _Handler {
+  method: string
+  resolve: BatchResolve
+  reject: BatchReject
+  uri: string
+}
+
+interface _ProcessJobResult {
+  resolved?: any
+  rejected?: any
+}
+
+interface _Request {
+  id: string
+  method?: string
+  params?: FetchParams
+  uri: string
+}
+
+interface _ResponseJob {
+  _job_error?: string
+  _job_result?: string
+  _req?: {
+    method: string
+    uri: string
+  }
+}
+
+interface _ResponseJobs {
+  [key: string]: _ResponseJob
+}
+
+interface _ResponseJson {
+  jobs?: _ResponseJobs
+  _handled?: number
+}
+
+const fetchMultipleInit = (fetchJson: FetchJson, batch: Batches, internalApi: ApiInternal): FetchMultiple => {
+  const newContext = (batchOptions: FetchMultipleOptions): _Context => {
     batchOptions.triggerHandlers = typeof batchOptions.triggerHandlers === 'boolean'
       ? batchOptions.triggerHandlers
       : true
@@ -11,35 +61,26 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       'Content-Type': 'application/json'
     }
 
-    const headers = { ...batchHeaders }
-    const handlers = {}
-    const reqIds = {}
-    const requests = []
-
-    const context = {
+    return {
       batchHeaders,
       batchOptions,
 
-      headers,
-      handlers,
-      reqIds,
-      requests
+      headers: { ...batchHeaders },
+      handlers: {},
+      reqIds: {},
+      requests: []
     }
-
-    return context
   }
 
-  const prepareRequest = (req, context) => {
+  const prepareRequest = (req: BatchRequest, context: _Context): void => {
     const { batchHeaders, headers, handlers, reqIds, requests } = context
 
-    Object.keys(req.options.headers).forEach((headerKey) => {
-      if (typeof batchHeaders[headerKey] !== 'undefined') {
+    for (const headerKey in req.options.headers) {
+      if (batchHeaders[headerKey] === undefined) {
         // DO NOT replace a batch header with one from the sub-request
-        return
+        headers[headerKey] = req.options.headers[headerKey]
       }
-
-      headers[headerKey] = req.options.headers[headerKey]
-    })
+    }
 
     const { id, uniqueId } = req
     const { method, params, uri } = req.options
@@ -51,11 +92,13 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       uri
     }
 
-    if (typeof reqIds[uniqueId] === 'undefined') {
+    if (reqIds[uniqueId] === undefined) {
       reqIds[uniqueId] = [id]
-      const req = { id: uniqueId }
+      const req: _Request = {
+        id: uniqueId,
+        uri: uri === '' ? 'index' : uri
+      }
       if (method !== 'GET') req.method = method
-      req.uri = uri === '' ? 'index' : uri
       if (Object.keys(params).length > 0) req.params = params
 
       requests.push(req)
@@ -64,13 +107,13 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     }
   }
 
-  const normalizeJobs = (jobs, context) => {
+  const normalizeJobs = (jobs: _ResponseJobs, context: _Context): void => {
     const { handlers, reqIds } = context
 
-    Object.keys(jobs).forEach((jobId) => {
+    for (const jobId in jobs) {
       const jobReqIds = reqIds[jobId]
       if (!Array.isArray(jobReqIds)) {
-        return
+        continue
       }
       const firstReqId = jobReqIds[0]
       const handler = handlers[firstReqId]
@@ -79,29 +122,29 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
         method: handler.method,
         uri: handler.uri
       }
-    })
+    }
   }
 
-  const processJob = (job, reqId, context) => {
+  const processJob = (job: _ResponseJob | undefined, reqId: string, context: _Context): _ProcessJobResult | null => {
     const { batchOptions, handlers } = context
-    if (!batchOptions.triggerHandlers) {
+    if (batchOptions.triggerHandlers !== true) {
       return null
     }
 
     const handler = handlers[reqId]
 
-    const resolve = (job) => {
+    const resolve = (job: object): _ProcessJobResult => {
       internalApi.log('Resolving %s %s...', handler.method, handler.uri)
       return { resolved: handler.resolve(job) }
     }
 
-    const reject = (reason) => {
+    const reject = (reason?: any): _ProcessJobResult => {
       internalApi.log('Rejecting %s %s (%s)...', handler.method, handler.uri, reason)
       return { rejected: handler.reject(reason) }
     }
 
-    if (job) {
-      if (!job._req ||
+    if (job !== undefined) {
+      if ((job._req == null) ||
         job._req.method !== handler.method ||
         job._req.uri !== handler.uri) {
         return reject(new Error(errors.FETCH_MULTIPLE.MISMATCHED))
@@ -113,7 +156,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
 
       if (job._job_result === 'ok' || job._job_result === 'message') {
         return resolve(job)
-      } else if (job._job_error) {
+      } else if (job._job_error !== undefined) {
         return reject(new Error(job._job_error))
       } else {
         return reject(job)
@@ -123,40 +166,36 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
     return reject(new Error(errors.FETCH_MULTIPLE.JOB_NOT_FOUND))
   }
 
-  const processJobs = (json, context) => {
-    const jobs = json.jobs || {}
+  const processJobs = (json: _ResponseJson, context: _Context): void => {
+    const jobs = json.jobs ?? {}
     json._handled = 0
     normalizeJobs(jobs, context)
 
     const { reqIds } = context
-    Object.keys(reqIds).forEach((uniqueId) => {
-      reqIds[uniqueId].forEach((reqId) => {
-        const job = jobs[uniqueId]
-        const handled = processJob(job, reqId, context)
-        if (handled !== null) {
+    for (const uniqueId in reqIds) {
+      for (const reqId of reqIds[uniqueId]) {
+        if (processJob(jobs[uniqueId], reqId, context) !== null) {
           json._handled++
         }
-      })
-    })
+      }
+    }
   }
 
-  const fetchMultiple = (fetches, options = {}) => {
+  const fetchMultiple: FetchMultiple = async (fetches, options = {}) => {
     const context = newContext(options)
     const { current, other, reset } = batch.init()
 
     fetches()
+    reset?.call(this)
 
-    if (typeof reset === 'function') {
-      reset()
-    }
-
-    return new Promise((resolve, reject) => {
-      if (other) {
+    return await new Promise<any>((resolve, reject) => {
+      if (other != null) {
         return other.enqueue(resolve, reject)
-      } else {
-        current.enqueue(resolve, reject)
+      } else if (current == null) {
+        return reject(new Error(errors.FETCH_MULTIPLE.NO_BATCH))
       }
 
+      current.enqueue(resolve, reject)
       current.forEachReq((req) => prepareRequest(req, context))
 
       if (context.requests.length === 0) {
@@ -164,7 +203,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       }
       const body = JSON.stringify(context.requests)
 
-      const fetchOptions = {
+      const fetchOptions: any = {
         uri: 'batch',
         headers: context.headers,
         body
@@ -172,7 +211,7 @@ const fetchMultipleInit = (fetchJson, batch, internalApi) => {
       standardizeReqOptions(fetchOptions)
 
       internalApi.log('Batch #%d is being fetched...', current.getId())
-      fetchJson(fetchOptions)
+      fetchJson(fetchOptions as StandardizedFetchOptions)
         .then(
           (json) => {
             processJobs(json, context)

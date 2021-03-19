@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "strict": true,
+    "sourceMap": true,
+    // monorepo
+    "baseUrl": "./packages",
+    "paths": {
+      "tinhte-api": [
+        "tinhte-api/src"
+      ],
+      "tinhte-api-react": [
+        "tinhte-api-react/src"
+      ],
+    }
+  }
+}
