@@ -1,43 +1,46 @@
 import React from 'react'
 import { apiFactory as coreFactory } from 'tinhte-api'
-import type { Api } from 'tinhte-api'
+import { Api, ApiAuth, ApiConfig } from 'tinhte-api/src/types'
 
-import Callback from './components/Callback'
-import Loader from './components/Loader'
+import { Callback } from './components/Callback'
+import { Loader } from './components/Loader'
 import helperCallbacksInit from './helpers/callbacks'
-import fetchApiDataForProvider from './helpers/fetchApiDataForProvider'
-import ApiConsumer from './hoc/ApiConsumer'
-import ApiProvider from './hoc/ApiProvider'
+import { fetchApiDataForProvider } from './helpers/fetchApiDataForProvider'
+import { ConsumerHoc } from './hoc/ApiConsumer'
+import { ProviderHoc } from './hoc/ApiProvider'
+import { ReactApi, ReactApiInternal } from './types'
 
-const reactFactory = (apiCore) => {
-  const api = apiCore
-
+const reactFactory = (apiCore: Api): ReactApi => {
   let providerMounted = false
 
-  const internalApi = {
+  const internalApi: ReactApiInternal = {
 
     LoaderComponent: () => <Loader api={api} internalApi={internalApi} />,
 
-    log: function (message) {
+    log: (...args) => {
       if (!api.getDebug()) {
         return false
       }
 
-      const args = arguments
-      args[0] = `[tinhte-api-react#${api.getUniqueId()}] ${args[0]}`
+      const args0 = args[0]
+      if (typeof args0 === 'string') {
+        args[0] = `[tinhte-api-react#${api.getUniqueId()}] ${args0}`
+      }
 
-      console.log.apply(this, args)
+      console.log.apply(console, args)
       return true
     },
 
     setAuth: (newAuth) => {
-      const auth = {}
-      const done = () => {
+      const auth: ApiAuth = {}
+      const done = (): void => {
         api.updateConfig({ auth })
+
+        // eslint-disable-next-line
         callbacks.fetchList(callbackListForAuth)
       }
 
-      if (!newAuth || newAuth.state !== api.getUniqueId()) {
+      if (newAuth === undefined || newAuth.state !== api.getUniqueId()) {
         return done()
       }
 
@@ -67,45 +70,40 @@ const reactFactory = (apiCore) => {
 
       return callbacks.fetchList(callbackListForProviderMount)
     }
+  }
 
+  const api: ReactApi = {
+    ...apiCore,
+
+    clone: (config: ApiConfig) => {
+      const clonedApi = apiCore.clone(config)
+      return reactFactory(clonedApi)
+    },
+
+    fetchApiDataForProvider: async (rootElement) =>
+      await fetchApiDataForProvider(api, internalApi, rootElement),
+
+    onAuthenticated: (callback) =>
+      callbacks.add(callbackListForAuth, callback, api.hasAuth()),
+
+    onProviderMounted: (callback) =>
+      callbacks.add(callbackListForProviderMount, callback, providerMounted),
+
+    CallbackComponent: () => <Callback api={api} internalApi={internalApi} />,
+
+    ConsumerHoc,
+
+    ProviderHoc: (Component) => ProviderHoc(Component, api, internalApi)
   }
 
   const callbackListForAuth = { name: 'auth', items: [] }
   const callbackListForProviderMount = { name: 'provider mount', items: [] }
   const callbacks = helperCallbacksInit(api, internalApi)
 
-  api.CallbackComponent = () => <Callback api={api} internalApi={internalApi} />
-
-  api.ConsumerHoc = ApiConsumer
-
-  api.ProviderHoc = (Component) => ApiProvider(Component, api, internalApi)
-
-  const coreClone = api.clone
-  api.clone = (config = {}) => {
-    const clonedApi = coreClone.call(api, config)
-    return reactFactory(clonedApi)
-  }
-
-  api.fetchApiDataForProvider = (rootElement) =>
-    fetchApiDataForProvider(api, internalApi, rootElement)
-
-  api.onAuthenticated = (callback) =>
-    callbacks.add(callbackListForAuth, callback, api.hasAuth())
-
-  api.onProviderMounted = (callback) =>
-    callbacks.add(callbackListForProviderMount, callback, providerMounted)
-
-  if (api.getDebug()) {
-    api.getInternalApi = () => internalApi
-  }
-
   return api
 }
 
-const apiFactory = (config = {}) => {
-  const apiCore = coreFactory(config)
-  const apiReact = reactFactory(apiCore)
-  return apiReact
-}
+const apiFactory = (config: ApiConfig = {}): ReactApi =>
+  reactFactory(coreFactory(config))
 
 export default apiFactory

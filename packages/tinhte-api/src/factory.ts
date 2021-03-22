@@ -66,7 +66,7 @@ const apiFactory = (config: ApiConfig = {}): Api => {
 
   const internalApi: ApiInternal = {
 
-    log: (...args: any[]) => {
+    log: (...args) => {
       if (!debug) {
         return false
       }
@@ -92,11 +92,11 @@ const apiFactory = (config: ApiConfig = {}): Api => {
     post: async (input) => await fetchShortcut('POST', input),
     put: async (input) => await fetchShortcut('PUT', input),
 
-    login: async (clientSecret: string, username: string, password: string) =>
-      await grantTypePassword(api, internalApi, clientSecret, username, password),
+    login: (clientSecret, username, password) =>
+      grantTypePassword(api, internalApi, clientSecret, username, password),
 
-    refreshToken: async (clientSecret: string, refreshToken: string) =>
-      await grantTypeRefreshToken(api, internalApi, clientSecret, refreshToken),
+    refreshToken: (clientSecret, refreshToken) =>
+      grantTypeRefreshToken(api, internalApi, clientSecret, refreshToken),
 
     clone: (config) => {
       const clonedConfig: ApiConfig = {

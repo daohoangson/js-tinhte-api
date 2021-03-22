@@ -17,6 +17,19 @@ export interface FetchOptions {
 
 export type FetchMultiple = (fetches: () => void, options?: FetchMultipleOptions) => Promise<any>
 
+export interface FetchMultipleJob {
+  _job_error?: string
+  _job_result?: string
+  _req?: {
+    method: string
+    uri: string
+  }
+}
+
+export interface FetchMultipleJobs {
+  [key: string]: FetchMultipleJob
+}
+
 export interface FetchMultipleOptions {
   triggerHandlers?: boolean
 }

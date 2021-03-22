@@ -78,7 +78,6 @@ const standardizeReqOptions = (options: StandardizedFetchOptions): string => {
   let isFullUri = false
   if (options.uri.match(/^https?:\/\//) === null) {
     const uriMatches = options.uri.match(/^\/*([^?]*)(\?(.+))?$/)
-    /* istanbul ignore else */
     if (uriMatches !== null) {
       options.uri = uriMatches[1]
       options.params = { ...options.params, ...extractParamsFromQuerystring(uriMatches[3]) }

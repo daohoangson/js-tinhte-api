@@ -1,8 +1,4 @@
 import React from 'react'
+import { ReactApiContext } from '../types'
 
-const api = null
-const apiData = {}
-const internalApi = null
-const Context = React.createContext({ api, apiData, internalApi })
-
-export default Context
+export default React.createContext<ReactApiContext>({ apiData: {} })

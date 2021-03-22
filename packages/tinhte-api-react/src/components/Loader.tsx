@@ -1,11 +1,23 @@
 import Cookies from 'js-cookie'
 import React from 'react'
+import { ReactApi, ReactApiInternal } from '../types'
 
-const buildAuthorizeUrl = (api) => {
+interface _LoaderProps {
+  api: ReactApi
+  internalApi: ReactApiInternal
+}
+
+interface _LoaderState {
+  listener: (event: MessageEvent) => void
+  src: string
+  userId: number
+}
+
+const buildAuthorizeUrl = (api: ReactApi): string | undefined => {
   const clientId = api.getClientId()
   const callbackUrl = api.getCallbackUrl()
-  if (!clientId || !callbackUrl) {
-    return null
+  if (clientId.length === 0 || callbackUrl.length === 0) {
+    return
   }
 
   const encodedUniqueId = encodeURIComponent(api.getUniqueId())
@@ -24,20 +36,20 @@ const buildAuthorizeUrl = (api) => {
   return authorizeUrl
 }
 
-const generateCookieName = (api) => {
+const generateCookieName = (api: ReactApi): string | undefined => {
   const prefix = api.getCookiePrefix()
-  if (!prefix) {
+  if (prefix.length === 0) {
     // no prefix -> always auth
     return ''
   }
 
-  const cookieSession = Cookies.get(`${prefix}session`)
-  const cookieUser = Cookies.get(`${prefix}user`)
-  if (!cookieSession && !cookieUser) {
+  const cookieSession = Cookies.get(`${prefix}session`) ?? ''
+  const cookieUser = Cookies.get(`${prefix}user`) ?? ''
+  if (cookieSession.length < 1 && cookieUser.length === 0) {
     // no session AND user -> no authentication
-    return null
+    return
   }
-  if (!cookieSession) {
+  if (cookieSession.length === 0) {
     // no session -> try to auth
     return ''
   }
@@ -47,28 +59,26 @@ const generateCookieName = (api) => {
   return `${safeClientId}__${safeSession}`
 }
 
-const getCookie = (api) => {
+const getCookie = (api: ReactApi): { name: string, value?: any } | undefined => {
   const name = generateCookieName(api)
-  if (!name) {
-    if (name === null) {
-      return null
-    } else {
-      return { name }
-    }
+  if (name === undefined) {
+    return
+  } else if (name.length === 0) {
+    return { name }
   }
 
   const value = Cookies.getJSON(name)
   return { name, value }
 }
 
-const setCookie = (api, auth) => {
-  if (!auth.access_token || !auth.expires_in || !auth.user_id) {
-    return null
+const setCookie = (api: ReactApi, auth: any): { name: string, value: object, expires: Date } | undefined => {
+  if (auth.access_token === undefined || auth.expires_in === undefined || auth.user_id === undefined) {
+    return
   }
 
   const name = generateCookieName(api)
-  if (!name) {
-    return null
+  if (name === undefined || name.length === 0) {
+    return
   }
 
   const value = {
@@ -83,52 +93,48 @@ const setCookie = (api, auth) => {
   return { name, value, expires }
 }
 
-class Loader extends React.Component {
-  constructor (props) {
+export class Loader extends React.Component<_LoaderProps, _LoaderState, any> {
+  constructor (props: _LoaderProps) {
     super(props)
 
     this.state = {
+      listener: (event) => {
+        const { data: { auth } } = event
+        const { api, internalApi } = this.props
+        internalApi.log('Received auth via window message', auth)
+
+        internalApi.setAuth(auth)
+        const userId = api.getUserId()
+        this.setState({ userId })
+
+        const accessToken = api.getAccessToken()
+        if (accessToken.length > 0 && accessToken === auth.access_token) {
+          const cookie = setCookie(api, auth)
+          if (cookie !== undefined) {
+            internalApi.log('Set cookie %s until %s', cookie.name, cookie.expires)
+          }
+        }
+      },
       src: '',
       userId: 0
     }
-
-    this.onWindowMessage = (e) => {
-      if (!e || !e.data || !e.data.auth) {
-        return
-      }
-      const auth = e.data.auth
-      const { api, internalApi } = this.props
-      internalApi.log('Received auth via window message', auth)
-
-      internalApi.setAuth(auth)
-      const userId = api.getUserId()
-      this.setState({ userId })
-
-      const accessToken = api.getAccessToken()
-      if (accessToken && accessToken === auth.access_token) {
-        const cookie = setCookie(api, auth)
-        if (cookie !== null) {
-          internalApi.log('Set cookie %s until %s', cookie.name, cookie.expires)
-        }
-      }
-    }
   }
 
-  componentDidMount () {
-    /* istanbul ignore else */
+  componentDidMount (): void {
     if (typeof window.addEventListener === 'function') {
-      window.addEventListener('message', this.onWindowMessage)
+      window.addEventListener('message', this.state.listener)
     }
 
     const { api, internalApi } = this.props
     const cookie = getCookie(api)
-    if (cookie === null) {
+    if (cookie === undefined) {
       internalApi.log('Skipped authentication due to bad config or no cookie')
       internalApi.setAuth({ state: api.getUniqueId() })
       return
     }
 
-    if (cookie.value) {
+    const value = cookie.value
+    if (value !== undefined) {
       internalApi.log('Restored auth from cookie', cookie)
 
       internalApi.setAuth({
@@ -142,19 +148,18 @@ class Loader extends React.Component {
     }
 
     const authorizeUrl = buildAuthorizeUrl(api)
-    if (authorizeUrl) {
+    if (authorizeUrl !== undefined) {
       this.setState({ src: authorizeUrl })
     }
   }
 
-  componentWillUnmount () {
-    /* istanbul ignore else */
+  componentWillUnmount (): void {
     if (typeof window.removeEventListener === 'function') {
-      window.removeEventListener('message', this.onWindowMessage)
+      window.removeEventListener('message', this.state.listener)
     }
   }
 
-  render () {
+  render (): React.ReactElement {
     return (
       <iframe
         className='ApiLoader' data-user-id={this.state.userId}
@@ -164,5 +169,3 @@ class Loader extends React.Component {
     )
   }
 }
-
-export default Loader

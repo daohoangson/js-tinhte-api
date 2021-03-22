@@ -1,36 +1,38 @@
+import React from 'react'
 import ssrPrepass from 'react-ssr-prepass'
 import { standardizeReqOptions } from 'tinhte-api'
+import { FetchOptions } from 'tinhte-api/src/fetches/types'
+import { ReactApi, ReactApiData, ReactApiInternal, ReactApiPreFetch } from '../types'
 
-const fetchApiDataForProvider = (api, internalApi, rootElement) => {
-  const queue = []
-  const reasons = {}
+export async function fetchApiDataForProvider (api: ReactApi, internalApi: ReactApiInternal, rootElement: React.ReactNode): Promise<ReactApiData> {
+  const queue: FetchOptions[] = []
+  const reasons: Record<string, string> = {}
 
-  return ssrPrepass(rootElement, (element) => {
-    if (element && element.type && typeof element.type.apiPreFetch === 'function') {
-      element.type.apiPreFetch(api, element, queue)
+  await ssrPrepass(rootElement, (element: any, instance) => {
+    if (element.type !== undefined) {
+      const { apiPreFetch } = element.type as { apiPreFetch?: ReactApiPreFetch }
+      if (typeof apiPreFetch === 'function') {
+        apiPreFetch(api, instance ?? element, queue)
+      }
     }
   })
-    .then(() => {
-      internalApi.log('fetchApiDataForProvider queue.length = %d', queue.length)
 
-      if (queue.length === 0) {
-        return {}
-      }
+  internalApi.log('fetchApiDataForProvider queue.length = %d', queue.length)
 
-      const fetches = () => queue.forEach(
-        (fetch, i) => api.fetchOne(fetch)
-          .catch((reason) => {
-            const uniqueId = standardizeReqOptions(fetch)
-            internalApi.log('fetchApiDataForProvider queue[%d] has been rejected (%s, %s)', i, uniqueId, reason)
-            reasons[uniqueId] = reason instanceof Error ? reason.message : reason
-          })
-      )
-      return api.fetchMultiple(fetches)
-    })
-    .then((json) => {
-      const jobs = json && json.jobs ? json.jobs : {}
-      return { jobs, reasons }
-    })
+  if (queue.length === 0) {
+    return { jobs: {}, reasons }
+  }
+
+  const json = await api.fetchMultiple(() => {
+    for (let i = 0; i < queue.length; i++) {
+      api.fetchOne(queue[i])
+        .catch((reason) => {
+          const uniqueId = standardizeReqOptions(fetch as any)
+          internalApi.log('fetchApiDataForProvider queue[%d] has been rejected (%s, %s)', i, uniqueId, reason)
+          reasons[uniqueId] = reason instanceof Error ? reason.message : typeof reason === 'string' ? reason : JSON.stringify(reason)
+        })
+    }
+  })
+
+  return { jobs: json?.jobs, reasons }
 }
-
-export default fetchApiDataForProvider

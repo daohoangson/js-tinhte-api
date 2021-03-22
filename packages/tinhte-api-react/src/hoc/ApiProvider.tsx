@@ -1,45 +1,45 @@
 import React from 'react'
 
-import errors from '../helpers/errors'
+import { ReactApi, ReactApiContext, ReactApiInternal, ReactApiProviderProps } from '../types'
 import ApiContext from './ApiContext'
 
-const hocApiProvider = (Component, api, internalApi) => {
-  if (!Component || !api || !internalApi) {
-    throw new Error(errors.API_PROVIDER.REQUIRED_PARAMS_MISSING)
-  }
+interface _ApiProviderState {
+  apiContext: ReactApiContext
+}
 
-  class ApiProvider extends React.Component {
-    constructor (props) {
+export const ProviderHoc = <P extends object>(Component: React.ComponentType<P>, api: ReactApi, internalApi: ReactApiInternal): React.ComponentType<P & ReactApiProviderProps> =>
+  class ApiProvider extends React.Component<P & ReactApiProviderProps, _ApiProviderState> {
+    constructor (props: P & ReactApiProviderProps) {
       super(props)
 
-      if (props.apiConfig) {
-        api.updateConfig(props.apiConfig)
+      const { apiConfig, apiData } = props
+      if (apiConfig != null) {
+        api.updateConfig(apiConfig)
       }
 
-      const apiData = this.props.apiData || {}
-      const apiContext = { api, apiData, internalApi }
-      this.state = { apiContext }
+      this.state = {
+        apiContext: {
+          api,
+          apiData: apiData ?? {},
+          internalApi
+        }
+      }
     }
 
-    componentDidMount () {
+    componentDidMount (): void {
       internalApi.setProviderMounted()
     }
 
-    render () {
-      const props = { ...this.props }
+    render (): React.ReactElement {
+      const props: any = { ...this.props }
       delete props.apiConfig
       delete props.apiData
 
       return (
-        <ApiContext.Provider className='ApiProvider' value={this.state.apiContext}>
+        <ApiContext.Provider value={this.state.apiContext}>
           <Component {...props} />
           {api.getAccessToken() === '' && <internalApi.LoaderComponent />}
         </ApiContext.Provider>
       )
     }
   }
-
-  return ApiProvider
-}
-
-export default hocApiProvider

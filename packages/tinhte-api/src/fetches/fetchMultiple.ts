@@ -2,7 +2,7 @@ import errors from '../helpers/errors'
 import standardizeReqOptions, { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
 import { ApiInternal } from '../types'
 import { Batches, BatchReject, BatchRequest, BatchResolve } from './batch'
-import { FetchHeaders, FetchJson, FetchMultiple, FetchMultipleOptions, FetchParams } from './types'
+import { FetchHeaders, FetchJson, FetchMultiple, FetchMultipleJob, FetchMultipleJobs, FetchMultipleOptions, FetchParams } from './types'
 
 interface _Context {
   batchHeaders: FetchHeaders
@@ -33,21 +33,8 @@ interface _Request {
   uri: string
 }
 
-interface _ResponseJob {
-  _job_error?: string
-  _job_result?: string
-  _req?: {
-    method: string
-    uri: string
-  }
-}
-
-interface _ResponseJobs {
-  [key: string]: _ResponseJob
-}
-
 interface _ResponseJson {
-  jobs?: _ResponseJobs
+  jobs?: FetchMultipleJobs
   _handled?: number
 }
 
@@ -107,7 +94,7 @@ const fetchMultipleInit = (fetchJson: FetchJson, batch: Batches, internalApi: Ap
     }
   }
 
-  const normalizeJobs = (jobs: _ResponseJobs, context: _Context): void => {
+  const normalizeJobs = (jobs: FetchMultipleJobs, context: _Context): void => {
     const { handlers, reqIds } = context
 
     for (const jobId in jobs) {
@@ -125,7 +112,7 @@ const fetchMultipleInit = (fetchJson: FetchJson, batch: Batches, internalApi: Ap
     }
   }
 
-  const processJob = (job: _ResponseJob | undefined, reqId: string, context: _Context): _ProcessJobResult | null => {
+  const processJob = (job: FetchMultipleJob | undefined, reqId: string, context: _Context): _ProcessJobResult | null => {
     const { batchOptions, handlers } = context
     if (batchOptions.triggerHandlers !== true) {
       return null

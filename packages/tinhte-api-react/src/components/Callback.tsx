@@ -1,29 +1,25 @@
 import React from 'react'
 import { parse } from 'querystring'
+import { ReactApi, ReactApiInternal } from '../types'
 
-const processCallback = (log) => {
-  /* istanbul ignore else */
-  if (!process.browser) {
-    return false
-  }
+export function processCallback (log?: (...args: any[]) => void): boolean {
+  const hash = window.location?.hash?.replace(/^#/, '') ?? ''
+  const auth = parse(hash)
 
-  const auth = window.location.hash
-    ? parse(window.location.hash.replace(/^#/, ''))
-    : false
-  if (!auth || !auth.state) {
-    log && log('Couldn\'t extract state from %s', window.location.href)
+  if (typeof auth.state !== 'string') {
+    log?.call(window, 'Couldn\'t extract state from %s', window.location?.href ?? 'N/A')
     return false
   }
 
   window.top.postMessage({ auth }, window.location.origin)
-  log && log('Forwarded auth to window.top')
+  log?.call(window, 'Forwarded auth to window.top')
 
   return true
 }
 
-const Callback = ({ api, internalApi }) => {
-  const log = api.getDebug() ? internalApi.log : null
-  const success = processCallback(log)
+export const Callback = (props: { api: ReactApi, internalApi: ReactApiInternal }): React.ReactElement => {
+  const { api, internalApi } = props
+  const success = processCallback(internalApi.log)
 
   if (!api.getDebug()) {
     return <span className='ApiCallback' />
@@ -31,7 +27,3 @@ const Callback = ({ api, internalApi }) => {
 
   return <span className='ApiCallback' data-success={success} />
 }
-
-export { processCallback }
-
-export default Callback
