@@ -1,6 +1,4 @@
-import ApiConsumer from './ApiConsumer'
-import ApiProvider from './ApiProvider'
+import { ApiConsumer } from './ApiConsumer'
+import { ApiProvider } from './ApiProvider'
 
-const hoc = { ApiConsumer, ApiProvider }
-
-export default hoc
+export const apiHoc = { ApiConsumer, ApiProvider }

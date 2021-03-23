@@ -156,7 +156,7 @@ const executeFetches = async (apiConsumer: React.Component<_ApiConsumerPropsInte
   ))
 }
 
-export const ConsumerHoc: ReactApiConsumerHoc = <P extends object>(Component: React.ComponentType<P> & ReactApiConsumerComponent) => {
+export const ApiConsumer: ReactApiConsumerHoc = <P extends object>(Component: React.ComponentType<P> & ReactApiConsumerComponent) => {
   class ApiConsumer extends React.Component<P & _ApiConsumerPropsInternal, _ApiConsumerState> {
     constructor (props: P & _ApiConsumerPropsInternal) {
       super(props)

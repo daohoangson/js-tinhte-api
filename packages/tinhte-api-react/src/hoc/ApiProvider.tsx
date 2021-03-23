@@ -7,7 +7,7 @@ interface _ApiProviderState {
   apiContext: ReactApiContext
 }
 
-export const ProviderHoc = <P extends object>(Component: React.ComponentType<P>, api: ReactApi, internalApi: ReactApiInternal): React.ComponentType<P & ReactApiProviderProps> =>
+export const ApiProvider = <P extends object>(Component: React.ComponentType<P>, api: ReactApi, internalApi: ReactApiInternal): React.ComponentType<P & ReactApiProviderProps> =>
   class ApiProvider extends React.Component<P & ReactApiProviderProps, _ApiProviderState> {
     constructor (props: P & ReactApiProviderProps) {
       super(props)
