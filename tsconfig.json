@@ -16,6 +16,7 @@
       "tinhte-api-react": [
         "tinhte-api-react/src"
       ],
-    }
+    },
+    "rootDir": "."
   }
 }

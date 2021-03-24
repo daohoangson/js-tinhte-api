@@ -6,6 +6,5 @@
   ],
   "compilerOptions": {
     "jsx": "react",
-    "rootDir": "src"
   }
 }

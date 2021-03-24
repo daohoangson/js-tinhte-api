@@ -1,7 +1,8 @@
 {
-    "editor.detectIndentation": false,
-    "editor.insertSpaces": true,
-    "editor.tabSize": 2,
-    "javascript.validate.enable": false,
-    "eslint.enable": false
+  "editor.detectIndentation": false,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "javascript.validate.enable": false,
+  "eslint.enable": false,
+  "editor.formatOnSave": false
 }
