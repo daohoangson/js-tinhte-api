@@ -92,11 +92,11 @@ const apiFactory = (config: ApiConfig = {}): Api => {
     post: async (input) => await fetchShortcut('POST', input),
     put: async (input) => await fetchShortcut('PUT', input),
 
-    login: (clientSecret, username, password) =>
-      grantTypePassword(api, internalApi, clientSecret, username, password),
+    login: async (clientSecret, username, password) =>
+      await grantTypePassword(api, internalApi, clientSecret, username, password),
 
-    refreshToken: (clientSecret, refreshToken) =>
-      grantTypeRefreshToken(api, internalApi, clientSecret, refreshToken),
+    refreshToken: async (clientSecret, refreshToken) =>
+      await grantTypeRefreshToken(api, internalApi, clientSecret, refreshToken),
 
     clone: (config) => {
       const clonedConfig: ApiConfig = {

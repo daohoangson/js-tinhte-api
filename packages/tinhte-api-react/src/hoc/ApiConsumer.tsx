@@ -22,6 +22,7 @@ const createFetchObject = (api: ReactApi, element: React.Component, fetch: React
   }
 
   if (
+    (fetch === null) ||
     typeof fetch !== 'object' ||
     typeof fetch.body !== 'undefined' ||
     typeof fetch.parseJson !== 'undefined'
