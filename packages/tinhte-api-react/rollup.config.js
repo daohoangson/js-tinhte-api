@@ -1,3 +1,4 @@
+import commonjs from '@rollup/plugin-commonjs'
 import nodePolyfills from 'rollup-plugin-node-polyfills'
 import resolve from '@rollup/plugin-node-resolve'
 import ts from 'rollup-plugin-ts'
@@ -23,6 +24,7 @@ export default [
       sourcemap: true
     },
     plugins: [
+      commonjs(),
       nodePolyfills(),
       ts(),
       resolve()
@@ -52,7 +54,7 @@ export default [
       sourcemap: true
     },
     plugins: [
-      ts({ tsconfig: { declaration: true } }),
+      ts({ tsconfig: resolvedConfig => ({ ...resolvedConfig, declaration: true }) }),
       resolve({ preferBuiltins: true })
     ]
   }
