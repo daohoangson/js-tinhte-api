@@ -6,8 +6,8 @@ import { Callback } from './components/Callback'
 import { Loader } from './components/Loader'
 import helperCallbacksInit from './helpers/callbacks'
 import { fetchApiDataForProvider } from './helpers/fetchApiDataForProvider'
-import { ConsumerHoc } from './hoc/ApiConsumer'
-import { ProviderHoc } from './hoc/ApiProvider'
+import { ApiConsumer } from './hoc/ApiConsumer'
+import { ApiProvider } from './hoc/ApiProvider'
 import { ReactApi, ReactApiInternal } from './types'
 
 const reactFactory = (apiCore: Api): ReactApi => {
@@ -83,6 +83,14 @@ const reactFactory = (apiCore: Api): ReactApi => {
     fetchApiDataForProvider: async (rootElement) =>
       await fetchApiDataForProvider(api, internalApi, rootElement),
 
+    getInternalApi: () => {
+      if (apiCore.getDebug()) {
+        return internalApi
+      } else {
+        throw new Error('internalApi is only available in debug mode')
+      }
+    },
+
     onAuthenticated: (callback) =>
       callbacks.add(callbackListForAuth, callback, api.hasAuth()),
 
@@ -91,9 +99,9 @@ const reactFactory = (apiCore: Api): ReactApi => {
 
     CallbackComponent: () => <Callback api={api} internalApi={internalApi} />,
 
-    ConsumerHoc,
+    ConsumerHoc: ApiConsumer,
 
-    ProviderHoc: (Component) => ProviderHoc(Component, api, internalApi)
+    ProviderHoc: (Component) => ApiProvider(Component, api, internalApi)
   }
 
   const callbackListForAuth = { name: 'auth', items: [] }

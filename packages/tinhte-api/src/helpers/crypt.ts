@@ -3,7 +3,7 @@ import CryptoES from 'crypto-es'
 export const algos = ['aes128']
 const aes128EcbPcks7 = { mode: CryptoES.mode.ECB, padding: CryptoES.pad.Pkcs7 }
 
-export function encrypt(algo: string, data: string, key: string): string {
+export function encrypt (algo: string, data: string, key: string): string {
   if (algo !== algos[0]) {
     throw new Error('Unsupported algo: ' + algo)
   }
@@ -15,7 +15,7 @@ export function encrypt(algo: string, data: string, key: string): string {
   return encoded
 }
 
-export function decrypt(algo: string, data: string, key: string): string {
+export function decrypt (algo: string, data: string, key: string): string {
   if (algo !== algos[0]) {
     throw new Error('Unsupported algo: ' + algo)
   }
@@ -29,6 +29,6 @@ export function decrypt(algo: string, data: string, key: string): string {
   return utf8
 }
 
-export function hashMd5(data: string): string {
+export function hashMd5 (data: string): string {
   return CryptoES.MD5(data).toString()
 }

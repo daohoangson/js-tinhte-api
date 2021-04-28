@@ -37,14 +37,13 @@ describe('api', () => {
     it('exposes internal (debug=true)', () => {
       const debug = true
       const api = apiFactory({ debug })
-      expect(api.getInternalApi).a('function')
+      expect(() => api.getInternalApi()).not.throws()
     })
 
     it('doesn\'t exposes internal (debug=fase)', () => {
       const debug = false
       const api = apiFactory({ debug })
-      // eslint-disable-next-line
-      expect(api.getInternalApi).is.undefined
+      expect(() => api.getInternalApi()).throws()
     })
   })
 

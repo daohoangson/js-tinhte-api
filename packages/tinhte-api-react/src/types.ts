@@ -11,6 +11,8 @@ export type ReactApi = Api & {
 
   fetchApiDataForProvider: (rootElement: React.ReactNode) => Promise<ReactApiData>
 
+  getInternalApi: () => ReactApiInternal
+
   onAuthenticated: (callback: () => any) => void
 
   onProviderMounted: (callback: () => any) => void
@@ -43,9 +45,9 @@ export interface ReactApiConsumerProps {
 }
 
 export interface ReactApiContext {
-  api: ReactApi
+  api?: ReactApi
   apiData: ReactApiData
-  internalApi: ReactApiInternal
+  internalApi?: ReactApiInternal
 }
 
 export interface ReactApiData {

@@ -43,7 +43,7 @@ const useApiData = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _Api
 
   const { props, state: { fetchedData } } = apiConsumer
   const { apiContext: { api, apiData: { jobs, reasons = {} }, internalApi } } = props
-  if (jobs === undefined) {
+  if (api === undefined || jobs === undefined) {
     return
   }
 
@@ -77,7 +77,7 @@ const useApiData = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _Api
     }
   }
 
-  internalApi.log('useApiData -> fetchedData (keys): ', Object.keys(fetchedData))
+  internalApi?.log('useApiData -> fetchedData (keys): ', Object.keys(fetchedData))
 }
 
 const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _ApiConsumerState>, eventName: 'onAuthenticated' | 'onProviderMounted', fetches?: Record<string, ReactApiConsumerFetch>, onFetched?: () => void): _ApiConsumerCancelFetch | undefined => {
@@ -90,11 +90,15 @@ const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsIn
 
   const { props: { apiContext } } = apiConsumer
   const { api, internalApi } = apiContext
+  if (api === undefined) {
+    notify()
+    return
+  }
 
   let isCancelled = false
   api[eventName](async () => {
     if (isCancelled) {
-      internalApi.log('executeFetches has been cancelled')
+      internalApi?.log('executeFetches has been cancelled')
       return
     }
 
@@ -115,7 +119,7 @@ const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsIn
       return
     }
 
-    internalApi.log('executeFetches...', neededKeys)
+    internalApi?.log('executeFetches...', neededKeys)
     await executeFetches(apiConsumer, api, neededFetches)
     notify()
   })
@@ -133,7 +137,7 @@ const executeFetches = async (apiConsumer: React.Component<_ApiConsumerPropsInte
   for (const key in fetches) {
     const fetch = createFetchObject(api, apiConsumer, fetches[key])
     if (fetch == null) {
-      return
+      continue
     }
 
     const { error, success } = fetch
