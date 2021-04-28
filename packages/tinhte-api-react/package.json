@@ -36,6 +36,7 @@
     "@web/dev-server-rollup": "^0.3.2",
     "@web/test-runner": "^0.12.17",
     "@web/test-runner-puppeteer": "^0.9.3",
+    "eslint": "^7.14.0",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "rollup": "^2.41.5",
