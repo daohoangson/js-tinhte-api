@@ -17,12 +17,13 @@ interface _ApiConsumerState {
 }
 
 const createFetchObject = (api: ReactApi, element: React.Component, fetch: ReactApiConsumerFetch): ReactApiConsumerFetchOptions | undefined => {
-  if (typeof fetch === 'function') {
+  while (typeof fetch === 'function') {
     fetch = fetch(api, element.props)
   }
 
   if (
-    (fetch === null) ||
+    fetch === null ||
+    fetch === undefined ||
     typeof fetch !== 'object' ||
     typeof fetch.body !== 'undefined' ||
     typeof fetch.parseJson !== 'undefined'
@@ -55,7 +56,7 @@ const useApiData = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _Api
     }
 
     const fetch = createFetchObject(api, apiConsumer, fetches[key])
-    if (fetch == null) {
+    if (fetch === undefined) {
       continue
     }
 
@@ -84,7 +85,7 @@ const useApiData = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _Api
 const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _ApiConsumerState>, eventName: 'onAuthenticated' | 'onProviderMounted', fetches?: Record<string, ReactApiConsumerFetch>, onFetched?: () => void): _ApiConsumerCancelFetch | undefined => {
   const notify = (): void => onFetched?.call(apiConsumer)
 
-  if (fetches == null) {
+  if (fetches === undefined) {
     notify()
     return
   }
@@ -137,7 +138,7 @@ const executeFetches = async (apiConsumer: React.Component<_ApiConsumerPropsInte
 
   for (const key in fetches) {
     const fetch = createFetchObject(api, apiConsumer, fetches[key])
-    if (fetch == null) {
+    if (fetch === undefined) {
       continue
     }
 
@@ -213,7 +214,7 @@ export const ApiConsumer: ReactApiConsumerHoc = <P extends object>(Component: Re
 
     for (const key in apiFetches) {
       const fetch = createFetchObject(api, element, apiFetches[key])
-      if (fetch == null) {
+      if (fetch === undefined) {
         return
       }
 

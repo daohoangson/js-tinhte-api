@@ -32,12 +32,12 @@ export interface ReactApiConsumerComponent {
   apiFetchesWithAuth?: Record<string, ReactApiConsumerFetch>
 }
 
-export type ReactApiConsumerFetch = ReactApiConsumerFetchOptions | ReactApiConsumerFetchOptionsBuilder | undefined
+export type ReactApiConsumerFetch = ReactApiConsumerFetchOptions | ReactApiConsumerFetchOptionsBuilder | null | undefined
 export type ReactApiConsumerFetchOptions = FetchOptions & {
   error?: (reason?: any) => any
   success?: (json: object) => any
 }
-export type ReactApiConsumerFetchOptionsBuilder = (api: Api, props: object) => ReactApiConsumerFetchOptions | undefined
+export type ReactApiConsumerFetchOptionsBuilder = (api: Api, props: object) => ReactApiConsumerFetchOptions | null | undefined
 
 export interface ReactApiConsumerProps {
   onFetched?: () => void

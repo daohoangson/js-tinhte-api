@@ -131,7 +131,7 @@ const fetchMultipleInit = (fetchJson: FetchJson, batch: Batches, internalApi: Ap
     }
 
     if (job !== undefined) {
-      if ((job._req == null) ||
+      if ((job._req === undefined) ||
         job._req.method !== handler.method ||
         job._req.uri !== handler.uri) {
         return reject(new Error(errors.FETCH_MULTIPLE.MISMATCHED))
@@ -178,7 +178,7 @@ const fetchMultipleInit = (fetchJson: FetchJson, batch: Batches, internalApi: Ap
     return await new Promise<any>((resolve, reject) => {
       if (other != null) {
         return other.enqueue(resolve, reject)
-      } else if (current == null) {
+      } else if (current === undefined) {
         return reject(new Error(errors.FETCH_MULTIPLE.NO_BATCH))
       }
 
