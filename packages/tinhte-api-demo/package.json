@@ -6,8 +6,6 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "ts-standard",
-    "lint:fix": "ts-standard --fix",
     "prestart": "npm run build",
     "start": "next start"
   },
