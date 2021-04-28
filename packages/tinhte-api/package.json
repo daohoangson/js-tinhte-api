@@ -2,10 +2,10 @@
   "name": "tinhte-api",
   "version": "5.0.0",
   "description": "tinhte-api library",
-  "browser": "dist/tinhte-api.umd.js",
   "main": "dist/tinhte-api.cjs.js",
   "module": "dist/tinhte-api.js",
   "types": "dist/tinhte-api.d.ts",
+  "browser": "dist/tinhte-api.umd.js",
   "files": [
     "dist"
   ],
