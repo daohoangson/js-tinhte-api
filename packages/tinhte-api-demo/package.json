@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "next dev",     
+    "lint": "standard",
+    "lint:fix": "standard --fix",
     "prestart": "npm run build",
     "start": "next start"
   },
@@ -19,7 +21,7 @@
     "tinhte-api-react": "^5.0.0"
   },
   "devDependencies": {
-    "ts-standard": "^10.0.0"
+    "standard": "^14.3.1"
   },
   "author": "Dao Hoang Son",
   "homepage": "https://tinhte.vn",
