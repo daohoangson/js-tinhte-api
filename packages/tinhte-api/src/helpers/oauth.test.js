@@ -2,7 +2,9 @@ import { expect } from '@esm-bundle/chai'
 
 import apiFactory from '../factory'
 
-describe('helpers', () => {
+describe('helpers', function () {
+  this.timeout(10000)
+
   describe('oauth/token', () => {
     const apiRoot = 'https://xfrocks.com/api/'
     const clientId = 'gljf4391k3'
