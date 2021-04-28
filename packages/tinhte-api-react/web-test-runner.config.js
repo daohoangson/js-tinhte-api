@@ -54,7 +54,7 @@ module.exports = {
   ],
   coverageConfig: {
     include: [
-      'src/**/*.{js,jsx}'
+      'src/**/*.{ts,tsx}'
     ]
   }
 }
