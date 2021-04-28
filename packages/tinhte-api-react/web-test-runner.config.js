@@ -1,5 +1,6 @@
 const rollupCommonjs = require('@rollup/plugin-commonjs')
 const rollupNodePolyfills = require('rollup-plugin-node-polyfills')
+const rollupTs = require('rollup-plugin-ts')
 const { esbuildPlugin } = require('@web/dev-server-esbuild')
 const { fromRollup } = require('@web/dev-server-rollup')
 const { puppeteerLauncher } = require('@web/test-runner-puppeteer')
@@ -27,11 +28,15 @@ const patcher = fromRollup(() => ({
 
 const commonjs = fromRollup(rollupCommonjs)
 const nodePolyfills = fromRollup(rollupNodePolyfills)
+const ts = fromRollup(rollupTs)
 
 module.exports = {
   files: [
     'src/**/*.test.{js,jsx}'
   ],
+  mimeTypes: {
+    '**/*.{jsx,ts,tsx}': 'js'
+  },
   nodeResolve: true,
   plugins: [
     patcher(),
@@ -40,7 +45,8 @@ module.exports = {
     esbuildPlugin({
       jsx: true
     }),
-    nodePolyfills()
+    nodePolyfills(),
+    ts()
   ],
   rootDir: '../..',
   browsers: [
