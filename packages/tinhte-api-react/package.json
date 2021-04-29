@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api-react",
-  "version": "6.0.0-alpha.3",
+  "version": "6.0.0-alpha.4",
   "description": "tinhte-api React component",
   "main": "dist/tinhte-api-react.cjs.js",
   "module": "dist/tinhte-api-react.js",
