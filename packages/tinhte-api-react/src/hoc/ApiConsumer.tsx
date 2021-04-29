@@ -25,8 +25,8 @@ const createFetchObject = (api: ReactApi, element: React.Component, fetch: React
     fetch === null ||
     fetch === undefined ||
     typeof fetch !== 'object' ||
-    typeof fetch.body !== 'undefined' ||
-    typeof fetch.parseJson !== 'undefined'
+    (fetch.body !== null && fetch.body !== undefined) ||
+    fetch.parseJson !== undefined
   ) {
     return
   }
@@ -51,7 +51,7 @@ const useApiData = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _Api
 
   const existing = props as Record<string, any>
   for (const key of fetchKeys) {
-    if (typeof existing[key] !== 'undefined') {
+    if (existing[key] !== undefined) {
       continue
     }
 
@@ -109,8 +109,7 @@ const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsIn
     const neededFetches: Record<string, ReactApiConsumerFetch> = {}
     const existing = props as Record<string, any>
     for (const key in fetches) {
-      if (typeof existing[key] === 'undefined' &&
-        typeof fetchedData[key] === 'undefined') {
+      if (existing[key] === undefined && fetchedData[key] === undefined) {
         neededFetches[key] = fetches[key]
       }
     }
