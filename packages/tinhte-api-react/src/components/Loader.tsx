@@ -21,7 +21,7 @@ const buildAuthorizeUrl = (api: ReactApi): string | undefined => {
   }
 
   const encodedUniqueId = encodeURIComponent(api.getUniqueId())
-  const callbackFullUrl = callbackUrl.charAt(0) === '/' ? window.location.origin + callbackUrl : callbackUrl
+  const callbackFullUrl = callbackUrl.charAt(0) === '/' ? ((window?.location?.origin ?? '') + callbackUrl) : callbackUrl
   const guestRedirectUri = `${callbackFullUrl}#user_id=0&state=${encodedUniqueId}`
   const redirectUri = callbackFullUrl
 
@@ -121,7 +121,7 @@ export class Loader extends React.Component<_LoaderProps, _LoaderState, any> {
   }
 
   componentDidMount (): void {
-    if (typeof window.addEventListener === 'function') {
+    if (typeof window?.addEventListener === 'function') {
       window.addEventListener('message', this.state.listener)
     }
 
@@ -154,7 +154,7 @@ export class Loader extends React.Component<_LoaderProps, _LoaderState, any> {
   }
 
   componentWillUnmount (): void {
-    if (typeof window.removeEventListener === 'function') {
+    if (typeof window?.removeEventListener === 'function') {
       window.removeEventListener('message', this.state.listener)
     }
   }
