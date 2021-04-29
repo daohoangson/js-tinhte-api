@@ -1,4 +1,4 @@
-import CryptoES from 'crypto-es'
+import CryptoES from 'crypto-js'
 
 export const algos = ['aes128']
 const aes128EcbPcks7 = { mode: CryptoES.mode.ECB, padding: CryptoES.pad.Pkcs7 }
