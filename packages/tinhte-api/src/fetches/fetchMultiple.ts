@@ -176,7 +176,7 @@ const fetchMultipleInit = (fetchJson: FetchJson, batch: Batches, internalApi: Ap
     reset?.call(this)
 
     return await new Promise<any>((resolve, reject) => {
-      if (other != null) {
+      if (other !== undefined) {
         return other.enqueue(resolve, reject)
       } else if (current === undefined) {
         return reject(new Error(errors.FETCH_MULTIPLE.NO_BATCH))

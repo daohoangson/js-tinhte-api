@@ -43,7 +43,7 @@ const batchFactory = (): Batches => {
 
   const batches: Batches = {
     init: () => {
-      if (current != null) {
+      if (current !== null) {
         return { other: current }
       }
 

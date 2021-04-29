@@ -44,7 +44,7 @@ const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
 
   const buildUrl = (options: StandardizedFetchOptions): string => {
     let url = options.uri
-    url = (url.match(/^https?:\/\//) != null) ? url : `${api.getApiRoot()}?${url}`
+    url = (url.match(/^https?:\/\//) !== null) ? url : `${api.getApiRoot()}?${url}`
 
     const urlQueryParts = buildUrlQueryParts(options)
     if (urlQueryParts.length > 0) {

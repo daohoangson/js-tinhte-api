@@ -13,7 +13,7 @@ export const ApiProvider = <P extends object>(Component: React.ComponentType<P>,
       super(props)
 
       const { apiConfig, apiData } = props
-      if (apiConfig != null) {
+      if (apiConfig !== undefined) {
         api.updateConfig(apiConfig)
       }
 
