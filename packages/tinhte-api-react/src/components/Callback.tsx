@@ -3,15 +3,15 @@ import { parse } from 'querystring'
 import { ReactApi, ReactApiInternal } from '../types'
 
 export function processCallback (log?: (...args: any[]) => void): boolean {
-  const hash = window.location?.hash?.replace(/^#/, '') ?? ''
+  const hash = window?.location?.hash?.replace(/^#/, '') ?? ''
   const auth = parse(hash)
 
   if (typeof auth.state !== 'string') {
-    log?.call(window, 'Couldn\'t extract state from %s', window.location?.href ?? 'N/A')
+    log?.call(window, 'Couldn\'t extract state from %s', window?.location?.href ?? 'N/A')
     return false
   }
 
-  window.top.postMessage({ auth }, window.location.origin)
+  window?.top?.postMessage({ auth }, window?.location?.origin)
   log?.call(window, 'Forwarded auth to window.top')
 
   return true
