@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api",
-  "version": "6.0.0-alpha.1",
+  "version": "6.0.0-alpha.2",
   "description": "tinhte-api library",
   "main": "dist/tinhte-api.cjs.js",
   "module": "dist/tinhte-api.js",
