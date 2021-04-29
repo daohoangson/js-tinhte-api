@@ -11,7 +11,6 @@
     "pretest": "npm run build",
     "test": "lerna run test:coverage",
     "clean": "lerna clean",
-    "prepublish": "npm run clean && npm run build",
     "publish": "lerna publish --concurrency=1 --no-push"
   }
 }
