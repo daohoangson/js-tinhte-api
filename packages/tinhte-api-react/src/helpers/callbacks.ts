@@ -62,39 +62,38 @@ export default (api: ReactApi, internalApi: ReactApiInternal): Callbacks => {
             callback()
           }
           internalApi.log('Triggered %d callbacks', items.length)
-
-          items.length = 0
         },
         options
       ).catch(() => [])
     },
 
     fetchList: async (list) => {
-      const { items } = list
-      const callbackCount = items.length
+      const items = [...list.items]
+      list.items.length = 0
 
       const promise = new Promise<number>((resolve) => {
         for (const callback of items) {
           sharedItems.push(callback)
         }
-        sharedResolves.push(() => resolve(callbackCount))
+        sharedResolves.push(() => resolve(items.length))
+        const expectedLength = sharedItems.length
 
-        const sharedItemsLength = sharedItems.length
         waitABitThen(async () => {
-          if (sharedItems.length !== sharedItemsLength) {
+          const snapshotItems = [...sharedItems]
+          const snapshotResolves = [...sharedResolves]
+          if (snapshotItems.length !== expectedLength) {
             // another invocation has altered the shared queue,
             // stop running now and let that handle the fetch
             return
           }
-
-          await callbacks.fetchItems(sharedItems)
-          for (const callback of sharedResolves) {
-            callback()
-          }
+          sharedItems.length = 0
           sharedResolves.length = 0
-        })
 
-        items.length = 0
+          await callbacks.fetchItems(snapshotItems)
+          for (const sharedResolve of snapshotResolves) {
+            sharedResolve()
+          }
+        })
       })
 
       return await promise
