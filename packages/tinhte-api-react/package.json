@@ -22,7 +22,7 @@
     "tinhte-api": "^6.0.0-alpha.3"
   },
   "peerDependencies": {
-    "react": "*"
+    "react": ">=16.8 <17"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.13.10",

@@ -19,17 +19,20 @@ describe('components', () => {
       window.location.hash = ''
     })
 
-    it('renders error', () => {
+    it('renders error', (done) => {
       const debug = true
       const api = apiFactory({ debug })
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).contains('data-success="false"')
+        setTimeout(() => {
+          expect(node.innerHTML).contains('data-success="false"')
+          done()
+        }, 10)
       })
     })
 
-    it('renders success', () => {
+    it('renders success', (done) => {
       window.location.hash = '#state=yes'
 
       const debug = true
@@ -37,7 +40,10 @@ describe('components', () => {
       const ApiCallback = api.CallbackComponent
 
       render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).contains('data-success="true"')
+        setTimeout(() => {
+          expect(node.innerHTML).contains('data-success="true"')
+          done()
+        }, 10)
       })
     })
 
