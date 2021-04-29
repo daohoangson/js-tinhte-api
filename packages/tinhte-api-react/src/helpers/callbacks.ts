@@ -33,8 +33,10 @@ export default (api: ReactApi, internalApi: ReactApiInternal): Callbacks => {
       internalApi.log('Added new %s callback, total=%d', list.name, items.length)
 
       if (triggerNow) {
-        // eslint-disable-next-line
-        callbacks.fetchList(list)
+        callbacks.fetchList(list).then(
+          (_) => {},
+          () => { /* ignore errors */ }
+        )
       }
 
       return () => {
