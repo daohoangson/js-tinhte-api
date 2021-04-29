@@ -2,8 +2,7 @@ import { expect } from '@esm-bundle/chai'
 import React from 'react'
 import ReactDom from 'react-dom'
 
-import { apiFactory, apiHoc } from '..'
-import errors from '../helpers/errors'
+import { apiFactory } from '..'
 
 const { render, unmountComponentAtNode } = ReactDom
 
@@ -17,42 +16,6 @@ describe('hoc', () => {
 
     afterEach(() => {
       unmountComponentAtNode(node)
-    })
-
-    describe('required params', () => {
-      const testRequiredParam = (Component, api, internalApi) => {
-        const catched = []
-
-        try {
-          apiHoc.ApiProvider(Component, api, internalApi)
-        } catch (e) {
-          catched.push(e)
-        }
-
-        expect(catched.length).equals(1)
-        expect(catched[0].message).equals(errors.API_PROVIDER.REQUIRED_PARAMS_MISSING)
-      }
-
-      it('checks for Component', () => {
-        const Component = null
-        const api = {}
-        const internalApi = {}
-        testRequiredParam(Component, api, internalApi)
-      })
-
-      it('checks for api', () => {
-        const Component = () => 'foo'
-        const api = null
-        const internalApi = {}
-        testRequiredParam(Component, api, internalApi)
-      })
-
-      it('checks for internalApi', () => {
-        const Component = () => 'foo'
-        const api = {}
-        const internalApi = null
-        testRequiredParam(Component, api, internalApi)
-      })
     })
 
     it('swallows our props', () => {
@@ -143,7 +106,7 @@ describe('hoc', () => {
       )
       Child2.apiFetches = {
         test2a: { uri: 'index' },
-        test2b: { uri: 'navigation' },
+        test2b: { uri: 'index', params: { for: 'test2b' } },
         noop2: () => null
       }
       const C2 = api2.ConsumerHoc(Child2)

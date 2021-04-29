@@ -1,34 +1,52 @@
 import nodePolyfills from 'rollup-plugin-node-polyfills'
 import resolve from '@rollup/plugin-node-resolve'
-import commonjs from '@rollup/plugin-commonjs'
+import ts from 'rollup-plugin-ts'
 import pkg from './package.json'
+
+const input = 'src/index.ts'
+const external = Object.keys(pkg.dependencies)
 
 export default [
   {
-    input: 'src/index.js',
+    input,
     output: {
       name: 'TinhteApi',
       file: pkg.browser,
-      format: 'umd'
+      format: 'umd',
+      sourcemap: true
     },
     plugins: [
       nodePolyfills(),
-      resolve(),
-      commonjs()
+      ts(),
+      resolve()
     ]
   },
 
   {
-    input: 'src/index.js',
-    external: Object.keys(pkg.dependencies),
-    output: [
-      { file: pkg.main, format: 'cjs' },
-      { file: pkg.module, format: 'es' }
-    ],
+    input,
+    external,
+    output: {
+      file: pkg.main,
+      format: 'cjs',
+      sourcemap: true
+    },
     plugins: [
-      resolve({
-        preferBuiltins: true
-      })
+      ts(),
+      resolve({ preferBuiltins: true })
+    ]
+  },
+
+  {
+    input,
+    external,
+    output: {
+      file: pkg.module,
+      format: 'es',
+      sourcemap: true
+    },
+    plugins: [
+      ts({ tsconfig: { declaration: true } }),
+      resolve({ preferBuiltins: true })
     ]
   }
 ]

@@ -3,7 +3,6 @@ import React from 'react'
 import ReactDom from 'react-dom'
 
 import { apiFactory, apiHoc } from '..'
-import errors from '../helpers/errors'
 
 const { render, unmountComponentAtNode } = ReactDom
 
@@ -17,19 +16,6 @@ describe('hoc', () => {
 
     afterEach(() => {
       unmountComponentAtNode(node)
-    })
-
-    it('check for required param', () => {
-      const catched = []
-
-      try {
-        apiHoc.ApiConsumer()
-      } catch (e) {
-        catched.push(e)
-      }
-
-      expect(catched.length).equals(1)
-      expect(catched[0].message).equals(errors.API_CONSUMER.REQUIRED_PARAM_MISSING)
     })
 
     it('populates api', (done) => {

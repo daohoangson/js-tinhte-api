@@ -10,7 +10,7 @@
       "use": "@vercel/next",
       "config": {
         "installCommand": "( cd ../.. && npm ci && npm run build )",
-        "buildCommand": ""
+        "buildCommand": "date"
       }
     }
   ],

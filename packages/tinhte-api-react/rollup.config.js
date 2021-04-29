@@ -1,14 +1,18 @@
-import babel from '@rollup/plugin-babel'
+import commonjs from '@rollup/plugin-commonjs'
 import nodePolyfills from 'rollup-plugin-node-polyfills'
 import resolve from '@rollup/plugin-node-resolve'
-import commonjs from '@rollup/plugin-commonjs'
+import ts from 'rollup-plugin-ts'
 import pkg from './package.json'
 
-const extensions = ['.js', '.jsx']
+const input = 'src/index.ts'
+const external = [
+  ...Object.keys(pkg.peerDependencies),
+  ...Object.keys(pkg.dependencies)
+]
 
 export default [
   {
-    input: 'src/index.js',
+    input,
     external: Object.keys(pkg.peerDependencies),
     output: {
       name: 'TinhteApiReact',
@@ -16,42 +20,42 @@ export default [
       format: 'umd',
       globals: {
         react: 'React'
-      }
+      },
+      sourcemap: true
     },
     plugins: [
-      nodePolyfills(),
-      resolve({
-        extensions
-      }),
       commonjs(),
-      babel({
-        babelHelpers: 'bundled',
-        extensions,
-        presets: ['@babel/env', '@babel/react']
-      })
+      nodePolyfills(),
+      ts(),
+      resolve()
     ]
   },
 
   {
-    input: 'src/index.js',
-    external: [
-      ...Object.keys(pkg.peerDependencies),
-      ...Object.keys(pkg.dependencies)
-    ],
-    output: [
-      { file: pkg.main, format: 'cjs' },
-      { file: pkg.module, format: 'es' }
-    ],
+    input,
+    external,
+    output: {
+      file: pkg.main,
+      format: 'cjs',
+      sourcemap: true
+    },
     plugins: [
-      resolve({
-        extensions,
-        preferBuiltins: true
-      }),
-      babel({
-        babelHelpers: 'bundled',
-        extensions,
-        presets: ['@babel/env', '@babel/react']
-      })
+      ts(),
+      resolve({ preferBuiltins: true })
+    ]
+  },
+
+  {
+    input,
+    external,
+    output: {
+      file: pkg.module,
+      format: 'es',
+      sourcemap: true
+    },
+    plugins: [
+      ts({ tsconfig: resolvedConfig => ({ ...resolvedConfig, declaration: true }) }),
+      resolve({ preferBuiltins: true })
     ]
   }
 ]

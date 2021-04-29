@@ -117,7 +117,7 @@ describe('components', () => {
           expect(node.innerHTML).contains('src=""')
           expect(hasAuthenticated).equals(true)
           done()
-        }, 10)
+        }, 100)
       })
     })
 
