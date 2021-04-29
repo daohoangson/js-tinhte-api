@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api-react",
-  "version": "6.0.0-alpha.2",
+  "version": "6.0.0-alpha.3",
   "description": "tinhte-api React component",
   "main": "dist/tinhte-api-react.cjs.js",
   "module": "dist/tinhte-api-react.js",
@@ -19,7 +19,7 @@
   "dependencies": {
     "js-cookie": "^2.2.1",
     "react-ssr-prepass": "^1.2.1",
-    "tinhte-api": "^6.0.0-alpha.2"
+    "tinhte-api": "^6.0.0-alpha.3"
   },
   "peerDependencies": {
     "react": "*"
