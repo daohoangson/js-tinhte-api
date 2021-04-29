@@ -2,7 +2,7 @@ import { FetchMultipleOptions } from 'tinhte-api/src/fetches/types'
 import { ReactApi, ReactApiInternal } from '../types'
 
 const waitABitThen = (callback: () => any): void => {
-  if (typeof window.requestAnimationFrame === 'function') {
+  if (typeof window?.requestAnimationFrame === 'function') {
     window.requestAnimationFrame(callback)
   } else {
     setTimeout(callback, 0)
