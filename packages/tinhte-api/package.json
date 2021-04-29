@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api",
-  "version": "6.0.0-alpha.1",
+  "version": "6.0.0-alpha.2",
   "description": "tinhte-api library",
   "main": "dist/tinhte-api.cjs.js",
   "module": "dist/tinhte-api.js",
@@ -17,10 +17,11 @@
     "test:coverage": "npm run lint && web-test-runner --coverage"
   },
   "dependencies": {
-    "crypto-es": "^1.2.7"
+    "crypto-js": "^3.1.9-1"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4",
+    "@types/crypto-js": "^4.0.1",
     "@types/node": "^14.14.35",
     "@web/dev-server-rollup": "^0.3.2",
     "@web/test-runner": "^0.12.17",
