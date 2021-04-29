@@ -2,17 +2,6 @@ import Cookies from 'js-cookie'
 import React from 'react'
 import { ReactApi, ReactApiInternal } from '../types'
 
-interface _LoaderProps {
-  api: ReactApi
-  internalApi: ReactApiInternal
-}
-
-interface _LoaderState {
-  listener: (event: MessageEvent) => void
-  src: string
-  userId: number
-}
-
 const buildAuthorizeUrl = (api: ReactApi): string | undefined => {
   const clientId = api.getClientId()
   const callbackUrl = api.getCallbackUrl()
@@ -21,7 +10,7 @@ const buildAuthorizeUrl = (api: ReactApi): string | undefined => {
   }
 
   const encodedUniqueId = encodeURIComponent(api.getUniqueId())
-  const callbackFullUrl = callbackUrl.charAt(0) === '/' ? ((window?.location?.origin ?? '') + callbackUrl) : callbackUrl
+  const callbackFullUrl = callbackUrl.charAt(0) === '/' ? window.location.origin + callbackUrl : callbackUrl
   const guestRedirectUri = `${callbackFullUrl}#user_id=0&state=${encodedUniqueId}`
   const redirectUri = callbackFullUrl
 
@@ -93,39 +82,28 @@ const setCookie = (api: ReactApi, auth: any): { name: string, value: object, exp
   return { name, value, expires }
 }
 
-export class Loader extends React.Component<_LoaderProps, _LoaderState, any> {
-  constructor (props: _LoaderProps) {
-    super(props)
+export const Loader = (props: { api: ReactApi, internalApi: ReactApiInternal }): React.ReactElement => {
+  const [src, setSrc] = React.useState('')
+  const [userId, setUserId] = React.useState(0)
 
-    this.state = {
-      listener: (event) => {
-        const { data: { auth } } = event
-        const { api, internalApi } = this.props
-        internalApi.log('Received auth via window message', auth)
+  const { api, internalApi } = props
+  React.useEffect(() => {
+    const listener = (event: MessageEvent): void => {
+      const { data: { auth } } = event
+      internalApi.log('Received auth via window message', auth)
 
-        internalApi.setAuth(auth)
-        const userId = api.getUserId()
-        this.setState({ userId })
+      internalApi.setAuth(auth)
+      setUserId(api.getUserId())
 
-        const accessToken = api.getAccessToken()
-        if (accessToken.length > 0 && accessToken === auth.access_token) {
-          const cookie = setCookie(api, auth)
-          if (cookie !== undefined) {
-            internalApi.log('Set cookie %s until %s', cookie.name, cookie.expires)
-          }
+      const accessToken = api.getAccessToken()
+      if (accessToken.length > 0 && accessToken === auth.access_token) {
+        const cookie = setCookie(api, auth)
+        if (cookie !== undefined) {
+          internalApi.log('Set cookie %s until %s', cookie.name, cookie.expires)
         }
-      },
-      src: '',
-      userId: 0
-    }
-  }
-
-  componentDidMount (): void {
-    if (typeof window?.addEventListener === 'function') {
-      window.addEventListener('message', this.state.listener)
+      }
     }
 
-    const { api, internalApi } = this.props
     const cookie = getCookie(api)
     if (cookie === undefined) {
       internalApi.log('Skipped authentication due to bad config or no cookie')
@@ -141,31 +119,28 @@ export class Loader extends React.Component<_LoaderProps, _LoaderState, any> {
         ...cookie.value,
         state: api.getUniqueId()
       })
-      this.setState({ userId: api.getUserId() })
+      setUserId(api.getUserId())
 
       // skip initializing further once we have recovered auth from cookie
       return
     }
 
     const authorizeUrl = buildAuthorizeUrl(api)
-    if (authorizeUrl !== undefined) {
-      this.setState({ src: authorizeUrl })
+    if (authorizeUrl === undefined) {
+      internalApi.log('Skipped authentication without URL')
+      return
     }
-  }
 
-  componentWillUnmount (): void {
-    if (typeof window?.removeEventListener === 'function') {
-      window.removeEventListener('message', this.state.listener)
-    }
-  }
+    setSrc(authorizeUrl)
+    window.addEventListener('message', listener)
+    return () => window.removeEventListener('message', listener)
+  }, [api, internalApi])
 
-  render (): React.ReactElement {
-    return (
-      <iframe
-        className='ApiLoader' data-user-id={this.state.userId}
-        sandbox='allow-same-origin allow-scripts' src={this.state.src}
-        style={{ display: 'block', height: 0, width: 0 }}
-      />
-    )
-  }
+  return (
+    <iframe
+      className='ApiLoader' data-user-id={userId}
+      sandbox='allow-same-origin allow-scripts' src={src}
+      style={{ display: 'block', height: 0, width: 0 }}
+    />
+  )
 }
