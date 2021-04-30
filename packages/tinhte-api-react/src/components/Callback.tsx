@@ -18,7 +18,7 @@ export function processCallback (log?: (...args: any[]) => void): boolean {
 }
 
 export const Callback = (props: { api: ReactApi, internalApi: ReactApiInternal }): React.ReactElement => {
-  const [success, setSuccess] = React.useState<boolean | null>(null);
+  const [success, setSuccess] = React.useState<boolean | null>(null)
 
   const { api, internalApi } = props
   React.useEffect(() => {
