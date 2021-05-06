@@ -153,6 +153,30 @@ describe('components', () => {
         })
       }
 
+      it('without cookiePrefix -> set auth but no cookie', (done) => {
+        const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+        const apiConfig = { clientId }
+        const userId = Math.random()
+        const messageFactory = (api) => {
+          const auth = {
+            access_token: 'access token',
+            expires_in: 3600,
+            user_id: userId,
+            state: api.getUniqueId()
+          }
+          const message = { auth }
+          return message
+        }
+
+        const cookieBefore = document.cookie
+
+        testReceiveMessage(apiConfig, messageFactory, () => {
+          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
+          expect(document.cookie).equals(cookieBefore)
+          done()
+        })
+      })
+
       it('without auth', (done) => {
         const apiConfig = {}
         const messageFactory = () => ({ foo: 'bar' })
