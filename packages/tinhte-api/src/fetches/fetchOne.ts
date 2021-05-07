@@ -1,7 +1,7 @@
-import standardizeReqOptions, { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
+import standardizeReqOptions from '../helpers/standardizeReqOptions'
 import { ApiInternal } from '../types'
 import { Batches } from './batch'
-import { FetchJson, FetchOne } from './types'
+import { FetchJson, FetchOne, StandardizedFetchOptions } from './types'
 
 const fetchOneInit = (fetchJson: FetchJson, batch: Batches, internalApi: ApiInternal): FetchOne => {
   let reqLatestId = 0

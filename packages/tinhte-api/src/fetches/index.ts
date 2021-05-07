@@ -2,8 +2,7 @@ import batchFactory from './batch'
 import fetchOneInit from './fetchOne'
 import fetchMultipleInit from './fetchMultiple'
 import { Api, ApiInternal } from '../types'
-import { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
-import { Fetches, FetchJson } from './types'
+import { Fetches, FetchJson, StandardizedFetchOptions } from './types'
 
 const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
   const batch = batchFactory()

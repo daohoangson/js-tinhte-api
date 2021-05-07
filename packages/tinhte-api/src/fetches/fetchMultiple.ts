@@ -1,8 +1,8 @@
 import errors from '../helpers/errors'
-import standardizeReqOptions, { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
+import standardizeReqOptions from '../helpers/standardizeReqOptions'
 import { ApiInternal } from '../types'
 import { Batches, BatchReject, BatchRequest, BatchResolve } from './batch'
-import { FetchHeaders, FetchJson, FetchMultiple, FetchMultipleJob, FetchMultipleJobs, FetchMultipleOptions, FetchParams } from './types'
+import { FetchHeaders, FetchJson, FetchMultiple, FetchMultipleJob, FetchMultipleJobs, FetchMultipleOptions, FetchParams, StandardizedFetchOptions } from './types'
 
 interface _Context {
   batchHeaders: FetchHeaders

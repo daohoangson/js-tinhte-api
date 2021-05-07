@@ -1,18 +1,7 @@
 import { parse, stringify } from 'querystring'
-import { FetchHeaders, FetchOptions, FetchParams } from '../fetches/types'
+import { FetchOptions, FetchParams, StandardizedFetchOptions } from '../fetches/types'
 
 import { hashMd5 } from './crypt'
-
-export type StandardizedFetchOptions = FetchOptions & {
-  body: BodyInit | null
-  explain: string
-  method: string
-  headers: FetchHeaders
-  params: FetchParams
-  paramsAsString: string
-  parseJson: boolean
-  uri: string
-}
 
 const filterEmptyValueFromArray = (array: string[]): string[] => {
   const filtered: string[] = []

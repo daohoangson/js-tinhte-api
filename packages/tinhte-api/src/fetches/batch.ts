@@ -1,4 +1,4 @@
-import { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
+import { StandardizedFetchOptions } from './types'
 
 export interface Batch {
   enqueue: (resolve: BatchResolve, reject: BatchReject) => void

@@ -1,5 +1,3 @@
-import { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
-
 export type FetchHeaders = Record<string, string>
 
 export type FetchJson = (options: StandardizedFetchOptions) => Promise<any>
@@ -13,6 +11,17 @@ export interface FetchOptions {
   params?: FetchParams
   parseJson?: boolean
   uri?: string
+}
+
+export type StandardizedFetchOptions = FetchOptions & {
+  body: BodyInit | null
+  explain: string
+  method: string
+  headers: FetchHeaders
+  params: FetchParams
+  paramsAsString: string
+  parseJson: boolean
+  uri: string
 }
 
 export type FetchMultiple = (fetches: () => void, options?: FetchMultipleOptions) => Promise<any>
