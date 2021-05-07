@@ -56,7 +56,7 @@ const extractParamsFromQuerystring = (str: string): FetchParams => {
 const stringCompareFn = (a: string, b: string): number => a.localeCompare(b)
 
 const standardizeReqOptions = (options: StandardizedFetchOptions): string | undefined => {
-  const input: FetchOptions = { ...options } as any
+  const input: FetchOptions = { ...options }
   options.uri = input.uri ?? ''
   options.params = input.params ?? {}
   options.headers = input.headers ?? {}
