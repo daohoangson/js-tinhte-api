@@ -59,7 +59,7 @@ const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
     fetchCount++
 
     const url = buildUrl(options)
-    const { body, method, params, parseJson } = options
+    const { body, keepalive, method, params, parseJson } = options
 
     const headers = { ...api.getHeaders() }
     const { headers: optionHeaders } = options
@@ -76,6 +76,7 @@ const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
       body,
       credentials: (typeof params._xfToken === 'string') ? 'include' : undefined,
       headers,
+      keepalive: keepalive === true,
       method
     })
 

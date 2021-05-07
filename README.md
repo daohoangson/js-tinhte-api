@@ -291,7 +291,8 @@ Alias:
 Params:
  
  - `options` object or string (will be used as `uri`)
-   - `body` default=`null`
+   - `body` default=`undefined`
+   - `keepalive` default=`false`
    - `method` default=`'GET'`
    - `headers` default=`{}`
    - `params` default=`{}`

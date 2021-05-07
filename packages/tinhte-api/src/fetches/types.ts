@@ -6,6 +6,7 @@ export type FetchOne = (input: FetchOptions | string) => Promise<any>
 
 export interface FetchOptions {
   body?: BodyInit
+  keepalive?: boolean
   method?: string
   headers?: FetchHeaders
   params?: FetchParams

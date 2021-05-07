@@ -91,6 +91,7 @@ const standardizeReqOptions = (options: StandardizedFetchOptions): string | unde
 
   if (
     options.body !== undefined ||
+    options.keepalive === true ||
     options.parseJson === false
   ) {
     // requests with these options can't be detected properly
