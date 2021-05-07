@@ -138,18 +138,44 @@ describe('components', () => {
 
     describe('receives message', () => {
       const testReceiveMessage = (apiConfig, messageFactory, callback) => {
-        const api = apiFactory(apiConfig)
+        const api = apiFactory({ ...apiConfig, callbackUrl: '/callback-url' })
         const P = api.ProviderHoc(() => 'foo')
 
         render(<P />, node, () => {
-          const message = messageFactory(api)
-          window.postMessage(message, window.location.origin)
-
           setTimeout(() => {
-            callback()
+            const message = messageFactory(api)
+            window.postMessage(message, window.location.origin)
+
+            setTimeout(() => {
+              callback()
+            }, 10)
           }, 10)
         })
       }
+
+      it('without cookiePrefix -> set auth but no cookie', (done) => {
+        const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
+        const apiConfig = { clientId }
+        const userId = Math.random()
+        const messageFactory = (api) => {
+          const auth = {
+            access_token: 'access token',
+            expires_in: 3600,
+            user_id: userId,
+            state: api.getUniqueId()
+          }
+          const message = { auth }
+          return message
+        }
+
+        const cookieBefore = document.cookie
+
+        testReceiveMessage(apiConfig, messageFactory, () => {
+          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
+          expect(document.cookie).equals(cookieBefore)
+          done()
+        })
+      })
 
       it('without auth', (done) => {
         const apiConfig = {}
@@ -218,31 +244,6 @@ describe('components', () => {
         testReceiveMessage(apiConfig, messageFactory, () => {
           expect(node.innerHTML).contains(`data-user-id="${userId}"`)
           expect(document.cookie).does.not.contain(`${clientId}__${cookieSession}`)
-          done()
-        })
-      })
-
-      it('without session -> set auth but no cookie', (done) => {
-        const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
-        const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
-        const apiConfig = { clientId, cookiePrefix, debug: true }
-        const userId = Math.random()
-        const messageFactory = (api) => {
-          const auth = {
-            access_token: 'access token',
-            expires_in: 3600,
-            user_id: userId,
-            state: api.getUniqueId()
-          }
-          const message = { auth }
-          return message
-        }
-
-        expect(document.cookie).does.not.contain(cookiePrefix)
-
-        testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
-          expect(document.cookie).does.not.contain(`${clientId}__`)
           done()
         })
       })

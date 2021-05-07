@@ -10,15 +10,13 @@ type _ApiConsumerPropsInternal = ReactApiConsumerProps & {
   apiContext: ReactApiContext
 }
 
-interface _ApiConsumerState {
-  fetchedData: Record<string, any>
-  cancelFetches?: _ApiConsumerCancelFetch
-  cancelFetchesWithAuth?: _ApiConsumerCancelFetch
-}
+type _FetchedData = Record<string, any>
 
-const createFetchObject = (api: ReactApi, element: React.Component, fetch: ReactApiConsumerFetch): ReactApiConsumerFetchOptions | undefined => {
+type _FetchedDataSetter = React.Dispatch<React.SetStateAction<_FetchedData>>
+
+const createFetchObject = (api: ReactApi, props: object, fetch: ReactApiConsumerFetch): ReactApiConsumerFetchOptions | undefined => {
   while (typeof fetch === 'function') {
-    fetch = fetch(api, element.props)
+    fetch = fetch(api, props)
   }
 
   if (
@@ -34,7 +32,7 @@ const createFetchObject = (api: ReactApi, element: React.Component, fetch: React
   return { ...fetch }
 }
 
-const useApiData = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _ApiConsumerState>, fetches?: Record<string, ReactApiConsumerFetch>): void => {
+const useApiData = (props: _ApiConsumerPropsInternal, fetches?: Record<string, ReactApiConsumerFetch>): _FetchedData | undefined => {
   if (typeof fetches !== 'object') {
     return
   }
@@ -43,19 +41,19 @@ const useApiData = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _Api
     return
   }
 
-  const { props, state: { fetchedData } } = apiConsumer
   const { apiContext: { api, apiData: { jobs, reasons = {} }, internalApi } } = props
   if (api === undefined || jobs === undefined) {
     return
   }
 
   const existing = props as Record<string, any>
+  const propsData: _FetchedData = {}
   for (const key of fetchKeys) {
     if (existing[key] !== undefined) {
       continue
     }
 
-    const fetch = createFetchObject(api, apiConsumer, fetches[key])
+    const fetch = createFetchObject(api, props, fetches[key])
     if (fetch === undefined) {
       continue
     }
@@ -72,26 +70,33 @@ const useApiData = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _Api
     const reason = reasons[uniqueId]
     if (typeof reason === 'string') {
       const { error } = fetch
-      fetchedData[key] = error?.call(apiConsumer, new Error(reason)) ?? {}
+      propsData[key] = typeof error === 'function' ? error(new Error(reason)) : {}
     } else {
       const { success } = fetch
-      fetchedData[key] = success?.call(apiConsumer, job) ?? job
+      propsData[key] = typeof success === 'function' ? success(job) : job
     }
   }
 
-  internalApi?.log('useApiData -> fetchedData (keys): ', Object.keys(fetchedData))
+  const keys = Object.keys(propsData)
+  if (keys.length > 0) {
+    internalApi?.log('useApiData -> keys', keys)
+    return propsData
+  }
 }
 
-const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsInternal, _ApiConsumerState>, eventName: 'onAuthenticated' | 'onProviderMounted', fetches?: Record<string, ReactApiConsumerFetch>, onFetched?: () => void): _ApiConsumerCancelFetch | undefined => {
-  const notify = (): void => onFetched?.call(apiConsumer)
+const executeFetchesIfNeeded = (props: _ApiConsumerPropsInternal, propsData: _FetchedData, setData: _FetchedDataSetter, eventName: 'onAuthenticated' | 'onProviderMounted', fetches?: Record<string, ReactApiConsumerFetch>, onFetched?: () => void): _ApiConsumerCancelFetch | undefined => {
+  const notify = (): void => {
+    if (typeof onFetched === 'function') {
+      onFetched()
+    }
+  }
 
   if (fetches === undefined) {
     notify()
     return
   }
 
-  const { props: { apiContext } } = apiConsumer
-  const { api, internalApi } = apiContext
+  const { apiContext: { api, internalApi } } = props
   if (api === undefined) {
     notify()
     return
@@ -104,12 +109,10 @@ const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsIn
       return
     }
 
-    const { props, state } = apiConsumer
-    const { fetchedData } = state
     const neededFetches: Record<string, ReactApiConsumerFetch> = {}
     const existing = props as Record<string, any>
     for (const key in fetches) {
-      if (existing[key] === undefined && fetchedData[key] === undefined) {
+      if (existing[key] === undefined && propsData[key] === undefined) {
         neededFetches[key] = fetches[key]
       }
     }
@@ -121,7 +124,7 @@ const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsIn
     }
 
     internalApi?.log('executeFetches...', neededKeys)
-    await executeFetches(apiConsumer, api, neededFetches)
+    await executeFetches(props, setData, neededFetches)
     notify()
   })
 
@@ -131,12 +134,17 @@ const executeFetchesIfNeeded = (apiConsumer: React.Component<_ApiConsumerPropsIn
   return cancel
 }
 
-const executeFetches = async (apiConsumer: React.Component<_ApiConsumerPropsInternal, _ApiConsumerState>, api: ReactApi, fetches: Record<string, ReactApiConsumerFetch>): Promise<void> => {
+const executeFetches = async (props: _ApiConsumerPropsInternal, setData: _FetchedDataSetter, fetches: Record<string, ReactApiConsumerFetch>): Promise<void> => {
+  const { apiContext: { api } } = props
+  if (api === undefined) {
+    return
+  }
+
   const promises: Array<Promise<any>> = []
   const fetchedData: Record<string, any> = {}
 
   for (const key in fetches) {
-    const fetch = createFetchObject(api, apiConsumer, fetches[key])
+    const fetch = createFetchObject(api, props, fetches[key])
     if (fetch === undefined) {
       continue
     }
@@ -148,55 +156,39 @@ const executeFetches = async (apiConsumer: React.Component<_ApiConsumerPropsInte
     )
   }
 
+  if (promises.length === 0) {
+    return
+  }
   await Promise.all(promises)
 
-  apiConsumer.setState((prevState) => (
-    {
-      ...prevState,
-      fetchedData: {
-        ...prevState.fetchedData,
-        ...fetchedData
-      }
-    }
-  ))
+  if (Object.keys(fetchedData).length === 0) {
+    return
+  }
+  setData((prev) => ({ ...prev, ...fetchedData }))
 }
 
 export const ApiConsumer: ReactApiConsumerHoc = <P extends object>(Component: React.ComponentType<P> & ReactApiConsumerComponent) => {
-  class ApiConsumer extends React.Component<P & _ApiConsumerPropsInternal, _ApiConsumerState> {
-    constructor (props: P & _ApiConsumerPropsInternal) {
-      super(props)
+  const ApiConsumer = (props: P & _ApiConsumerPropsInternal): React.ReactElement => {
+    const { apiFetches } = Component
+    const [data, setData] = React.useState<_FetchedData>({})
 
-      const fetchedData = {}
-      this.state = { fetchedData }
+    React.useEffect(() => {
+      const propsData = useApiData(props, apiFetches) ?? data
+      setData(propsData)
 
-      const { apiFetches } = Component
-      useApiData(this, apiFetches)
-    }
+      const { apiFetchesWithAuth } = Component
+      const { onFetched, onFetchedWithAuth } = props
+      const cancelFetches = executeFetchesIfNeeded(props, propsData, setData, 'onProviderMounted', apiFetches, onFetched)
+      const cancelFetchesWithAuth = executeFetchesIfNeeded(props, propsData, setData, 'onAuthenticated', apiFetchesWithAuth, onFetchedWithAuth)
 
-    componentDidMount (): void {
-      const { apiFetches, apiFetchesWithAuth } = Component
-      const { onFetched, onFetchedWithAuth } = this.props
-      this.setState((prevState) => ({
-        ...prevState,
-        cancelFetches: executeFetchesIfNeeded(this, 'onProviderMounted', apiFetches, onFetched),
-        cancelFetchesWithAuth: executeFetchesIfNeeded(this, 'onAuthenticated', apiFetchesWithAuth, onFetchedWithAuth)
-      }))
-    }
+      return () => {
+        if (cancelFetches !== undefined) cancelFetches()
+        if (cancelFetchesWithAuth !== undefined) cancelFetchesWithAuth()
+      }
+    }, [])
 
-    componentWillUnmount (): void {
-      this.state.cancelFetches?.call(this)
-      this.state.cancelFetchesWithAuth?.call(this)
-    }
-
-    render (): React.ReactElement {
-      const { apiContext } = this.props
-      const { api } = apiContext
-
-      const props: any = { ...this.props }
-      delete props.apiContext
-
-      return <Component {...props} {...this.state.fetchedData} api={api} />
-    }
+    const { apiContext: { api }, ...componentProps } = props
+    return <Component {...(componentProps as P)} {...data} api={api} />
   }
 
   const ApiContextConsumer = (props: P & ReactApiConsumerProps): React.ReactElement => (
@@ -211,8 +203,9 @@ export const ApiConsumer: ReactApiConsumerHoc = <P extends object>(Component: Re
       return
     }
 
+    const { props } = element
     for (const key in apiFetches) {
-      const fetch = createFetchObject(api, element, apiFetches[key])
+      const fetch = createFetchObject(api, props, apiFetches[key])
       if (fetch === undefined) {
         return
       }
