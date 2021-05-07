@@ -74,12 +74,12 @@ const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
 
     let p = fetch(url, {
       body,
-      credentials: (typeof params?._xfToken === 'string') ? 'include' : undefined,
+      credentials: (typeof params._xfToken === 'string') ? 'include' : undefined,
       headers,
       method
     })
 
-    if (parseJson) {
+    if (parseJson !== false) {
       p = p.then(async response => {
         return await response.json()
           .catch((reason) => {

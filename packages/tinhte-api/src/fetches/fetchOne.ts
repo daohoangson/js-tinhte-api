@@ -20,7 +20,7 @@ const fetchOneInit = (fetchJson: FetchJson, batch: Batches, internalApi: ApiInte
     const reqId = reqLatestId
     const current = batch.getCurrent()
 
-    if (current === null || options.body !== null || !options.parseJson) {
+    if (current === null || uniqueId === undefined) {
       internalApi.log('Request #%d is being fetched...', reqId)
       return await fetchJson(options)
     } else {

@@ -5,7 +5,7 @@ export type FetchJson = (options: StandardizedFetchOptions) => Promise<any>
 export type FetchOne = (input: FetchOptions | string) => Promise<any>
 
 export interface FetchOptions {
-  body?: BodyInit | null
+  body?: BodyInit
   method?: string
   headers?: FetchHeaders
   params?: FetchParams
@@ -14,13 +14,10 @@ export interface FetchOptions {
 }
 
 export type StandardizedFetchOptions = FetchOptions & {
-  body: BodyInit | null
-  explain: string
   method: string
   headers: FetchHeaders
   params: FetchParams
   paramsAsString: string
-  parseJson: boolean
   uri: string
 }
 
