@@ -1,7 +1,7 @@
-import standardizeReqOptions, { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
+import standardizeReqOptions from '../helpers/standardizeReqOptions'
 import { ApiInternal } from '../types'
 import { Batches } from './batch'
-import { FetchJson, FetchOne } from './types'
+import { FetchJson, FetchOne, StandardizedFetchOptions } from './types'
 
 const fetchOneInit = (fetchJson: FetchJson, batch: Batches, internalApi: ApiInternal): FetchOne => {
   let reqLatestId = 0
@@ -20,7 +20,7 @@ const fetchOneInit = (fetchJson: FetchJson, batch: Batches, internalApi: ApiInte
     const reqId = reqLatestId
     const current = batch.getCurrent()
 
-    if (current === null || options.body !== null || !options.parseJson) {
+    if (current === null || uniqueId === undefined) {
       internalApi.log('Request #%d is being fetched...', reqId)
       return await fetchJson(options)
     } else {

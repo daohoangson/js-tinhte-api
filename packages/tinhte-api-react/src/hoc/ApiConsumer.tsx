@@ -59,6 +59,10 @@ const useApiData = (props: _ApiConsumerPropsInternal, fetches?: Record<string, R
     }
 
     const uniqueId = standardizeReqOptions(fetch as any)
+    if (uniqueId === undefined) {
+      continue
+    }
+
     const job = jobs[uniqueId]
     if (job === undefined ||
       job._req === undefined ||

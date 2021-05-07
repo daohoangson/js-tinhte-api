@@ -25,9 +25,13 @@ export async function fetchApiDataForProvider (api: ReactApi, internalApi: React
 
   const json = await api.fetchMultiple(() => {
     for (let i = 0; i < queue.length; i++) {
+      const uniqueId = standardizeReqOptions(fetch as any)
+      if (uniqueId === undefined) {
+        continue
+      }
+
       api.fetchOne(queue[i])
         .catch((reason) => {
-          const uniqueId = standardizeReqOptions(fetch as any)
           internalApi.log('fetchApiDataForProvider queue[%d] has been rejected (%s, %s)', i, uniqueId, reason)
           reasons[uniqueId] = reason instanceof Error ? reason.message : typeof reason === 'string' ? reason : JSON.stringify(reason)
         })

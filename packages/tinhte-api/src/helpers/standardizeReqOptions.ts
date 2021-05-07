@@ -1,18 +1,7 @@
 import { parse, stringify } from 'querystring'
-import { FetchHeaders, FetchOptions, FetchParams } from '../fetches/types'
+import { FetchOptions, FetchParams, StandardizedFetchOptions } from '../fetches/types'
 
 import { hashMd5 } from './crypt'
-
-export type StandardizedFetchOptions = FetchOptions & {
-  body: BodyInit | null
-  explain: string
-  method: string
-  headers: FetchHeaders
-  params: FetchParams
-  paramsAsString: string
-  parseJson: boolean
-  uri: string
-}
 
 const filterEmptyValueFromArray = (array: string[]): string[] => {
   const filtered: string[] = []
@@ -66,14 +55,12 @@ const extractParamsFromQuerystring = (str: string): FetchParams => {
 
 const stringCompareFn = (a: string, b: string): number => a.localeCompare(b)
 
-const standardizeReqOptions = (options: StandardizedFetchOptions): string => {
+const standardizeReqOptions = (options: StandardizedFetchOptions): string | undefined => {
   const input: FetchOptions = { ...options }
   options.uri = input.uri ?? ''
   options.params = input.params ?? {}
   options.headers = input.headers ?? {}
-  options.body = input.body ?? null
-  options.method = (input.method ?? (options.body !== null ? 'POST' : 'GET')).toUpperCase()
-  options.parseJson = input.parseJson !== false
+  options.method = (input.method ?? (options.body !== undefined ? 'POST' : 'GET')).toUpperCase()
 
   let isFullUri = false
   if (options.uri.match(/^https?:\/\//) === null) {
@@ -91,21 +78,28 @@ const standardizeReqOptions = (options: StandardizedFetchOptions): string => {
   const paramsParts = paramsStringified.split(/&/).sort(stringCompareFn)
   options.paramsAsString = paramsParts.join('&')
 
-  if (!isFullUri) {
-    options.explain = `${options.method} ${options.uri}?${options.paramsAsString}`
-  } else {
+  let explain = `${options.method} ${options.uri}?${options.paramsAsString}`
+  if (isFullUri) {
     // still parse query from options.uri to make sure options.param is correct
     const uriQueryMatches = options.uri.match(/\?(.+)$/)
     if (uriQueryMatches !== null) {
       options.params = { ...options.params, ...extractParamsFromQuerystring(uriQueryMatches[1]) }
     }
 
-    options.explain = `${options.method} full=${options.uri} params=${options.paramsAsString}`
+    explain = `${options.method} full=${options.uri} params=${options.paramsAsString}`
   }
 
-  const uniqueId = hashMd5(options.explain)
+  if (
+    options.body !== undefined ||
+    options.keepalive === true ||
+    options.parseJson === false
+  ) {
+    // requests with these options can't be detected properly
+    // unique ID will not be generated
+    return
+  }
 
-  return uniqueId
+  return hashMd5(explain)
 }
 
 export default standardizeReqOptions

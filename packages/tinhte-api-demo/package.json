@@ -1,6 +1,6 @@
 {
   "name": "tinhte-api-demo",
-  "version": "6.0.0-alpha.4",
+  "version": "6.0.0-alpha.5",
   "description": "tinhte-api DEMO",
   "private": true,
   "scripts": {
@@ -18,7 +18,7 @@
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
     "sanitize-html": "^2.3.3",
-    "tinhte-api-react": "^6.0.0-alpha.4"
+    "tinhte-api-react": "^6.0.0-alpha.5"
   },
   "devDependencies": {
     "standard": "^14.3.1"

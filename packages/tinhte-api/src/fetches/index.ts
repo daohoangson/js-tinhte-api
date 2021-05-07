@@ -2,8 +2,7 @@ import batchFactory from './batch'
 import fetchOneInit from './fetchOne'
 import fetchMultipleInit from './fetchMultiple'
 import { Api, ApiInternal } from '../types'
-import { StandardizedFetchOptions } from '../helpers/standardizeReqOptions'
-import { Fetches, FetchJson } from './types'
+import { Fetches, FetchJson, StandardizedFetchOptions } from './types'
 
 const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
   const batch = batchFactory()
@@ -60,7 +59,7 @@ const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
     fetchCount++
 
     const url = buildUrl(options)
-    const { body, method, params, parseJson } = options
+    const { body, keepalive, method, params, parseJson } = options
 
     const headers = { ...api.getHeaders() }
     const { headers: optionHeaders } = options
@@ -75,12 +74,13 @@ const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
 
     let p = fetch(url, {
       body,
-      credentials: (typeof params?._xfToken === 'string') ? 'include' : undefined,
+      credentials: (typeof params._xfToken === 'string') ? 'include' : undefined,
       headers,
+      keepalive: keepalive === true,
       method
     })
 
-    if (parseJson) {
+    if (parseJson !== false) {
       p = p.then(async response => {
         return await response.json()
           .catch((reason) => {
