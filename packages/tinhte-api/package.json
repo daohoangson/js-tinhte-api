@@ -13,7 +13,7 @@
     "build": "rollup -c",
     "lint": "ts-standard",
     "lint:fix": "ts-standard --fix",
-    "test": "web-test-runner",
+    "test": "web-test-runner --watch",
     "test:coverage": "npm run lint && web-test-runner --coverage"
   },
   "dependencies": {
