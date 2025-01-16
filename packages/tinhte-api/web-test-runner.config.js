@@ -2,7 +2,7 @@ const rollupCommonjs = require('@rollup/plugin-commonjs')
 const rollupNodePolyfills = require('rollup-plugin-node-polyfills')
 const rollupTs = require('rollup-plugin-ts')
 const { fromRollup } = require('@web/dev-server-rollup')
-const { puppeteerLauncher } = require('@web/test-runner-puppeteer')
+const { playwrightLauncher } = require('@web/test-runner-playwright')
 
 const commonjs = fromRollup(rollupCommonjs)
 const nodePolyfills = fromRollup(rollupNodePolyfills)
@@ -23,6 +23,6 @@ module.exports = {
   ],
   rootDir: '../..',
   browsers: [
-    puppeteerLauncher()
+    playwrightLauncher({ product: 'chromium' })
   ]
 }

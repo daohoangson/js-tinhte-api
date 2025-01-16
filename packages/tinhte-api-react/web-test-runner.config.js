@@ -3,7 +3,7 @@ const rollupNodePolyfills = require('rollup-plugin-node-polyfills')
 const rollupTs = require('rollup-plugin-ts')
 const { esbuildPlugin } = require('@web/dev-server-esbuild')
 const { fromRollup } = require('@web/dev-server-rollup')
-const { puppeteerLauncher } = require('@web/test-runner-puppeteer')
+const { playwrightLauncher } = require('@web/test-runner-playwright')
 
 const patcher = fromRollup(() => ({
   name: 'patcher',
@@ -50,7 +50,7 @@ module.exports = {
   ],
   rootDir: '../..',
   browsers: [
-    puppeteerLauncher()
+    playwrightLauncher({ product: 'chromium' })
   ],
   coverageConfig: {
     include: [
