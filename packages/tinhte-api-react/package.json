@@ -28,6 +28,7 @@
     "@babel/preset-env": "^7.13.10",
     "@babel/preset-react": "^7.12.13",
     "@esm-bundle/chai": "^4.3.4",
+    "@playwright/browser-chromium": "^1.49.1",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-commonjs": "^17.1.0",
     "@types/js-cookie": "^2.2.6",

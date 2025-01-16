@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4",
+    "@playwright/browser-chromium": "^1.49.1",
     "@types/crypto-js": "^4.0.1",
     "@types/node": "^14.14.35",
     "@web/dev-server-rollup": "^0.6.4",
