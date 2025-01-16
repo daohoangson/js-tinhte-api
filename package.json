@@ -2,15 +2,15 @@
   "name": "tinhte-api-lerna",
   "private": true,
   "devDependencies": {
-    "lerna": "^4.0.0"
+    "lerna": "^8.1.9"
   },
   "scripts": {
-    "bootstrap": "lerna bootstrap --hoist",
-    "prebuild": "npm run bootstrap",
-    "build": "lerna run build --concurrency=1",
-    "pretest": "npm run build",
+    "build": "lerna run build",
+    "publish": "lerna publish from-package --yes",
     "test": "lerna run test:coverage",
-    "clean": "lerna clean",
-    "publish": "lerna publish --concurrency=1 --no-push"
-  }
+    "version": "lerna version --no-push"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }
