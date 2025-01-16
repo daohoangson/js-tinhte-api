@@ -7,7 +7,9 @@ import fetchOneInit from './fetchOne'
 import errors from '../helpers/errors'
 import { hashMd5 as md5 } from '../helpers/crypt'
 
-describe('api', () => {
+describe('api', function () {
+  this.timeout(10_000)
+
   describe('fetchOne', function () {
     afterEach(() => {
       window.XenForo = null

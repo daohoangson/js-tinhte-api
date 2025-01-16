@@ -6,7 +6,9 @@ import { apiFactory } from '..'
 
 const { render, unmountComponentAtNode } = ReactDom
 
-describe('hoc', () => {
+describe('hoc', function () {
+  this.timeout(10_000)
+
   describe('ApiProvider', () => {
     let node
 

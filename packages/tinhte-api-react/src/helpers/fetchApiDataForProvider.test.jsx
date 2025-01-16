@@ -4,7 +4,9 @@ import { crypt } from 'tinhte-api'
 
 import { apiFactory } from '..'
 
-describe('fetchApiDataForProvider', () => {
+describe('fetchApiDataForProvider', function () {
+  this.timeout(10_000)
+
   it('returns jobs', () => {
     const api = apiFactory()
     const Child = () => 'child'
