@@ -11,7 +11,7 @@ export function processCallback (log?: (...args: any[]) => void): boolean {
     return false
   }
 
-  window.top.postMessage({ auth }, window.location.origin)
+  window.top?.postMessage({ auth }, window.location.origin)
   log?.call(window, 'Forwarded auth to window.top')
 
   return true

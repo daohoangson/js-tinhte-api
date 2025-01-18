@@ -121,7 +121,7 @@ const fetchesInit = (api: Api, internalApi: ApiInternal): Fetches => {
         })
     }
 
-    return p
+    return await p
   }
 
   const fetchOne = fetchOneInit(fetchJson, batch, internalApi)
