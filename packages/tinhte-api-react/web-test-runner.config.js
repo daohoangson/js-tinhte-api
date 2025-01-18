@@ -1,6 +1,5 @@
 const rollupCommonjs = require('@rollup/plugin-commonjs')
 const rollupNodePolyfills = require('rollup-plugin-node-polyfills')
-const rollupTs = require('rollup-plugin-ts')
 const { esbuildPlugin } = require('@web/dev-server-esbuild')
 const { fromRollup } = require('@web/dev-server-rollup')
 const { playwrightLauncher } = require('@web/test-runner-playwright')
@@ -28,7 +27,6 @@ const patcher = fromRollup(() => ({
 
 const commonjs = fromRollup(rollupCommonjs)
 const nodePolyfills = fromRollup(rollupNodePolyfills)
-const ts = fromRollup(rollupTs)
 
 module.exports = {
   files: [
@@ -43,10 +41,10 @@ module.exports = {
 
     commonjs(),
     esbuildPlugin({
-      jsx: true
+      jsx: true,
+      ts: true
     }),
     nodePolyfills(),
-    ts()
   ],
   rootDir: '../..',
   browsers: [

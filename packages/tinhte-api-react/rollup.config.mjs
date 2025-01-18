@@ -1,25 +1,32 @@
 import commonjs from '@rollup/plugin-commonjs'
 import nodePolyfills from 'rollup-plugin-node-polyfills'
 import resolve from '@rollup/plugin-node-resolve'
-import ts from 'rollup-plugin-ts'
+import typescript from '@rollup/plugin-typescript'
 import pkg from './package.json'
 
 const input = 'src/index.ts'
-const external = Object.keys(pkg.dependencies)
+const external = [
+  ...Object.keys(pkg.peerDependencies),
+  ...Object.keys(pkg.dependencies)
+]
 
 export default [
   {
     input,
+    external: Object.keys(pkg.peerDependencies),
     output: {
-      name: 'TinhteApi',
+      name: 'TinhteApiReact',
       file: pkg.browser,
       format: 'umd',
+      globals: {
+        react: 'React'
+      },
       sourcemap: true
     },
     plugins: [
       commonjs(),
       nodePolyfills(),
-      ts(),
+      typescript(),
       resolve()
     ]
   },
@@ -33,7 +40,7 @@ export default [
       sourcemap: true
     },
     plugins: [
-      ts(),
+      typescript(),
       resolve({ preferBuiltins: true })
     ]
   },
@@ -47,7 +54,7 @@ export default [
       sourcemap: true
     },
     plugins: [
-      ts({ tsconfig: resolvedConfig => ({ ...resolvedConfig, declaration: true }) }),
+      typescript(),
       resolve({ preferBuiltins: true })
     ]
   }

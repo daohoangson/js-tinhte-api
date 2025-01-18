@@ -1,12 +1,11 @@
 const rollupCommonjs = require('@rollup/plugin-commonjs')
 const rollupNodePolyfills = require('rollup-plugin-node-polyfills')
-const rollupTs = require('rollup-plugin-ts')
+const { esbuildPlugin } = require('@web/dev-server-esbuild')
 const { fromRollup } = require('@web/dev-server-rollup')
 const { playwrightLauncher } = require('@web/test-runner-playwright')
 
 const commonjs = fromRollup(rollupCommonjs)
 const nodePolyfills = fromRollup(rollupNodePolyfills)
-const ts = fromRollup(rollupTs)
 
 module.exports = {
   files: [
@@ -17,9 +16,15 @@ module.exports = {
   },
   nodeResolve: true,
   plugins: [
-    commonjs(),
+    commonjs({
+      include: [
+        '**/node_modules/crypto-js/**',
+      ],
+    }),
+    esbuildPlugin({
+      ts: true
+    }),
     nodePolyfills(),
-    ts()
   ],
   rootDir: '../..',
   browsers: [
