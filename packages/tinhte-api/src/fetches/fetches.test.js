@@ -1,5 +1,6 @@
-import { expect } from '@esm-bundle/chai'
+// @vitest-environment jsdom
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import apiFactory from '../factory'
 import fetchBatchFactory from './batch'
 import fetchMultipleInit from './fetchMultiple'
@@ -7,10 +8,8 @@ import fetchOneInit from './fetchOne'
 import errors from '../helpers/errors'
 import { hashMd5 as md5 } from '../helpers/crypt'
 
-describe('api', function () {
-  this.timeout(10_000)
-
-  describe('fetchOne', function () {
+describe('api', { timeout: 10_000 }, () => {
+  describe('fetchOne', () => {
     afterEach(() => {
       window.XenForo = null
       window.XF = null

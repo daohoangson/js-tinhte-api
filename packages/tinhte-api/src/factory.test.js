@@ -1,5 +1,6 @@
-import { expect } from '@esm-bundle/chai'
+// @vitest-environment jsdom
 
+import { describe, expect, it } from 'vitest'
 import apiFactory from './factory'
 
 describe('apiFactory', () => {

@@ -1,64 +1,43 @@
-import { expect } from '@esm-bundle/chai'
+import { render, screen } from '@testing-library/react'
 import React from 'react'
-import ReactDom from 'react-dom'
 
 import { apiFactory, apiHoc } from '..'
 
-const { render, unmountComponentAtNode } = ReactDom
-
-describe('hoc', function () {
-  this.timeout(10_000)
-
+describe('hoc', () => {
   describe('ApiConsumer', () => {
-    let node
-
-    beforeEach(() => {
-      node = document.createElement('div')
-    })
-
-    afterEach(() => {
-      unmountComponentAtNode(node)
-    })
-
-    it('populates api', (done) => {
+    it('populates api', async () => {
       const userId = Math.random()
       const api = apiFactory({ auth: { userId: userId } })
 
-      const Child = ({ api }) => <span className='userId'>{api ? api.getUserId() : 'not'}</span>
+      const Child = ({ api }) => <span data-testid='userId'>{api ? api.getUserId() : 'not'}</span>
       const C = apiHoc.ApiConsumer(Child)
       const P = api.ProviderHoc(() => <C />)
 
-      render(<P />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).contains(`<span class="userId">${userId}</span>`)
-          done()
-        }, 10)
-      })
+      render(<P />)
+      expect(await screen.findByTestId('userId')).toHaveTextContent(userId.toString())
     })
 
     it('does not throw error if not in ApiProvider tree', () => {
-      const Child = ({ api }) => <div className='Child'>{api ? 'not' : 'ok'}</div>
+      const Child = ({ api }) => <div data-testid='child'>{api ? 'not' : 'ok'}</div>
       const C = apiHoc.ApiConsumer(Child)
 
-      render(<C />, node, () => {
-        expect(node.innerHTML).contains('<div class="Child">ok</div>')
-      })
+      render(<C />)
+      expect(screen.getByTestId('child')).toHaveTextContent('ok')
     })
 
-    describe('apiFetchesWithAuth', function () {
+    describe('apiFetchesWithAuth', () => {
       it('accepts non-object', () => {
         const api = apiFactory()
-        const Child = () => <div className='Child'>ok</div>
+        const Child = () => <div data-testid='child'>ok</div>
         Child.apiFetchesWithAuth = 'bar'
         const C = apiHoc.ApiConsumer(Child)
         const P = api.ProviderHoc(() => <C />)
 
-        render(<P />, node, () => {
-          expect(node.innerHTML).contains('<div class="Child">ok</div>')
-        })
+        render(<P />)
+        expect(screen.getByTestId('child')).toHaveTextContent('ok')
       })
 
-      it('executes if already authenticated', () => {
+      it('executes if already authenticated', async () => {
         const api = apiFactory({ auth: {} })
         const Child = () => 'foo'
         Child.apiFetchesWithAuth = { index: { uri: 'index' } }
@@ -66,11 +45,11 @@ describe('hoc', function () {
 
         return new Promise((resolve) => {
           const P = api.ProviderHoc(() => <C onFetchedWithAuth={resolve} />)
-          render(<P />, node)
+          render(<P />)
         })
       })
 
-      it('executes after new auth is available', () => {
+      it('executes after new auth is available', async () => {
         const debug = true
         const api = apiFactory({ debug })
         const internalApi = api.getInternalApi()
@@ -78,7 +57,7 @@ describe('hoc', function () {
         let successCount = 0
         const success = () => {
           successCount++
-          expect(successCount).equals(1)
+          expect(successCount).toBe(1)
         }
 
         const Child = () => 'foo'
@@ -87,38 +66,38 @@ describe('hoc', function () {
 
         return new Promise((resolve) => {
           const P = api.ProviderHoc(() => <C onFetchedWithAuth={resolve} />)
-          render(<P />, node, () => internalApi.setAuth())
+          render(<P />)
+          internalApi.setAuth()
         })
       })
 
       it('cancels when unmount', () => {
         const api = apiFactory()
 
+        let successCount = 0
+        const success = () => (successCount++)
+
         const Child = () => 'foo'
-        Child.apiFetchesWithAuth = { index: { uri: 'index' } }
+        Child.apiFetchesWithAuth = { index: { uri: 'index', success } }
         const C = apiHoc.ApiConsumer(Child)
         const P = api.ProviderHoc(() => <C />)
 
-        const testNode = document.createElement('div')
-        render(<P />, testNode, () => {
-          setTimeout(() => {
-            const unmounted = unmountComponentAtNode(testNode)
-            expect(unmounted).equals(true)
-          }, 10)
-        })
+        const { unmount } = render(<P />)
+        unmount()
+        expect(successCount).toBe(0)
       })
     })
 
-    describe('apiFetches', function () {
-      it('accepts function as fetch', () => {
+    describe('apiFetches', () => {
+      it('accepts function as fetch', async () => {
         const api = apiFactory()
         const foo = `foo${Math.random()}`
 
-        const Child = ({ index }) => <div className='index'>{index && index.links ? 'ok' : 'not'}</div>
+        const Child = ({ index }) => <div data-testid='index'>{index && index.links ? 'ok' : 'not'}</div>
         Child.apiFetches = {
           index: (api, props) => {
-            expect(api).an('object')
-            expect(props.foo).equals(foo)
+            expect(api).toBeDefined()
+            expect(props.foo).toBe(foo)
             return { uri: 'index' }
           }
         }
@@ -126,11 +105,11 @@ describe('hoc', function () {
 
         return new Promise((resolve) => {
           const check = () => {
-            expect(node.innerHTML).contains('<div class="index">ok</div>')
+            expect(screen.getByTestId('index')).toHaveTextContent('ok')
             resolve()
           }
           const P = api.ProviderHoc(() => <C onFetched={check} foo={foo} />)
-          render(<P />, node)
+          render(<P />)
         })
       })
 
@@ -140,18 +119,18 @@ describe('hoc', function () {
           const Parent = ({ children }) => <div>{children}</div>
           const P = api.ProviderHoc(Parent)
 
-          const Child = ({ index }) => <div className='index'>{index || 'not'}</div>
+          const Child = ({ index }) => <div data-testid='index'>{index || 'not'}</div>
           Child.apiFetches = fetches
           const C = apiHoc.ApiConsumer(Child)
 
           return new Promise((resolve) => {
             const check = () => {
-              expect(node.innerHTML).contains(`<div class="index">${expectedOutput}</div>`)
-              expect(api.getFetchCount()).equals(0)
+              expect(screen.getByTestId('index')).toHaveTextContent(expectedOutput)
+              expect(api.getFetchCount()).toBe(0)
               resolve()
             }
 
-            render(<P><C {...props} onFetched={check} /></P>, node)
+            render(<P><C {...props} onFetched={check} /></P>)
           })
         }
 
@@ -181,11 +160,11 @@ describe('hoc', function () {
         })
       })
 
-      it('returns empty object on error', () => {
+      it('returns empty object on error', async () => {
         const api = apiFactory()
 
         const Child = ({ post1 }) => (
-          <div className='post1'>
+          <div data-testid='post1'>
             {
               post1 &&
               Object.keys(post1).length === 0 &&
@@ -198,15 +177,15 @@ describe('hoc', function () {
 
         return new Promise((resolve) => {
           const check = () => {
-            expect(node.innerHTML).contains('<div class="post1">ok</div>')
+            expect(screen.getByTestId('post1')).toHaveTextContent('ok')
             resolve()
           }
           const P = api.ProviderHoc(() => <C onFetched={check} />)
-          render(<P />, node)
+          render(<P />)
         })
       })
 
-      it('executes onFetched', () => {
+      it('executes onFetched', async () => {
         const api = apiFactory()
 
         const Child = () => 'foo'
@@ -214,30 +193,25 @@ describe('hoc', function () {
         const C = apiHoc.ApiConsumer(Child)
 
         const test = () => new Promise((resolve) => {
-          const testNode = document.createElement('div')
-          const testDone = () => {
-            unmountComponentAtNode(testNode)
-            resolve()
-          }
-          const P = api.ProviderHoc(() => <C onFetched={testDone} />)
-          render(<P />, testNode)
+          const P = api.ProviderHoc(() => <C onFetched={resolve} />)
+          render(<P />)
         })
 
         // run the test twice
-        return Promise.all([test(), test()])
+        await Promise.all([test(), test()])
       })
 
-      it('handles bad context', () => {
+      it('handles bad context', async () => {
         const Child = () => 'foo'
         Child.apiFetches = { index: { uri: 'index' } }
         const C = apiHoc.ApiConsumer(Child)
 
         return new Promise((resolve) => {
-          render(<C onFetched={resolve} />, node)
+          render(<C onFetched={resolve} />)
         })
       })
 
-      it('merge batch with apiFetchesWithAuth', () => {
+      it('merge batch with apiFetchesWithAuth', async () => {
         const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
         const cookiePrefix = `cookie_prefix_${Math.random()}_`.replace(/[^a-z0-9]/gi, '')
         const cookieSession = `${Math.random()}`.replace(/[^0-9]/gi, '')
@@ -247,7 +221,7 @@ describe('hoc', function () {
           access_token: 'access token',
           user_id: Math.random()
         }
-        expect(document.cookie).does.not.contain(cookiePrefix)
+        expect(document.cookie).not.toContain(cookiePrefix)
         document.cookie = `${cookiePrefix}session=${cookieSession}`
         document.cookie = `${clientId}__${cookieSession}=${JSON.stringify(auth)}`
 
@@ -261,9 +235,9 @@ describe('hoc', function () {
           return new Promise((resolve) => {
             const resolve2 = resolve
             const P = api.ProviderHoc(() => <C onFetchedWithAuth={resolve1} onFetched={resolve2} />)
-            render(<P />, node)
+            render(<P />)
           })
-        }).then(() => expect(api.getFetchCount()).equals(1))
+        }).then(() => expect(api.getFetchCount()).toBe(1))
       })
     })
   })

@@ -1,4 +1,4 @@
-import { expect } from '@esm-bundle/chai'
+import { expect, describe, it, beforeEach } from 'vitest'
 
 import apiFactory from './factory'
 
@@ -21,15 +21,15 @@ describe('api', () => {
       const api1 = apiFactory(apiConfig)
       const api2 = api1.clone()
 
-      expect(api2.getApiRoot()).equals(apiConfig.apiRoot)
-      expect(api2.getAccessToken()).equals(apiConfig.auth.accessToken)
-      expect(api2.getUserId()).equals(apiConfig.auth.userId)
-      expect(api2.getCallbackUrl()).equals(apiConfig.callbackUrl)
-      expect(api2.getClientId()).equals(apiConfig.clientId)
-      expect(api2.getCookiePrefix()).equals(apiConfig.cookiePrefix)
-      expect(api2.getDebug()).equals(apiConfig.debug)
-      expect(api2.getOtt()).equals(apiConfig.ott)
-      expect(api2.getScope()).equals(apiConfig.scope)
+      expect(api2.getApiRoot()).toBe(apiConfig.apiRoot)
+      expect(api2.getAccessToken()).toBe(apiConfig.auth.accessToken)
+      expect(api2.getUserId()).toBe(apiConfig.auth.userId)
+      expect(api2.getCallbackUrl()).toBe(apiConfig.callbackUrl)
+      expect(api2.getClientId()).toBe(apiConfig.clientId)
+      expect(api2.getCookiePrefix()).toBe(apiConfig.cookiePrefix)
+      expect(api2.getDebug()).toBe(apiConfig.debug)
+      expect(api2.getOtt()).toBe(apiConfig.ott)
+      expect(api2.getScope()).toBe(apiConfig.scope)
     })
   })
 
@@ -37,13 +37,13 @@ describe('api', () => {
     it('exposes internal (debug=true)', () => {
       const debug = true
       const api = apiFactory({ debug })
-      expect(() => api.getInternalApi()).not.throws()
+      expect(() => api.getInternalApi()).not.toThrow()
     })
 
     it('doesn\'t exposes internal (debug=fase)', () => {
       const debug = false
       const api = apiFactory({ debug })
-      expect(() => api.getInternalApi()).throws()
+      expect(() => api.getInternalApi()).toThrow()
     })
   })
 
@@ -66,7 +66,7 @@ describe('api', () => {
         }
 
         internalApi.setAuth(auth)
-        expect(api.getAccessToken()).equals('')
+        expect(api.getAccessToken()).toBe('')
       })
 
       it('updates access token', () => {
@@ -77,7 +77,7 @@ describe('api', () => {
         }
 
         internalApi.setAuth(auth)
-        expect(api.getAccessToken()).equals(accessToken)
+        expect(api.getAccessToken()).toBe(accessToken)
       })
 
       it('handles invalid user id', () => {
@@ -88,7 +88,7 @@ describe('api', () => {
         }
 
         internalApi.setAuth(auth)
-        expect(api.getUserId()).equals(0)
+        expect(api.getUserId()).toBe(0)
       })
 
       it('updates user id', () => {
@@ -99,7 +99,7 @@ describe('api', () => {
         }
 
         internalApi.setAuth(auth)
-        expect(api.getUserId()).equals(userId)
+        expect(api.getUserId()).toBe(userId)
       })
 
       it('updates user id from string', () => {
@@ -111,7 +111,7 @@ describe('api', () => {
         }
 
         internalApi.setAuth(auth)
-        expect(api.getUserId()).equals(userIdNumber)
+        expect(api.getUserId()).toBe(userIdNumber)
       })
     })
   })

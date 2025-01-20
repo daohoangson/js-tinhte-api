@@ -1,5 +1,4 @@
-import { expect } from '@esm-bundle/chai'
-
+import { describe, expect, it } from 'vitest'
 import _ from './standardizeReqOptions'
 
 describe('helpers', () => {
