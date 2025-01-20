@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import React from 'react'
 
 import { apiFactory } from '..'
@@ -87,9 +87,9 @@ describe('hoc', () => {
 
       const api2 = apiFactory()
       const Child2 = ({ test2a, test2b }) => (
-        <div className='Child2'>
-          <div className='test2a'>{test2a ? 'ok' : 'not'}</div>
-          <div className='test2b'>{test2b ? 'ok' : 'not'}</div>
+        <div data-testid='Child2'>
+          <div data-testid='test2a'>{test2a ? 'ok' : 'not'}</div>
+          <div data-testid='test2b'>{test2b ? 'ok' : 'not'}</div>
         </div>
       )
       Child2.apiFetches = {
@@ -98,8 +98,7 @@ describe('hoc', () => {
         noop2: () => null
       }
       const C2 = api2.ConsumerHoc(Child2)
-      let onC2Fetched = null
-      const P2 = api2.ProviderHoc(() => <C2 onFetched={onC2Fetched} />)
+      const P2 = api2.ProviderHoc(() => <C2 />)
 
       expect(api.getFetchCount()).equals(0)
       expect(api2.getFetchCount()).equals(0)
@@ -115,15 +114,13 @@ describe('hoc', () => {
       expect(api.getFetchCount()).equals(1)
       expect(api2.getFetchCount()).equals(0)
 
-      onC2Fetched = () => {
-        expect(screen.getByTestId('test2a')).toHaveTextContent('ok')
-        expect(screen.getByTestId('test2b')).toHaveTextContent('ok')
-        expect(api.getFetchCount()).equals(1)
-        expect(api2.getFetchCount()).equals(1)
-      }
-
       const node2 = document.createElement('div')
       render(<P2 apiData={apiData} />, node2)
+
+      await waitFor(() => expect(screen.getByTestId('test2a')).toHaveTextContent('ok'))
+      await waitFor(() => expect(screen.getByTestId('test2b')).toHaveTextContent('ok'))
+      expect(api.getFetchCount()).equals(1)
+      expect(api2.getFetchCount()).equals(1)
     })
   })
 })
