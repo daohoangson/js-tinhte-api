@@ -5,7 +5,7 @@ import { apiFactory, apiHoc } from '..'
 
 describe('hoc', () => {
   describe('ApiConsumer', () => {
-    it('populates api', async () => {
+    it('populates api', () => {
       const userId = Math.random()
       const api = apiFactory({ auth: { userId: userId } })
 
@@ -14,7 +14,7 @@ describe('hoc', () => {
       const P = api.ProviderHoc(() => <C />)
 
       render(<P />)
-      expect(await screen.findByTestId('userId')).toHaveTextContent(userId.toString())
+      expect(screen.getByTestId('userId')).toHaveTextContent(userId.toString())
     })
 
     it('does not throw error if not in ApiProvider tree', () => {
