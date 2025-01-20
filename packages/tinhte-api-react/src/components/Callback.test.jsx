@@ -1,59 +1,39 @@
-import { expect } from '@esm-bundle/chai'
+import { render } from '@testing-library/react'
 import React from 'react'
-import ReactDom from 'react-dom'
 
 import { apiFactory } from '..'
 
-const { render, unmountComponentAtNode } = ReactDom
-
 describe('components', () => {
   describe('Callback', () => {
-    let node
-
-    beforeEach(() => {
-      node = document.createElement('div')
-    })
-
-    afterEach(() => {
-      unmountComponentAtNode(node)
-      window.location.hash = ''
-    })
-
-    it('renders error', (done) => {
+    it('renders error', async () => {
       const debug = true
       const api = apiFactory({ debug })
       const ApiCallback = api.CallbackComponent
 
-      render(<ApiCallback />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).contains('data-success="false"')
-          done()
-        }, 10)
-      })
+      const { container } = render(<ApiCallback />)
+      const element = container.querySelector('.ApiCallback')
+      expect(element).toHaveAttribute('data-success', 'false')
     })
 
-    it('renders success', (done) => {
+    it('renders success', async () => {
       window.location.hash = '#state=yes'
 
       const debug = true
       const api = apiFactory({ debug })
       const ApiCallback = api.CallbackComponent
 
-      render(<ApiCallback />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).contains('data-success="true"')
-          done()
-        }, 10)
-      })
+      const { container } = render(<ApiCallback />)
+      const element = container.querySelector('.ApiCallback')
+      expect(element).toHaveAttribute('data-success', 'true')
     })
 
     it('renders without debugging info', () => {
       const api = apiFactory()
       const ApiCallback = api.CallbackComponent
 
-      render(<ApiCallback />, node, () => {
-        expect(node.innerHTML).does.not.contain('data-success')
-      })
+      const { container } = render(<ApiCallback />)
+      const element = container.querySelector('.ApiCallback')
+      expect(element).not.toHaveAttribute('data-success')
     })
   })
 })

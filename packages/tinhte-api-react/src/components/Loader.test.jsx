@@ -1,24 +1,11 @@
-import { expect } from '@esm-bundle/chai'
+import { render, waitFor } from '@testing-library/react'
 import React from 'react'
-import ReactDom from 'react-dom'
 
 import { apiFactory } from '..'
 
-const { render, unmountComponentAtNode } = ReactDom
-
 describe('components', () => {
   describe('Loader', () => {
-    let node
-
-    beforeEach(() => {
-      node = document.createElement('div')
-    })
-
-    afterEach(() => {
-      unmountComponentAtNode(node)
-    })
-
-    it('displays an iframe', (done) => {
+    it('displays an iframe', async () => {
       const api = apiFactory({
         callbackUrl: 'callback url',
         clientId: 'client ID',
@@ -27,21 +14,19 @@ describe('components', () => {
 
       const P = api.ProviderHoc(() => 'foo')
 
-      render(<P />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).contains('<iframe')
-          expect(node.innerHTML).contains('src="')
+      const { container } = render(<P />)
 
-          expect(node.innerHTML).contains(api.getApiRoot())
-          expect(node.innerHTML).contains(encodeURIComponent(api.getCallbackUrl()))
-          expect(node.innerHTML).contains(encodeURIComponent(api.getClientId()))
-          expect(node.innerHTML).contains(encodeURIComponent(api.getScope()))
-          done()
-        }, 10)
-      })
+      const iframe = await waitFor(() => container.querySelector('iframe'))
+      const url = new URL(iframe.src)
+      expect(url.href.startsWith(api.getApiRoot())).toBeTruthy()
+
+      const { searchParams } = url
+      expect(searchParams.get('client_id')).toBe(api.getClientId())
+      expect(searchParams.get('redirect_uri')).toBe(api.getCallbackUrl())
+      expect(searchParams.get('scope')).toBe(api.getScope())
     })
 
-    it('displays an iframe (with origin in callback url)', (done) => {
+    it('displays an iframe (with origin in callback url)', async () => {
       const api = apiFactory({
         callbackUrl: '/path',
         clientId: 'client ID'
@@ -49,16 +34,15 @@ describe('components', () => {
 
       const P = api.ProviderHoc(() => 'foo')
 
-      render(<P />, node, () => {
-        setTimeout(() => {
-          const callbackFullUrl = window.location.origin + '/path'
-          expect(node.innerHTML).contains(encodeURIComponent(callbackFullUrl))
-          done()
-        }, 10)
-      })
+      const { container } = render(<P />)
+
+      const iframe = await waitFor(() => container.querySelector('iframe'))
+      const { searchParams } = new URL(iframe.src)
+      const callbackFullUrl = window.location.origin + '/path'
+      expect(searchParams.get('redirect_uri')).toBe(callbackFullUrl)
     })
 
-    it('displays an iframe with user cookie', (done) => {
+    it('displays an iframe with user cookie', async () => {
       const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
       const api = apiFactory({
         callbackUrl: '/path',
@@ -70,15 +54,13 @@ describe('components', () => {
       expect(document.cookie).does.not.contain(cookiePrefix)
       document.cookie = `${cookiePrefix}user=xxx`
 
-      render(<P />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).does.not.contain('src=""')
-          done()
-        }, 10)
-      })
+      const { container } = render(<P />)
+
+      const iframe = await waitFor(() => container.querySelector('iframe'))
+      expect(iframe.getAttribute('src')).not.toBe('')
     })
 
-    it('displays an iframe with session cookie', (done) => {
+    it('displays an iframe with session cookie', async () => {
       const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
       const api = apiFactory({
         callbackUrl: '/path',
@@ -90,15 +72,13 @@ describe('components', () => {
       expect(document.cookie).does.not.contain(cookiePrefix)
       document.cookie = `${cookiePrefix}session=xxx`
 
-      render(<P />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).does.not.contain('src=""')
-          done()
-        }, 10)
-      })
+      const { container } = render(<P />)
+
+      const iframe = await waitFor(() => container.querySelector('iframe'))
+      expect(iframe.getAttribute('src')).not.toBe('')
     })
 
-    it('skips auth without user/session cookie', (done) => {
+    it('skips auth without user/session cookie', async () => {
       const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
       const api = apiFactory({
         callbackUrl: '/path',
@@ -112,16 +92,13 @@ describe('components', () => {
 
       expect(document.cookie).does.not.contain(cookiePrefix)
 
-      render(<P />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).contains('src=""')
-          expect(hasAuthenticated).equals(true)
-          done()
-        }, 100)
-      })
+      const { container } = render(<P />)
+
+      await waitFor(() => expect(hasAuthenticated).equals(true))
+      expect(container.querySelector('iframe').getAttribute('src')).toBe('')
     })
 
-    it('does not show up with access token already set', () => {
+    it('does not show up with access token already set', async () => {
       const api = apiFactory({
         auth: { accessToken: 'access token' },
         callbackUrl: 'callback url',
@@ -131,29 +108,31 @@ describe('components', () => {
 
       const P = api.ProviderHoc(() => 'foo')
 
-      render(<P />, node, () => {
-        expect(node.innerHTML).does.not.contain('<iframe')
-      })
+      let hasAuthenticated = false
+      api.onAuthenticated(() => (hasAuthenticated = true))
+
+      const { container } = render(<P />)
+
+      await waitFor(() => expect(hasAuthenticated).equals(true))
+      expect(container.querySelector('iframe')).toBeNull()
     })
 
     describe('receives message', () => {
-      const testReceiveMessage = (apiConfig, messageFactory, callback) => {
+      const testReceiveMessage = async (apiConfig, messageFactory) => {
         const api = apiFactory({ ...apiConfig, callbackUrl: '/callback-url' })
         const P = api.ProviderHoc(() => 'foo')
 
-        render(<P />, node, () => {
-          setTimeout(() => {
-            const message = messageFactory(api)
-            window.postMessage(message, window.location.origin)
+        const renderResult = render(<P />)
+        const { container } = renderResult
+        await waitFor(() => expect(container.querySelector('iframe')).toBeInTheDocument())
 
-            setTimeout(() => {
-              callback()
-            }, 10)
-          }, 10)
-        })
+        const message = messageFactory(api)
+        window.postMessage(message, window.location.origin)
+
+        return renderResult
       }
 
-      it('without cookiePrefix -> set auth but no cookie', (done) => {
+      it('without cookiePrefix -> set auth but no cookie', async () => {
         const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
         const apiConfig = { clientId }
         const userId = Math.random()
@@ -170,32 +149,30 @@ describe('components', () => {
 
         const cookieBefore = document.cookie
 
-        testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
-          expect(document.cookie).equals(cookieBefore)
-          done()
-        })
+        const { container } = await testReceiveMessage(apiConfig, messageFactory)
+        await waitFor(() => expect(container.querySelector('iframe').dataset.userId).toBe(String(userId)))
+        expect(document.cookie).equals(cookieBefore)
       })
 
-      it('without auth', (done) => {
+      it('without auth', async () => {
         const apiConfig = {}
         const messageFactory = () => ({ foo: 'bar' })
-        testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).contains('data-user-id="0"')
-          done()
-        })
+        const { container } = await testReceiveMessage(apiConfig, messageFactory)
+
+        await new Promise((resolve) => setTimeout(resolve, 10))
+        expect(container.querySelector('iframe').dataset.userId).toBe('0')
       })
 
-      it('without access token', (done) => {
+      it('without access token', async () => {
         const apiConfig = {}
         const messageFactory = () => ({ auth: {} })
-        testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).contains('data-user-id="0"')
-          done()
-        })
+        const { container } = await testReceiveMessage(apiConfig, messageFactory)
+
+        await new Promise((resolve) => setTimeout(resolve, 10))
+        expect(container.querySelector('iframe').dataset.userId).toBe('0')
       })
 
-      it('with valid auth', (done) => {
+      it('with valid auth', async () => {
         const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
         const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
         const cookieSession = `${Math.random()}`.replace(/[^0-9]/gi, '')
@@ -215,14 +192,12 @@ describe('components', () => {
         expect(document.cookie).does.not.contain(cookiePrefix)
         document.cookie = `${apiConfig.cookiePrefix}session=${cookieSession}`
 
-        testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
-          expect(document.cookie).contains(`${clientId}__${cookieSession}`)
-          done()
-        })
+        const { container } = await testReceiveMessage(apiConfig, messageFactory)
+        await waitFor(() => expect(container.querySelector('iframe').dataset.userId).toBe(String(userId)))
+        expect(document.cookie).contains(`${clientId}__${cookieSession}`)
       })
 
-      it('without expires_in -> set auth but no cookie', (done) => {
+      it('without expires_in -> set auth but no cookie', async () => {
         const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
         const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
         const cookieSession = `${Math.random()}`.replace(/[^0-9]/gi, '')
@@ -241,15 +216,13 @@ describe('components', () => {
         expect(document.cookie).does.not.contain(cookiePrefix)
         document.cookie = `${apiConfig.cookiePrefix}session=${cookieSession}`
 
-        testReceiveMessage(apiConfig, messageFactory, () => {
-          expect(node.innerHTML).contains(`data-user-id="${userId}"`)
-          expect(document.cookie).does.not.contain(`${clientId}__${cookieSession}`)
-          done()
-        })
+        const { container } = await testReceiveMessage(apiConfig, messageFactory)
+        await waitFor(() => expect(container.querySelector('iframe').dataset.userId).toBe(String(userId)))
+        expect(document.cookie).does.not.contain(`${clientId}__${cookieSession}`)
       })
     })
 
-    it('restores auth from cookie', (done) => {
+    it('restores auth from cookie', async () => {
       const clientId = `cid${Math.random()}`.replace(/[^a-z0-9]/gi, '')
       const cookiePrefix = `cookie_prefix_${Math.random()}`.replace(/[^a-z0-9]/gi, '')
       const cookieSession = `${Math.random()}`.replace(/[^0-9]/gi, '')
@@ -264,12 +237,9 @@ describe('components', () => {
       document.cookie = `${cookiePrefix}session=${cookieSession}`
       document.cookie = `${clientId}__${cookieSession}=${JSON.stringify(auth)}`
 
-      render(<P />, node, () => {
-        setTimeout(() => {
-          expect(node.innerHTML).contains(`data-user-id="${auth.user_id}"`)
-          done()
-        }, 10)
-      })
+      const { container } = render(<P />)
+
+      await waitFor(() => expect(container.querySelector('iframe').dataset.userId).toBe(String(auth.user_id)))
     })
   })
 })
