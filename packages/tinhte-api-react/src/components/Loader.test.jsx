@@ -57,7 +57,7 @@ describe('components', () => {
       const { container } = render(<P />)
 
       const iframe = await waitFor(() => container.querySelector('iframe'))
-      expect(iframe.src).not.toBe('')
+      expect(iframe.getAttribute('src')).not.toBe('')
     })
 
     it('displays an iframe with session cookie', async () => {
@@ -75,7 +75,7 @@ describe('components', () => {
       const { container } = render(<P />)
 
       const iframe = await waitFor(() => container.querySelector('iframe'))
-      expect(iframe.src).not.toBe('')
+      expect(iframe.getAttribute('src')).not.toBe('')
     })
 
     it('skips auth without user/session cookie', async () => {
